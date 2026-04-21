@@ -1,0 +1,185 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ───────────────────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function getRole() {
+      return getUserData().role;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && getRole() == 'admin';
+    }
+
+    function isSupervisor() {
+      return isAuthenticated() && getRole() == 'supervisor';
+    }
+
+    function isEmployee() {
+      return isAuthenticated() && getRole() == 'employee';
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    function isActiveUser() {
+      return isAuthenticated() && getUserData().isActive == true;
+    }
+
+    // Directory listing for supervisors (assign candidate → employee, etc.)
+    function isDirectoryRole() {
+      return resource.data.role == 'employee'
+        || resource.data.role == 'supervisor';
+    }
+
+    // ─── Users ─────────────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isAdmin();
+      allow read: if isOwner(userId);
+      // Supervisors: minimal HR directory (not admin accounts)
+      allow read: if isSupervisor() && isActiveUser() && isDirectoryRole();
+
+      allow create: if false;
+      allow update, delete: if isAdmin();
+      allow update: if isOwner(userId) && isActiveUser()
+        && request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['languagePreference', 'updatedAt']);
+    }
+
+    // ─── Candidate profiles (recruitment) ─────────────────────────────────
+    match /candidate_profiles/{candidateId} {
+      allow read, write: if isAdmin();
+
+      // Supervisors can view all CVs, regardless of who created them.
+      allow read: if isSupervisor() && isActiveUser();
+
+      allow create: if isSupervisor() && isActiveUser()
+        && request.resource.data.createdBySupervisorId == request.auth.uid;
+
+      allow update: if isSupervisor() && isActiveUser()
+        && resource.data.createdBySupervisorId == request.auth.uid
+        && request.resource.data.createdBySupervisorId
+          == resource.data.createdBySupervisorId;
+
+      allow delete: if isSupervisor() && isActiveUser()
+        && resource.data.createdBySupervisorId == request.auth.uid;
+    }
+
+    // ─── Attendance logs ───────────────────────────────────────────────────
+    match /attendance_logs/{logId} {
+      allow read, write: if isAdmin();
+
+      allow read: if isEmployee() && isActiveUser()
+        && resource.data.employeeId == request.auth.uid;
+
+      allow create: if isEmployee() && isActiveUser()
+        && request.resource.data.employeeId == request.auth.uid;
+
+      allow update: if isEmployee() && isActiveUser()
+        && resource.data.employeeId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['checkOutTime', 'checkOutLat', 'checkOutLng']);
+    }
+
+    // ─── Leave requests ───────────────────────────────────────────────────
+    match /leave_requests/{requestId} {
+      allow read, write: if isAdmin();
+
+      allow read: if isEmployee() && isActiveUser()
+        && resource.data.employeeId == request.auth.uid;
+
+      allow create: if isEmployee() && isActiveUser()
+        && request.resource.data.employeeId == request.auth.uid
+        && request.resource.data.status == 'pending';
+    }
+
+    // ─── Permission / short leave requests ───────────────────────────────
+    match /permission_requests/{requestId} {
+      allow read, write: if isAdmin();
+
+      allow read: if isEmployee() && isActiveUser()
+        && resource.data.employeeId == request.auth.uid;
+
+      allow create: if isEmployee() && isActiveUser()
+        && request.resource.data.employeeId == request.auth.uid;
+    }
+
+    // ─── Salaries ──────────────────────────────────────────────────────────
+    match /salaries/{salaryId} {
+      allow read, write: if isAdmin();
+
+      allow read: if isEmployee() && isActiveUser()
+        && resource.data.employeeId == request.auth.uid;
+    }
+
+    // ─── Commissions ───────────────────────────────────────────────────────
+    match /commissions/{commissionId} {
+      allow read, write: if isAdmin();
+
+      allow read: if isEmployee() && isActiveUser()
+        && resource.data.employeeId == request.auth.uid;
+    }
+
+    // ─── Employee compensation (admin + self read) ───────────────────────
+    match /employee_compensation_profiles/{employeeId} {
+      allow read, write: if isAdmin();
+
+      allow read: if isEmployee() && isActiveUser()
+        && employeeId == request.auth.uid;
+    }
+
+    // ─── Admin-triggered user provisioning (processed by Admin SDK / CF) ─
+    match /admin_user_creation_requests/{requestId} {
+      allow read, create, delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // ─── Company settings (theme, policies, …) ───────────────────────────
+    match /company_settings/{settingId} {
+      allow read: if isAuthenticated() && isActiveUser();
+      allow write: if isAdmin();
+    }
+
+    // ─── Company locations (geofence for attendance) ─────────────────────
+    match /company_locations/{locationId} {
+      allow read: if isAuthenticated() && isActiveUser();
+      allow write: if isAdmin();
+    }
+
+    // ─── Activity / audit logs ─────────────────────────────────────────────
+    match /activity_logs/{logId} {
+      allow read: if isAdmin();
+
+      allow create: if isAuthenticated() && isActiveUser()
+        && request.resource.data.userId == request.auth.uid;
+
+      allow update, delete: if false;
+    }
+
+    // ─── In-app notifications ──────────────────────────────────────────────
+    match /notifications/{notifId} {
+      allow read: if isAuthenticated() && isActiveUser()
+        && (resource.data.targetUserId == request.auth.uid || isAdmin());
+
+      allow create: if isAdmin();
+
+      allow update: if isAuthenticated() && isActiveUser()
+        && resource.data.targetUserId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['isRead', 'readAt']);
+
+      allow delete: if isAdmin()
+        || (isAuthenticated() && isActiveUser()
+          && resource.data.targetUserId == request.auth.uid);
+    }
+  }
+}

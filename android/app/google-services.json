@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "737044049717",
+    "project_id": "hr-sys-fa9d3",
+    "storage_bucket": "hr-sys-fa9d3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:737044049717:android:8ccce8d76982c269b2667c",
+        "android_client_info": {
+          "package_name": "com.company.hr_sys"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMN3YpVwaEvvhv_b8ZxZUOTg79WmTqvjk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
