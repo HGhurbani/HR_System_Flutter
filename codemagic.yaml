@@ -49,4 +49,4 @@ workflows:
     integrations:
       # Replace with the "App Store Connect API key name" you configured in:
       # Codemagic -> Team settings -> Team integrations -> Developer Portal
-      app_store_connect: HR
+      app_store_connect: HR_SYS
