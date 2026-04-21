@@ -4,6 +4,11 @@ workflows:
     max_build_duration: 60
     instance_type: mac_mini_m1
 
+    integrations:
+      # Must match the "App Store Connect API key name" configured in Codemagic:
+      # Team settings -> Team integrations -> Developer Portal
+      app_store_connect: HR
+
     environment:
       flutter: stable
 
@@ -37,16 +42,11 @@ workflows:
         # Uses the App Store Connect API key stored in Codemagic Team integrations.
         auth: integration
 
-        # Set true if you want Codemagic to submit for TestFlight beta review automatically (external testing).
-        # For internal testing only, keep this false (and optionally mark builds internal only via use-profiles export options).
+        # For external testing, keep true (requires beta review).
+        # For internal testing only, set false.
         submit_to_testflight: true
 
         # Optional: assign the uploaded build to these TestFlight groups
         # beta_groups:
         #   - Internal Testers
         #   - QA
-
-    integrations:
-      # Replace with the "App Store Connect API key name" you configured in:
-      # Codemagic -> Team settings -> Team integrations -> Developer Portal
-      app_store_connect: HR_SYS
