@@ -9,7 +9,7 @@ workflows:
         bundle_identifier: com.company.hrSys
 
     integrations:
-      app_store_connect: HR_SYS
+      app_store_connect: HR
     scripts:
       - name: Get Flutter packages
         script: flutter pub get
