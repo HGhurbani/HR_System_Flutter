@@ -40,7 +40,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '737044049717',
     projectId: 'hr-sys-fa9d3',
     storageBucket: 'hr-sys-fa9d3.firebasestorage.app',
-    iosBundleId: 'com.company.hrSys',
+    iosBundleId: 'com.company.hrsysapp',
   );
 
   static const FirebaseOptions web = FirebaseOptions(
