@@ -47,6 +47,8 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs your location to verify you are at the workplace when checking attendance.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs your location to verify workplace attendance, including when location access is set to Always.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to capture CV images.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
