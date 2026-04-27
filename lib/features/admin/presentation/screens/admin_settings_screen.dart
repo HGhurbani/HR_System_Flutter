@@ -155,6 +155,16 @@ class AdminSettingsScreen extends ConsumerWidget {
                                         _toggleLocation(context, ref, location),
                                   ),
                                   IconButton(
+                                    tooltip: context.isArabic ? 'حذف' : 'Delete',
+                                    icon: const Icon(Icons.delete_outline),
+                                    color: AppColors.error,
+                                    onPressed: () => _deleteLocation(
+                                      context,
+                                      ref,
+                                      location,
+                                    ),
+                                  ),
+                                  IconButton(
                                     tooltip: l10n.edit,
                                     icon: const Icon(Icons.edit_outlined),
                                     onPressed: () => _showLocationSheet(
@@ -233,6 +243,36 @@ class AdminSettingsScreen extends ConsumerWidget {
       });
       if (context.mounted) {
         context.showSnackBar(context.l10n.updateSuccess);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showSnackBar('${context.l10n.error}: $e', isError: true);
+      }
+    }
+  }
+
+  Future<void> _deleteLocation(
+    BuildContext context,
+    WidgetRef ref,
+    CompanyLocation location,
+  ) async {
+    final confirm = await context.showConfirmDialog(
+      title: context.isArabic ? 'حذف الموقع' : 'Delete location',
+      message: context.isArabic
+          ? 'هل أنت متأكد من حذف "${location.name}"؟'
+          : 'Are you sure you want to delete "${location.name}"?',
+      isDanger: true,
+    );
+    if (confirm != true) return;
+
+    try {
+      await ref
+          .read(firestoreProvider)
+          .collection(AppConstants.companyLocationsCollection)
+          .doc(location.id)
+          .delete();
+      if (context.mounted) {
+        context.showSnackBar(context.l10n.deleteSuccess);
       }
     } catch (e) {
       if (context.mounted) {

@@ -51,12 +51,29 @@ class _EmployeeAttendanceScreenState
     }
 
     final position = ref.read(attendanceNotifierProvider).currentPosition!;
-    final locations = ref.read(companyLocationsProvider).valueOrNull ?? [];
-    final insideGeofence = locations.isEmpty
-        ? true
-        : notifier.checkGeofence(position, locations);
+    List<CompanyLocation> locations;
+    try {
+      locations = await ref.read(companyLocationsProvider.future);
+    } catch (_) {
+      locations = const [];
+    }
 
-    if (!insideGeofence && locations.isNotEmpty) {
+    // Strict mode: do not allow check-in until company locations exist.
+    if (locations.isEmpty) {
+      if (mounted) {
+        context.showSnackBar(
+          context.isArabic
+              ? 'لا يمكن تسجيل الحضور قبل إضافة مواقع الشركة من إعدادات الأدمن'
+              : 'Check-in is disabled until company locations are configured',
+          isError: true,
+        );
+      }
+      return;
+    }
+
+    final insideGeofence = notifier.checkGeofence(position, locations);
+
+    if (!insideGeofence) {
       if (mounted) {
         context.showSnackBar(l10n.locationNotInZone, isError: true);
       }
@@ -101,6 +118,34 @@ class _EmployeeAttendanceScreenState
     }
 
     final position = ref.read(attendanceNotifierProvider).currentPosition!;
+    List<CompanyLocation> locations;
+    try {
+      locations = await ref.read(companyLocationsProvider.future);
+    } catch (_) {
+      locations = const [];
+    }
+
+    // Strict mode: do not allow check-out until company locations exist.
+    if (locations.isEmpty) {
+      if (mounted) {
+        context.showSnackBar(
+          context.isArabic
+              ? 'لا يمكن تسجيل الانصراف قبل إضافة مواقع الشركة من إعدادات الأدمن'
+              : 'Check-out is disabled until company locations are configured',
+          isError: true,
+        );
+      }
+      return;
+    }
+
+    final insideGeofence = notifier.checkGeofence(position, locations);
+    if (!insideGeofence) {
+      if (mounted) {
+        context.showSnackBar(l10n.locationNotInZone, isError: true);
+      }
+      return;
+    }
+
     final success = await notifier.checkOut(
       attendanceId: attendanceId,
       position: position,

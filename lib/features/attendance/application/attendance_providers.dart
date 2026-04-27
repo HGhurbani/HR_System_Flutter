@@ -312,7 +312,7 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
           .doc();
 
       final shiftStart = workSchedule.shiftStartOnDay(now, shiftType);
-      final grace = workSchedule.graceMinutesFor(shiftType);
+      final grace = workSchedule.graceMinutesFor(shiftType, day: now);
       final lateMinutes = now.isAfter(shiftStart)
           ? now.difference(shiftStart).inMinutes
           : 0;

@@ -8,39 +8,26 @@ import '../domain/entities/candidate_status.dart';
 
 // ─── Filter State ─────────────────────────────────────────────────────────
 class CandidateFilter {
-  final CandidateNationality? nationality;
   final CandidateStatus? status;
-  final String? assignedEmployeeId;
   final String searchQuery;
 
   const CandidateFilter({
-    this.nationality,
     this.status,
-    this.assignedEmployeeId,
     this.searchQuery = '',
   });
 
   CandidateFilter copyWith({
-    CandidateNationality? nationality,
     CandidateStatus? status,
-    String? assignedEmployeeId,
     String? searchQuery,
-    bool clearNationality = false,
     bool clearStatus = false,
-    bool clearEmployee = false,
   }) {
     return CandidateFilter(
-      nationality: clearNationality ? null : (nationality ?? this.nationality),
       status: clearStatus ? null : (status ?? this.status),
-      assignedEmployeeId: clearEmployee
-          ? null
-          : (assignedEmployeeId ?? this.assignedEmployeeId),
       searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 
-  bool get hasActiveFilters =>
-      nationality != null || status != null || assignedEmployeeId != null;
+  bool get hasActiveFilters => status != null;
 }
 
 final candidateFilterProvider =
@@ -55,16 +42,8 @@ final candidatesStreamProvider =
       .collection(AppConstants.candidateProfilesCollection)
       .orderBy('createdAt', descending: true);
 
-  if (filter.nationality != null) {
-    query = query.where('nationality',
-        isEqualTo: filter.nationality!.value);
-  }
   if (filter.status != null) {
     query = query.where('status', isEqualTo: filter.status!.value);
-  }
-  if (filter.assignedEmployeeId != null) {
-    query = query.where('assignedEmployeeId',
-        isEqualTo: filter.assignedEmployeeId);
   }
 
   return query.snapshots().map((snap) =>
@@ -94,14 +73,8 @@ final supervisorCandidatesProvider =
       .collection(AppConstants.candidateProfilesCollection)
       .orderBy('createdAt', descending: true);
 
-  if (filter.nationality != null) {
-    query = query.where('nationality', isEqualTo: filter.nationality!.value);
-  }
   if (filter.status != null) {
     query = query.where('status', isEqualTo: filter.status!.value);
-  }
-  if (filter.assignedEmployeeId != null) {
-    query = query.where('assignedEmployeeId', isEqualTo: filter.assignedEmployeeId);
   }
 
   return query.snapshots().map((snap) =>

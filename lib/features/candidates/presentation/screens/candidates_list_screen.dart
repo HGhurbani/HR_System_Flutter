@@ -204,13 +204,6 @@ class _ActiveFiltersBar extends StatelessWidget {
             child: Wrap(
               spacing: 8,
               children: [
-                if (filter.nationality != null)
-                  Chip(
-                    label:
-                        Text(filter.nationality!.value),
-                    deleteIcon: const Icon(Icons.close, size: 14),
-                    onDeleted: () {},
-                  ),
                 if (filter.status != null)
                   Chip(
                     label: Text(filter.status!.value),
@@ -449,13 +442,11 @@ class _FilterSheet extends ConsumerStatefulWidget {
 }
 
 class _FilterSheetState extends ConsumerState<_FilterSheet> {
-  CandidateNationality? _nationality;
   CandidateStatus? _status;
 
   @override
   void initState() {
     super.initState();
-    _nationality = widget.currentFilter.nationality;
     _status = widget.currentFilter.status;
   }
 
@@ -471,21 +462,6 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
         children: [
           Text(l10n.filter, style: context.textTheme.headlineSmall),
           const SizedBox(height: 20),
-          Text(l10n.nationality, style: context.textTheme.titleMedium),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            children: CandidateNationality.values.map((n) {
-              final label = _nationalityLabel(n, l10n);
-              return FilterChip(
-                label: Text(label),
-                selected: _nationality == n,
-                onSelected: (v) =>
-                    setState(() => _nationality = v ? n : null),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 16),
           Text(l10n.status, style: context.textTheme.titleMedium),
           const SizedBox(height: 10),
           Wrap(
@@ -520,7 +496,6 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
                     ref
                         .read(candidateFilterProvider.notifier)
                         .update((s) => s.copyWith(
-                              nationality: _nationality,
                               status: _status,
                             ));
                     Navigator.pop(context);
@@ -533,21 +508,6 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
         ],
       ),
     );
-  }
-
-  String _nationalityLabel(CandidateNationality n, l10n) {
-    switch (n) {
-      case CandidateNationality.philippines:
-        return l10n.nationalityPhilippines;
-      case CandidateNationality.kenya:
-        return l10n.nationalityKenya;
-      case CandidateNationality.uganda:
-        return l10n.nationalityUganda;
-      case CandidateNationality.ethiopia:
-        return l10n.nationalityEthiopia;
-      case CandidateNationality.bangladesh:
-        return l10n.nationalityBangladesh;
-    }
   }
 
   String _statusLabel(CandidateStatus s, l10n) {
