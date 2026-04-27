@@ -12,7 +12,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appName => 'نظام الموارد البشرية';
 
   @override
-  String get appTagline => 'نظام إدارة العمالة المنزلية';
+  String get appTagline => 'إدارة الموارد البشرية';
 
   @override
   String get loading => 'جاري التحميل...';
@@ -426,6 +426,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get assignedTo => 'مسند إلى';
+
+  @override
+  String get reservedBy => 'محجوز بواسطة';
 
   @override
   String get createdBy => 'أضيف بواسطة';

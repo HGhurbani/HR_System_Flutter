@@ -7,6 +7,7 @@ import '../../../../core/widgets/loading_widget.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../candidates/application/candidates_providers.dart';
 import '../../../candidates/domain/entities/candidate_status.dart';
+import '../../../notifications/presentation/widgets/notifications_icon_button.dart';
 
 class SupervisorDashboardScreen extends ConsumerWidget {
   const SupervisorDashboardScreen({super.key});
@@ -24,6 +25,7 @@ class SupervisorDashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.supervisorDashboard),
         actions: [
+          const NotificationsIconButton(),
           PopupMenuButton(
             icon: CircleAvatar(
               radius: 16,

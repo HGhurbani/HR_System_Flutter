@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTagline.
   ///
   /// In ar, this message translates to:
-  /// **'نظام إدارة العمالة المنزلية'**
+  /// **'إدارة الموارد البشرية'**
   String get appTagline;
 
   /// No description provided for @loading.
@@ -919,6 +919,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'مسند إلى'**
   String get assignedTo;
+
+  /// No description provided for @reservedBy.
+  ///
+  /// In ar, this message translates to:
+  /// **'محجوز بواسطة'**
+  String get reservedBy;
 
   /// No description provided for @createdBy.
   ///

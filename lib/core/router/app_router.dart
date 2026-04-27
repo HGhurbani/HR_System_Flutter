@@ -15,6 +15,7 @@ import '../../features/admin/presentation/screens/admin_leaves_screen.dart';
 import '../../features/admin/presentation/screens/admin_salary_screen.dart';
 import '../../features/admin/presentation/screens/admin_reports_screen.dart';
 import '../../features/admin/presentation/screens/admin_settings_screen.dart';
+import '../../features/admin/presentation/screens/admin_holidays_screen.dart';
 import '../../features/supervisor/presentation/screens/supervisor_shell.dart';
 import '../../features/supervisor/presentation/screens/supervisor_dashboard_screen.dart';
 import '../../features/candidates/presentation/screens/candidates_list_screen.dart';
@@ -27,6 +28,7 @@ import '../../features/employee/presentation/screens/employee_salary_screen.dart
 import '../../features/employee/presentation/screens/employee_leaves_screen.dart';
 import '../../features/employee/presentation/screens/employee_profile_screen.dart';
 import '../../features/settings/presentation/screens/user_app_settings_screen.dart';
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
 
 // Route names
 class AppRoutes {
@@ -34,6 +36,7 @@ class AppRoutes {
   static const splash = '/';
   static const login = '/login';
   static const forgotPassword = '/forgot-password';
+  static const notifications = '/notifications';
 
   // Admin
   static const adminShell = '/admin';
@@ -49,6 +52,7 @@ class AppRoutes {
   static const adminSalary = '/admin/salary';
   static const adminReports = '/admin/reports';
   static const adminSettings = '/admin/settings';
+  static const adminHolidays = '/admin/settings/holidays';
 
   // Supervisor
   static const supervisorShell = '/supervisor';
@@ -126,6 +130,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
 
       // ── Admin Shell ──────────────────────────────────────────────────────
       StatefulShellRoute.indexedStack(
@@ -199,6 +207,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(
               path: AppRoutes.adminSettings,
               builder: (context, state) => const AdminSettingsScreen(),
+              routes: [
+                GoRoute(
+                  path: 'holidays',
+                  builder: (context, state) => const AdminHolidaysScreen(),
+                ),
+              ],
             ),
           ]),
         ],

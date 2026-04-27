@@ -101,13 +101,13 @@ abstract class AppLocalizations {
   /// Application name
   ///
   /// In ar, this message translates to:
-  /// **'نظام الموارد البشرية'**
+  /// **'ATHAR - HR'**
   String get appName;
 
   /// No description provided for @appTagline.
   ///
   /// In ar, this message translates to:
-  /// **'نظام إدارة العمالة المنزلية'**
+  /// **'إدارة الموارد البشرية'**
   String get appTagline;
 
   /// No description provided for @loading.
@@ -932,6 +932,12 @@ abstract class AppLocalizations {
   /// **'مسند إلى'**
   String get assignedTo;
 
+  /// No description provided for @reservedBy.
+  ///
+  /// In ar, this message translates to:
+  /// **'محجوز بواسطة'**
+  String get reservedBy;
+
   /// No description provided for @createdBy.
   ///
   /// In ar, this message translates to:
@@ -1483,6 +1489,48 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تفاصيل العمولة'**
   String get commissionDetails;
+
+  /// No description provided for @commissionType.
+  ///
+  /// In ar, this message translates to:
+  /// **'نوع العمولة'**
+  String get commissionType;
+
+  /// No description provided for @commissionRuleNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'بدون'**
+  String get commissionRuleNone;
+
+  /// No description provided for @commissionRuleFixed.
+  ///
+  /// In ar, this message translates to:
+  /// **'ثابت'**
+  String get commissionRuleFixed;
+
+  /// No description provided for @commissionRulePercentage.
+  ///
+  /// In ar, this message translates to:
+  /// **'نسبة'**
+  String get commissionRulePercentage;
+
+  /// No description provided for @commissionSourceManualAdjustment.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعديل يدوي'**
+  String get commissionSourceManualAdjustment;
+
+  /// No description provided for @commissionSourcePerformance.
+  ///
+  /// In ar, this message translates to:
+  /// **'أداء'**
+  String get commissionSourcePerformance;
+
+  /// No description provided for @commissionSourceCandidateConversion.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحويل مرشح'**
+  String get commissionSourceCandidateConversion;
 
   /// No description provided for @noCommission.
   ///

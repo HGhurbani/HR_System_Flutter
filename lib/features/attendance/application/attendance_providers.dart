@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../auth/application/auth_providers.dart';
+import '../../notifications/application/notifications_providers.dart';
 import '../data/models/attendance_model.dart';
+import '../data/models/attendance_policy_model.dart';
 import '../data/models/company_work_schedule.dart';
 
 // ─── Company Location Model ────────────────────────────────────────────────
@@ -134,6 +136,17 @@ final workScheduleProvider =
       .map((snap) => CompanyWorkSchedule.fromMap(snap.data()));
 });
 
+/// Payroll attendance policy (document `company_settings/attendance_policy`).
+final attendancePolicyProvider =
+    StreamProvider<AttendancePolicyModel>((ref) {
+  final firestore = ref.watch(firestoreProvider);
+  return firestore
+      .collection(AppConstants.companySettingsCollection)
+      .doc(AppConstants.companyAttendancePolicyDocId)
+      .snapshots()
+      .map((snap) => AttendancePolicyModel.fromMap(snap.data()));
+});
+
 // ─── Check-In/Out Notifier ─────────────────────────────────────────────────
 class AttendanceState {
   final bool isLoading;
@@ -171,14 +184,17 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
   final FirebaseFirestore _firestore;
   final String _employeeId;
   final String _employeeName;
+  final NotificationsService _notifications;
 
   AttendanceNotifier({
     required FirebaseFirestore firestore,
     required String employeeId,
     required String employeeName,
+    required NotificationsService notifications,
   })  : _firestore = firestore,
         _employeeId = employeeId,
         _employeeName = employeeName,
+        _notifications = notifications,
         super(const AttendanceState());
 
   Future<bool> getLocation() async {
@@ -319,6 +335,12 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
       );
 
       await doc.set(attendance.toMap());
+      await _notify(
+        title: 'تم تسجيل حضور',
+        body: 'سجل $_employeeName الحضور',
+        type: 'attendance_check_in',
+        targetUserId: adminNotificationTarget,
+      );
       state = state.copyWith(isLoading: false, isSuccess: true);
       return true;
     } catch (e) {
@@ -339,9 +361,15 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
           .doc(attendanceId)
           .update({
         'checkOutTime': FieldValue.serverTimestamp(),
-        'checkOutLat': position.latitude,
-        'checkOutLng': position.longitude,
+          'checkOutLat': position.latitude,
+          'checkOutLng': position.longitude,
       });
+      await _notify(
+        title: 'تم تسجيل انصراف',
+        body: 'سجل $_employeeName الانصراف',
+        type: 'attendance_check_out',
+        targetUserId: adminNotificationTarget,
+      );
       state = state.copyWith(isLoading: false, isSuccess: true);
       return true;
     } catch (e) {
@@ -354,6 +382,22 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
   void reset() {
     state = const AttendanceState();
   }
+
+  Future<void> _notify({
+    required String title,
+    required String body,
+    required String type,
+    required String targetUserId,
+  }) async {
+    try {
+      await _notifications.create(
+        title: title,
+        body: body,
+        type: type,
+        targetUserId: targetUserId,
+      );
+    } catch (_) {}
+  }
 }
 
 final attendanceNotifierProvider =
@@ -363,5 +407,6 @@ final attendanceNotifierProvider =
     firestore: ref.watch(firestoreProvider),
     employeeId: user?.uid ?? '',
     employeeName: user?.fullName ?? '',
+    notifications: ref.watch(notificationsServiceProvider),
   );
 });

@@ -72,36 +72,122 @@ class _CandidateDetailBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _buildHeader(context, l10n),
-          Padding(
+    return Column(
+      children: [
+        Expanded(child: _buildImageViewer()),
+        SafeArea(
+          top: false,
+          child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                if (!candidate.isImageOnlyProfile) ...[
-                  _buildInfoCard(context, l10n),
+                _buildReservationSummary(context, l10n),
+                if (user?.role.canManageCandidates == true) ...[
                   const SizedBox(height: 12),
-                ],
-                _buildPersonalCard(context, l10n),
-                const SizedBox(height: 12),
-                if (candidate.cvFileUrl?.isNotEmpty == true)
-                  _buildMediaCard(context, l10n),
-                if (candidate.cvFileUrl?.isNotEmpty == true)
-                  const SizedBox(height: 12),
-                if (candidate.notes?.isNotEmpty == true)
-                  _buildNotesCard(context, l10n),
-                if (candidate.notes?.isNotEmpty == true)
-                  const SizedBox(height: 12),
-                if (user?.role.canManageCandidates == true)
                   _buildActionsCard(context, ref, l10n),
-                const SizedBox(height: 24),
+                ],
               ],
             ),
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImageViewer() {
+    final imageUrl = candidate.imageUrl;
+
+    return ColoredBox(
+      color: Colors.black,
+      child: imageUrl == null || imageUrl.isEmpty
+          ? const Center(
+              child: Icon(
+                Icons.broken_image_outlined,
+                size: 56,
+                color: Colors.white,
+              ),
+            )
+          : InteractiveViewer(
+              minScale: 0.8,
+              maxScale: 5,
+              child: Center(
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.broken_image_outlined,
+                    size: 56,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+    );
+  }
+
+  Widget _buildReservationSummary(BuildContext context, dynamic l10n) {
+    final statusColor = _statusColor(candidate.status);
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    candidate.fullName,
+                    style: context.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                StatusBadge(
+                  label: _statusLabel(candidate.status, l10n),
+                  color: statusColor,
+                  fontSize: 12,
+                ),
+              ],
+            ),
+            if (candidate.assignedEmployeeName != null) ...[
+              const SizedBox(height: 8),
+              _InfoRow(
+                icon: Icons.person_pin_outlined,
+                label: l10n.assignedTo,
+                value: candidate.assignedEmployeeName!,
+                valueColor: AppColors.primary,
+              ),
+            ],
+            if (candidate.reservedByUserName != null) ...[
+              const SizedBox(height: 4),
+              _InfoRow(
+                icon: Icons.lock_outline_rounded,
+                label: l10n.reservedBy,
+                value: candidate.reservedByUserName!,
+              ),
+            ],
+            if (candidate.createdBySupervisorName != null) ...[
+              const SizedBox(height: 4),
+              _InfoRow(
+                icon: Icons.supervisor_account_outlined,
+                label: l10n.createdBy,
+                value: candidate.createdBySupervisorName!,
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -238,6 +324,12 @@ class _CandidateDetailBody extends ConsumerWidget {
                 label: l10n.assignedTo,
                 value: candidate.assignedEmployeeName!,
                 valueColor: AppColors.primary,
+              ),
+            if (candidate.reservedByUserName != null)
+              _InfoRow(
+                icon: Icons.lock_outline_rounded,
+                label: l10n.reservedBy,
+                value: candidate.reservedByUserName!,
               ),
             if (candidate.convertedEmployeeId != null)
               _InfoRow(

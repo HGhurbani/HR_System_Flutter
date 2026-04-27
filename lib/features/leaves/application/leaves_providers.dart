@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../auth/application/auth_providers.dart';
+import '../../notifications/application/notifications_providers.dart';
 import '../data/models/leave_request_model.dart';
 
 // ─── Employee's Own Leave Requests ────────────────────────────────────────
@@ -49,14 +50,17 @@ class LeavesNotifier extends StateNotifier<AsyncValue<void>> {
   final FirebaseFirestore _firestore;
   final String _employeeId;
   final String _employeeName;
+  final NotificationsService _notifications;
 
   LeavesNotifier({
     required FirebaseFirestore firestore,
     required String employeeId,
     required String employeeName,
+    required NotificationsService notifications,
   })  : _firestore = firestore,
         _employeeId = employeeId,
         _employeeName = employeeName,
+        _notifications = notifications,
         super(const AsyncValue.data(null));
 
   Future<bool> submitLeaveRequest({
@@ -99,6 +103,12 @@ class LeavesNotifier extends StateNotifier<AsyncValue<void>> {
       );
 
       await doc.set(request.toMap());
+      await _notify(
+        title: 'تم تقديم طلب إجازة',
+        body: 'تم تقديم طلب إجازة من ${request.employeeName ?? request.employeeId}',
+        type: 'leave_created',
+        targetUserId: adminNotificationTarget,
+      );
       state = const AsyncValue.data(null);
       return true;
     } catch (e, st) {
@@ -126,12 +136,44 @@ class LeavesNotifier extends StateNotifier<AsyncValue<void>> {
         'approvedByAdminId': adminId,
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      final targetDoc = await _firestore
+          .collection(AppConstants.leaveRequestsCollection)
+          .doc(requestId)
+          .get();
+      final targetEmployeeId =
+          targetDoc.data()?['employeeId'] as String? ?? adminNotificationTarget;
+      await _notify(
+        title: status == LeaveRequestStatus.approved
+            ? 'تم قبول طلب الإجازة'
+            : 'تم رفض طلب الإجازة',
+        body: adminNote?.isNotEmpty == true
+            ? adminNote!
+            : 'تم تحديث حالة طلب الإجازة',
+        type: 'leave_status_updated',
+        targetUserId: targetEmployeeId,
+      );
       state = const AsyncValue.data(null);
       return true;
     } catch (e, st) {
       state = AsyncValue.error(e, st);
       return false;
     }
+  }
+
+  Future<void> _notify({
+    required String title,
+    required String body,
+    required String type,
+    required String targetUserId,
+  }) async {
+    try {
+      await _notifications.create(
+        title: title,
+        body: body,
+        type: type,
+        targetUserId: targetUserId,
+      );
+    } catch (_) {}
   }
 }
 
@@ -142,5 +184,6 @@ final leavesNotifierProvider =
     firestore: ref.watch(firestoreProvider),
     employeeId: user?.uid ?? '',
     employeeName: user?.fullName ?? '',
+    notifications: ref.watch(notificationsServiceProvider),
   );
 });

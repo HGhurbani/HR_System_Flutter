@@ -1,0 +1,65 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return firestore.get(
+        /databases/(default)/documents/users/$(request.auth.uid)
+      ).data;
+    }
+
+    function isActiveUser() {
+      return isAuthenticated() && getUserData().isActive == true;
+    }
+
+    function hasRole(role) {
+      return isActiveUser() && getUserData().role == role;
+    }
+
+    function isAdminOrSupervisor() {
+      return hasRole('admin') || hasRole('supervisor');
+    }
+
+    function isImageUpload() {
+      return request.resource != null
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /candidate_images/{fileName} {
+      allow read: if isActiveUser();
+      allow create, update: if isAdminOrSupervisor() && isImageUpload();
+      allow delete: if hasRole('admin');
+    }
+
+    match /candidate_cvs/{fileName} {
+      allow read: if isActiveUser();
+      allow create, update: if isAdminOrSupervisor()
+        && request.resource != null
+        && request.resource.size <= 10 * 1024 * 1024;
+      allow delete: if hasRole('admin');
+    }
+
+    match /candidate_videos/{fileName} {
+      allow read: if isActiveUser();
+      allow create, update: if isAdminOrSupervisor()
+        && request.resource != null
+        && request.resource.size <= 50 * 1024 * 1024
+        && request.resource.contentType.matches('video/.*');
+      allow delete: if hasRole('admin');
+    }
+
+    match /avatars/{userId}/{fileName} {
+      allow read: if isActiveUser();
+      allow create, update: if isActiveUser()
+        && request.auth.uid == userId
+        && isImageUpload();
+      allow delete: if (isAuthenticated() && request.auth.uid == userId)
+        || hasRole('admin');
+    }
+  }
+}

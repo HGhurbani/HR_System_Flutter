@@ -184,6 +184,16 @@ class _SalaryCard extends StatelessWidget {
                 prefix: '-',
                 currency: l10n.currency,
               ),
+            if (salary.attendanceDeduction > 0)
+              _SalaryRow(
+                label: context.isArabic ? 'خصم الحضور' : 'Attendance deduction',
+                amount: salary.attendanceDeduction,
+                color: AppColors.error,
+                prefix: '-',
+                currency: l10n.currency,
+              ),
+            const SizedBox(height: 8),
+            _AttendanceSummary(salary: salary),
             const Divider(height: 20),
             _SalaryRow(
               label: l10n.netSalary,
@@ -202,6 +212,86 @@ class _SalaryCard extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _AttendanceSummary extends StatelessWidget {
+  final SalaryModel salary;
+
+  const _AttendanceSummary({required this.salary});
+
+  @override
+  Widget build(BuildContext context) {
+    final warning =
+        salary.attendancePercentage < salary.attendanceThresholdPercent;
+    final color = warning ? AppColors.error : AppColors.success;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.isArabic ? 'ملخص الحضور' : 'Attendance summary',
+            style: context.textTheme.titleSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 12,
+            runSpacing: 6,
+            children: [
+              _MetricText(
+                label: context.isArabic ? 'النسبة' : 'Rate',
+                value: '${salary.attendancePercentage.toStringAsFixed(1)}%',
+              ),
+              _MetricText(
+                label: context.isArabic ? 'حضور' : 'Present',
+                value: '${salary.presentDays}',
+              ),
+              _MetricText(
+                label: context.isArabic ? 'غياب' : 'Absent',
+                value: '${salary.absentDays}',
+              ),
+              _MetricText(
+                label: context.isArabic ? 'إجازات' : 'Leaves',
+                value: '${salary.approvedLeaveDays}',
+              ),
+              _MetricText(
+                label: context.isArabic ? 'أيام العمل' : 'Workdays',
+                value: '${salary.monthWorkingDays}',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetricText extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _MetricText({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '$label: $value',
+      style: context.textTheme.bodySmall?.copyWith(
+        color: AppColors.textSecondary,
+        fontWeight: FontWeight.w600,
       ),
     );
   }

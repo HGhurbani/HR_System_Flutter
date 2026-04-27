@@ -17,7 +17,7 @@ class HrApp extends ConsumerWidget {
     final isArabic = locale.languageCode == 'ar';
 
     return MaterialApp.router(
-      title: 'HR System',
+      title: 'ATHAR - HR',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(isArabic: isArabic),
       darkTheme: AppTheme.darkTheme(isArabic: isArabic),

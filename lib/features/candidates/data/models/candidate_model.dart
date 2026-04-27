@@ -18,6 +18,9 @@ class CandidateModel {
   final CandidateStatus status;
   final String? assignedEmployeeId;
   final String? assignedEmployeeName;
+  final String? reservedByUserId;
+  final String? reservedByUserName;
+  final DateTime? reservedAt;
   final String? convertedEmployeeId;
   final DateTime? convertedAt;
   final String? convertedByAdminId;
@@ -43,6 +46,9 @@ class CandidateModel {
     required this.status,
     this.assignedEmployeeId,
     this.assignedEmployeeName,
+    this.reservedByUserId,
+    this.reservedByUserName,
+    this.reservedAt,
     this.convertedEmployeeId,
     this.convertedAt,
     this.convertedByAdminId,
@@ -58,6 +64,8 @@ class CandidateModel {
     final data = doc.data()!;
     final assignedEmployeeId = data['assignedEmployeeId'] as String?;
     final assignedEmployeeName = data['assignedEmployeeName'] as String?;
+    final reservedByUserId = data['reservedByUserId'] as String?;
+    final reservedByUserName = data['reservedByUserName'] as String?;
     final rawStatus = data['status'] as String? ?? 'available';
     final parsedStatus = CandidateStatus.fromString(rawStatus);
     // If it's assigned to an employee, treat it as reserved even if legacy status says otherwise.
@@ -81,6 +89,11 @@ class CandidateModel {
       status: normalizedStatus,
       assignedEmployeeId: assignedEmployeeId,
       assignedEmployeeName: assignedEmployeeName,
+      reservedByUserId: reservedByUserId,
+      reservedByUserName: reservedByUserName,
+      reservedAt: data['reservedAt'] != null
+          ? (data['reservedAt'] as Timestamp).toDate()
+          : null,
       convertedEmployeeId: data['convertedEmployeeId'] as String?,
       convertedAt: data['convertedAt'] != null
           ? (data['convertedAt'] as Timestamp).toDate()
@@ -123,6 +136,9 @@ class CandidateModel {
       'status': status.value,
       'assignedEmployeeId': assignedEmployeeId,
       'assignedEmployeeName': assignedEmployeeName,
+      'reservedByUserId': reservedByUserId,
+      'reservedByUserName': reservedByUserName,
+      'reservedAt': reservedAt != null ? Timestamp.fromDate(reservedAt!) : null,
       'convertedEmployeeId': convertedEmployeeId,
       'convertedAt':
           convertedAt != null ? Timestamp.fromDate(convertedAt!) : null,
@@ -150,6 +166,9 @@ class CandidateModel {
     CandidateStatus? status,
     String? assignedEmployeeId,
     String? assignedEmployeeName,
+    String? reservedByUserId,
+    String? reservedByUserName,
+    DateTime? reservedAt,
     String? convertedEmployeeId,
     DateTime? convertedAt,
     String? convertedByAdminId,
@@ -173,6 +192,9 @@ class CandidateModel {
       assignedEmployeeId: assignedEmployeeId ?? this.assignedEmployeeId,
       assignedEmployeeName:
           assignedEmployeeName ?? this.assignedEmployeeName,
+      reservedByUserId: reservedByUserId ?? this.reservedByUserId,
+      reservedByUserName: reservedByUserName ?? this.reservedByUserName,
+      reservedAt: reservedAt ?? this.reservedAt,
       convertedEmployeeId:
           convertedEmployeeId ?? this.convertedEmployeeId,
       convertedAt: convertedAt ?? this.convertedAt,

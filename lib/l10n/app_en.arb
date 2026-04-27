@@ -2,8 +2,8 @@
   "@@locale": "en",
   "@@last_modified": "2026-04-07",
 
-  "appName": "HR System",
-  "appTagline": "Domestic Worker Recruitment Management",
+  "appName": "ATHAR - HR",
+  "appTagline": "Human Resources Management",
 
   "loading": "Loading...",
   "error": "Error",
@@ -149,6 +149,7 @@
   "cvFile": "CV File",
   "videoUrl": "Video",
   "assignedTo": "Assigned To",
+  "reservedBy": "Reserved By",
   "createdBy": "Created By",
   "assignCandidate": "Assign CV",
   "noCandidates": "No CVs found",
@@ -249,6 +250,13 @@
   "commissionAmount": "Commission Amount",
   "commissionMonth": "Commission Month",
   "commissionDetails": "Commission Details",
+  "commissionType": "Commission Type",
+  "commissionRuleNone": "None",
+  "commissionRuleFixed": "Fixed",
+  "commissionRulePercentage": "Percentage",
+  "commissionSourceManualAdjustment": "Manual adjustment",
+  "commissionSourcePerformance": "Performance",
+  "commissionSourceCandidateConversion": "Candidate conversion",
   "noCommission": "No commissions",
   "addCommission": "Add Commission",
 

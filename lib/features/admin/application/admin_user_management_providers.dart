@@ -9,6 +9,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../auth/data/models/user_model.dart';
 import '../../auth/domain/entities/user_role.dart';
+import '../../notifications/application/notifications_providers.dart';
 
 final employeesProvider = StreamProvider<List<UserModel>>((ref) {
   final firestore = ref.watch(firestoreProvider);
@@ -46,14 +47,17 @@ class ManagedUserService {
   final FirebaseFirestore _firestore;
   final String _adminId;
   final String _adminName;
+  final NotificationsService _notifications;
 
   const ManagedUserService({
     required FirebaseFirestore firestore,
     required String adminId,
     required String adminName,
+    required NotificationsService notifications,
   })  : _firestore = firestore,
         _adminId = adminId,
-        _adminName = adminName;
+        _adminName = adminName,
+        _notifications = notifications;
 
   Future<ManagedUserCreationResult> createManagedUser({
     required UserRole role,
@@ -141,6 +145,14 @@ class ManagedUserService {
           );
         },
       );
+      try {
+        await _notifications.create(
+          title: 'تم إنشاء مستخدم',
+          body: 'تم إنشاء حساب $fullName بصلاحية ${role.value}',
+          type: 'user_created',
+          targetUserId: adminNotificationTarget,
+        );
+      } catch (_) {}
       return result;
     } finally {
       await subscription.cancel();
@@ -164,5 +176,6 @@ final managedUserServiceProvider = Provider<ManagedUserService>((ref) {
     firestore: ref.watch(firestoreProvider),
     adminId: currentUser?.uid ?? '',
     adminName: currentUser?.fullName ?? '',
+    notifications: ref.watch(notificationsServiceProvider),
   );
 });

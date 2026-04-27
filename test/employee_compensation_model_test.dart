@@ -3,7 +3,7 @@ import 'package:hr_sys/features/salary/data/models/employee_compensation_model.d
 
 void main() {
   test('fixed commission rule returns fixed amount', () {
-    const profile = EmployeeCompensationModel(
+    final profile = EmployeeCompensationModel(
       employeeId: 'emp-1',
       basicSalary: 4000,
       isCommissionEligible: true,
@@ -17,7 +17,7 @@ void main() {
   });
 
   test('percentage commission rule uses basic salary', () {
-    const profile = EmployeeCompensationModel(
+    final profile = EmployeeCompensationModel(
       employeeId: 'emp-1',
       basicSalary: 4000,
       isCommissionEligible: true,

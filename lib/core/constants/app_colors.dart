@@ -3,17 +3,22 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Brand Colors
-  static const Color primary = Color(0xFF1B4F72);
-  static const Color primaryLight = Color(0xFF2E86C1);
-  static const Color primaryDark = Color(0xFF154360);
+  // Brand Colors — ATHAR Identity (Dark Forest Green + Gold)
+  static const Color primary = Color(0xFF1A3828);
+  static const Color primaryLight = Color(0xFF2A5C3F);
+  static const Color primaryDark = Color(0xFF0F2318);
 
   static const Color secondary = Color(0xFF27AE60);
   static const Color secondaryLight = Color(0xFF2ECC71);
   static const Color secondaryDark = Color(0xFF1E8449);
 
-  static const Color accent = Color(0xFFE67E22);
-  static const Color accentLight = Color(0xFFF39C12);
+  static const Color accent = Color(0xFFC9A84C);
+  static const Color accentLight = Color(0xFFE0C068);
+
+  // Gold — ATHAR signature color
+  static const Color gold = Color(0xFFC9A84C);
+  static const Color goldLight = Color(0xFFE0C068);
+  static const Color goldDark = Color(0xFFA8882E);
 
   // Semantic Colors
   static const Color success = Color(0xFF27AE60);
@@ -61,9 +66,15 @@ class AppColors {
   static const Color textOnPrimary = Color(0xFFFFFFFF);
   static const Color textOnDark = Color(0xFFE9ECEF);
 
-  // Gradient
+  // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primary, primaryLight],
+    colors: [primaryDark, primary],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient goldGradient = LinearGradient(
+    colors: [goldDark, gold],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

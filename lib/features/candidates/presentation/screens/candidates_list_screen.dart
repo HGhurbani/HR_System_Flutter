@@ -406,6 +406,26 @@ class _CandidateCard extends ConsumerWidget {
                         ],
                       ),
                     ],
+                    if (isAdminView && candidate.reservedByUserName != null) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.lock_outline_rounded,
+                              size: 14,
+                              color: AppColors.textSecondary),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${l10n.reservedBy}: ${candidate.reservedByUserName}',
+                            style: context.textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

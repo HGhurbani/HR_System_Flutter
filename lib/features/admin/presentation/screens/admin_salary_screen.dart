@@ -262,6 +262,7 @@ class _CompensationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -305,13 +306,24 @@ class _CompensationTile extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '${context.l10n.commission}: ${profile.commissionRuleType.value} ${profile.commissionRuleValue.toStringAsFixed(0)}',
+              '${l10n.commission}: ${_commissionRuleLabel(l10n, profile.commissionRuleType)} ${profile.commissionRuleValue.toStringAsFixed(0)}',
               style: context.textTheme.bodySmall,
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _commissionRuleLabel(dynamic l10n, CommissionRuleType type) {
+    switch (type) {
+      case CommissionRuleType.fixed:
+        return l10n.commissionRuleFixed;
+      case CommissionRuleType.percentage:
+        return l10n.commissionRulePercentage;
+      case CommissionRuleType.none:
+        return l10n.commissionRuleNone;
+    }
   }
 }
 
@@ -370,6 +382,25 @@ class _SalaryTile extends StatelessWidget {
                 ),
                 Text(
                   '${l10n.commission}: ${salary.commissionTotal.toStringAsFixed(0)} ${l10n.currency}',
+                ),
+                Text(
+                  '${context.isArabic ? 'خصم الحضور' : 'Attendance deduction'}: ${salary.attendanceDeduction.toStringAsFixed(0)} ${l10n.currency}',
+                  style: TextStyle(
+                    color: salary.attendanceDeduction > 0
+                        ? AppColors.error
+                        : AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  '${context.isArabic ? 'نسبة الحضور' : 'Attendance'}: ${salary.attendancePercentage.toStringAsFixed(1)}%',
+                  style: TextStyle(
+                    color: salary.attendancePercentage <
+                            salary.attendanceThresholdPercent
+                        ? AppColors.error
+                        : AppColors.success,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 Text(
                   '${l10n.netSalary}: ${salary.netSalary.toStringAsFixed(0)} ${l10n.currency}',
@@ -562,7 +593,7 @@ class _CompensationSheetState extends ConsumerState<_CompensationSheet> {
                     .map(
                       (type) => DropdownMenuItem(
                         value: type,
-                        child: Text(type.value),
+                        child: Text(_commissionRuleLabel(l10n, type)),
                       ),
                     )
                     .toList(),
@@ -601,6 +632,17 @@ class _CompensationSheetState extends ConsumerState<_CompensationSheet> {
         ),
       ),
     );
+  }
+
+  String _commissionRuleLabel(dynamic l10n, CommissionRuleType type) {
+    switch (type) {
+      case CommissionRuleType.fixed:
+        return l10n.commissionRuleFixed;
+      case CommissionRuleType.percentage:
+        return l10n.commissionRulePercentage;
+      case CommissionRuleType.none:
+        return l10n.commissionRuleNone;
+    }
   }
 }
 
@@ -713,24 +755,24 @@ class _CommissionSheetState extends ConsumerState<_CommissionSheet> {
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 value: _source,
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: 'manual_adjustment',
-                    child: Text('manual_adjustment'),
+                    child: Text(l10n.commissionSourceManualAdjustment),
                   ),
                   DropdownMenuItem(
                     value: 'performance',
-                    child: Text('performance'),
+                    child: Text(l10n.commissionSourcePerformance),
                   ),
                   DropdownMenuItem(
                     value: 'candidate_conversion',
-                    child: Text('candidate_conversion'),
+                    child: Text(l10n.commissionSourceCandidateConversion),
                   ),
                 ],
                 onChanged: (value) =>
                     setState(() => _source = value ?? 'manual_adjustment'),
                 decoration: InputDecoration(
-                  labelText: l10n.type,
+                  labelText: l10n.commissionType,
                   prefixIcon: const Icon(Icons.category_outlined),
                 ),
               ),

@@ -2,10 +2,10 @@
   "@@locale": "ar",
   "@@last_modified": "2026-04-07",
 
-  "appName": "نظام الموارد البشرية",
+  "appName": "ATHAR - HR",
   "@appName": { "description": "Application name" },
 
-  "appTagline": "نظام إدارة العمالة المنزلية",
+  "appTagline": "إدارة الموارد البشرية",
 
   "loading": "جاري التحميل...",
   "error": "خطأ",
@@ -151,6 +151,7 @@
   "cvFile": "ملف السيرة الذاتية",
   "videoUrl": "فيديو تعريفي",
   "assignedTo": "مسند إلى",
+  "reservedBy": "محجوز بواسطة",
   "createdBy": "أضيف بواسطة",
   "assignCandidate": "إسناد السيفي",
   "noCandidates": "لا توجد سيفيهات",
@@ -251,6 +252,13 @@
   "commissionAmount": "مبلغ العمولة",
   "commissionMonth": "شهر العمولة",
   "commissionDetails": "تفاصيل العمولة",
+  "commissionType": "نوع العمولة",
+  "commissionRuleNone": "بدون",
+  "commissionRuleFixed": "ثابت",
+  "commissionRulePercentage": "نسبة",
+  "commissionSourceManualAdjustment": "تعديل يدوي",
+  "commissionSourcePerformance": "أداء",
+  "commissionSourceCandidateConversion": "تحويل مرشح",
   "noCommission": "لا يوجد عمولات",
   "addCommission": "إضافة عمولة",
 

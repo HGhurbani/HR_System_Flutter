@@ -16,15 +16,21 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isAuthenticated() && getRole() == 'admin';
+      return isAuthenticated()
+        && getRole() == 'admin'
+        && getUserData().isActive == true;
     }
 
     function isSupervisor() {
-      return isAuthenticated() && getRole() == 'supervisor';
+      return isAuthenticated()
+        && getRole() == 'supervisor'
+        && getUserData().isActive == true;
     }
 
     function isEmployee() {
-      return isAuthenticated() && getRole() == 'employee';
+      return isAuthenticated()
+        && getRole() == 'employee'
+        && getUserData().isActive == true;
     }
 
     function isOwner(uid) {
@@ -59,19 +65,21 @@ service cloud.firestore {
     match /candidate_profiles/{candidateId} {
       allow read, write: if isAdmin();
 
-      // Supervisors can view all CVs, regardless of who created them.
-      allow read: if isSupervisor() && isActiveUser();
+      // Supervisors can view and manage CVs from the supervisor screens.
+      allow read: if isSupervisor();
 
-      allow create: if isSupervisor() && isActiveUser()
+      allow create: if isSupervisor()
         && request.resource.data.createdBySupervisorId == request.auth.uid;
 
-      allow update: if isSupervisor() && isActiveUser()
-        && resource.data.createdBySupervisorId == request.auth.uid
+      allow update: if isSupervisor()
         && request.resource.data.createdBySupervisorId
-          == resource.data.createdBySupervisorId;
-
-      allow delete: if isSupervisor() && isActiveUser()
-        && resource.data.createdBySupervisorId == request.auth.uid;
+          == resource.data.createdBySupervisorId
+        && request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly([
+             'fullName', 'imageUrl', 'cvFileUrl', 'videoUrl',
+             'status', 'assignedEmployeeId', 'assignedEmployeeName',
+             'updatedAt'
+           ]);
     }
 
     // ─── Attendance logs ───────────────────────────────────────────────────
@@ -149,6 +157,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ─── Company holidays (payroll / admin settings) ─────────────────────
+    match /company_holidays/{holidayId} {
+      allow read: if isAuthenticated() && isActiveUser();
+      allow write: if isAdmin();
+    }
+
     // ─── Company locations (geofence for attendance) ─────────────────────
     match /company_locations/{locationId} {
       allow read: if isAuthenticated() && isActiveUser();
@@ -170,12 +184,18 @@ service cloud.firestore {
       allow read: if isAuthenticated() && isActiveUser()
         && (resource.data.targetUserId == request.auth.uid || isAdmin());
 
-      allow create: if isAdmin();
+      allow create: if isAuthenticated() && isActiveUser()
+        && request.resource.data.actorUserId == request.auth.uid
+        && request.resource.data.keys().hasOnly([
+          'title', 'body', 'type', 'targetUserId', 'actorUserId',
+          'isRead', 'readAt', 'createdAt'
+        ]);
 
-      allow update: if isAuthenticated() && isActiveUser()
-        && resource.data.targetUserId == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys()
-           .hasOnly(['isRead', 'readAt']);
+      allow update: if isAdmin()
+        || (isAuthenticated() && isActiveUser()
+          && resource.data.targetUserId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['isRead', 'readAt']));
 
       allow delete: if isAdmin()
         || (isAuthenticated() && isActiveUser()

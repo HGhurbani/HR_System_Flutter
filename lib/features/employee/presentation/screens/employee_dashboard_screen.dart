@@ -7,6 +7,7 @@ import '../../../../core/widgets/loading_widget.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../attendance/application/attendance_providers.dart';
 import '../../../attendance/data/models/attendance_model.dart';
+import '../../../notifications/presentation/widgets/notifications_icon_button.dart';
 import '../employee_shell_scaffold.dart';
 
 class EmployeeDashboardScreen extends ConsumerWidget {
@@ -27,6 +28,7 @@ class EmployeeDashboardScreen extends ConsumerWidget {
         ),
         title: Text(l10n.employeeDashboard),
         actions: [
+          const NotificationsIconButton(),
           PopupMenuButton(
             icon: CircleAvatar(
               radius: 16,

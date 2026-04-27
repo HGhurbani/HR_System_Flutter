@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/shell_drawer_nav_list_tile.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../auth/application/auth_providers.dart';
@@ -99,16 +100,11 @@ class EmployeeShell extends ConsumerWidget {
                   padding: EdgeInsets.zero,
                   children: [
                     for (final entry in navItems.indexed)
-                      ListTile(
-                        leading: Icon(
-                          entry.$2.icon,
-                          color: entry.$1 == shell.currentIndex
-                              ? AppColors.primary
-                              : null,
-                        ),
-                        title: Text(entry.$2.label),
+                      ShellDrawerNavListTile(
+                        label: entry.$2.label,
+                        icon: entry.$2.icon,
+                        activeIcon: entry.$2.activeIcon,
                         selected: entry.$1 == shell.currentIndex,
-                        selectedColor: AppColors.primary,
                         onTap: () {
                           Navigator.pop(context);
                           shell.goBranch(entry.$1);

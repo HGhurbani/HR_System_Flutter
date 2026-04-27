@@ -9,10 +9,10 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
-  String get appName => 'نظام الموارد البشرية';
+  String get appName => 'ATHAR - HR';
 
   @override
-  String get appTagline => 'نظام إدارة العمالة المنزلية';
+  String get appTagline => 'إدارة الموارد البشرية';
 
   @override
   String get loading => 'جاري التحميل...';
@@ -428,6 +428,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get assignedTo => 'مسند إلى';
 
   @override
+  String get reservedBy => 'محجوز بواسطة';
+
+  @override
   String get createdBy => 'أضيف بواسطة';
 
   @override
@@ -705,6 +708,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get commissionDetails => 'تفاصيل العمولة';
+
+  @override
+  String get commissionType => 'نوع العمولة';
+
+  @override
+  String get commissionRuleNone => 'بدون';
+
+  @override
+  String get commissionRuleFixed => 'ثابت';
+
+  @override
+  String get commissionRulePercentage => 'نسبة';
+
+  @override
+  String get commissionSourceManualAdjustment => 'تعديل يدوي';
+
+  @override
+  String get commissionSourcePerformance => 'أداء';
+
+  @override
+  String get commissionSourceCandidateConversion => 'تحويل مرشح';
 
   @override
   String get noCommission => 'لا يوجد عمولات';

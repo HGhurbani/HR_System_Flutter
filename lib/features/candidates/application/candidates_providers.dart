@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../auth/application/auth_providers.dart';
+import '../../notifications/application/notifications_providers.dart';
 import '../data/models/candidate_model.dart';
 import '../domain/entities/candidate_status.dart';
 
@@ -112,14 +113,17 @@ class CandidatesNotifier extends StateNotifier<AsyncValue<void>> {
   final FirebaseFirestore _firestore;
   final String _currentUserId;
   final String _currentUserName;
+  final NotificationsService _notifications;
 
   CandidatesNotifier({
     required FirebaseFirestore firestore,
     required String currentUserId,
     required String currentUserName,
+    required NotificationsService notifications,
   })  : _firestore = firestore,
         _currentUserId = currentUserId,
         _currentUserName = currentUserName,
+        _notifications = notifications,
         super(const AsyncValue.data(null));
 
   Future<String?> createCandidate(CandidateModel candidate) async {
@@ -156,6 +160,12 @@ class CandidatesNotifier extends StateNotifier<AsyncValue<void>> {
       ).toMap();
 
       await docRef.set(data);
+      await _notify(
+        title: 'تمت إضافة سيفي',
+        body: 'تمت إضافة سيفي ${candidate.fullName}',
+        type: 'candidate_created',
+        targetUserId: adminNotificationTarget,
+      );
       state = const AsyncValue.data(null);
       return docRef.id;
     } catch (e, st) {
@@ -171,6 +181,12 @@ class CandidatesNotifier extends StateNotifier<AsyncValue<void>> {
           .collection(AppConstants.candidateProfilesCollection)
           .doc(id)
           .update({...data, 'updatedAt': FieldValue.serverTimestamp()});
+      await _notify(
+        title: 'تم تحديث سيفي',
+        body: 'تم تحديث بيانات السيفي',
+        type: 'candidate_updated',
+        targetUserId: adminNotificationTarget,
+      );
       state = const AsyncValue.data(null);
       return true;
     } catch (e, st) {
@@ -180,6 +196,16 @@ class CandidatesNotifier extends StateNotifier<AsyncValue<void>> {
   }
 
   Future<bool> updateStatus(String id, CandidateStatus status) async {
+    if (status == CandidateStatus.available) {
+      return updateCandidate(id, {
+        'status': status.value,
+        'assignedEmployeeId': null,
+        'assignedEmployeeName': null,
+        'reservedByUserId': null,
+        'reservedByUserName': null,
+        'reservedAt': null,
+      });
+    }
     return updateCandidate(id, {'status': status.value});
   }
 
@@ -188,11 +214,23 @@ class CandidatesNotifier extends StateNotifier<AsyncValue<void>> {
     String employeeId,
     String employeeName,
   ) async {
-    return updateCandidate(candidateId, {
+    final success = await updateCandidate(candidateId, {
       'assignedEmployeeId': employeeId,
       'assignedEmployeeName': employeeName,
+      'reservedByUserId': _currentUserId,
+      'reservedByUserName': _currentUserName,
+      'reservedAt': FieldValue.serverTimestamp(),
       'status': CandidateStatus.reserved.value,
     });
+    if (success) {
+      await _notify(
+        title: 'تم حجز سيفي',
+        body: 'تم إسناد السيفي إلى $employeeName',
+        type: 'candidate_assigned',
+        targetUserId: employeeId,
+      );
+    }
+    return success;
   }
 
   Future<bool> deleteCandidate(String id) async {
@@ -202,12 +240,34 @@ class CandidatesNotifier extends StateNotifier<AsyncValue<void>> {
           .collection(AppConstants.candidateProfilesCollection)
           .doc(id)
           .delete();
+      await _notify(
+        title: 'تم حذف سيفي',
+        body: 'تم حذف سيفي من النظام',
+        type: 'candidate_deleted',
+        targetUserId: adminNotificationTarget,
+      );
       state = const AsyncValue.data(null);
       return true;
     } catch (e, st) {
       state = AsyncValue.error(e, st);
       return false;
     }
+  }
+
+  Future<void> _notify({
+    required String title,
+    required String body,
+    required String type,
+    required String targetUserId,
+  }) async {
+    try {
+      await _notifications.create(
+        title: title,
+        body: body,
+        type: type,
+        targetUserId: targetUserId,
+      );
+    } catch (_) {}
   }
 }
 
@@ -218,5 +278,6 @@ final candidatesNotifierProvider =
     firestore: ref.watch(firestoreProvider),
     currentUserId: user?.uid ?? '',
     currentUserName: user?.fullName ?? '',
+    notifications: ref.watch(notificationsServiceProvider),
   );
 });

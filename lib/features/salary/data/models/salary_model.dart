@@ -9,10 +9,19 @@ class SalaryModel {
   final double basicSalary;
   final double additions;
   final double deductions;
+  final double attendanceDeduction;
+  final double totalDeductions;
   final double commissionRuleAmount;
   final double manualCommissionTotal;
   final double commissionTotal;
   final double netSalary;
+  final int monthWorkingDays;
+  final int requiredAttendanceDays;
+  final int presentDays;
+  final int approvedLeaveDays;
+  final int absentDays;
+  final double attendancePercentage;
+  final double attendanceThresholdPercent;
   final bool isApproved;
   final DateTime? approvedAt;
   final String? approvedByAdminId;
@@ -29,17 +38,26 @@ class SalaryModel {
     required this.basicSalary,
     this.additions = 0,
     this.deductions = 0,
+    this.attendanceDeduction = 0,
+    double? totalDeductions,
     this.commissionRuleAmount = 0,
     this.manualCommissionTotal = 0,
     this.commissionTotal = 0,
     required this.netSalary,
+    this.monthWorkingDays = 0,
+    this.requiredAttendanceDays = 0,
+    this.presentDays = 0,
+    this.approvedLeaveDays = 0,
+    this.absentDays = 0,
+    this.attendancePercentage = 100,
+    this.attendanceThresholdPercent = 98,
     this.isApproved = false,
     this.approvedAt,
     this.approvedByAdminId,
     this.notes,
     required this.createdAt,
     required this.updatedAt,
-  });
+  }) : totalDeductions = totalDeductions ?? deductions + attendanceDeduction;
 
   factory SalaryModel.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> doc,
@@ -55,6 +73,9 @@ class SalaryModel {
           (data['basicSalary'] as num?)?.toDouble() ?? 0,
       additions: (data['additions'] as num?)?.toDouble() ?? 0,
       deductions: (data['deductions'] as num?)?.toDouble() ?? 0,
+      attendanceDeduction:
+          (data['attendanceDeduction'] as num?)?.toDouble() ?? 0,
+      totalDeductions: (data['totalDeductions'] as num?)?.toDouble(),
       commissionRuleAmount:
           (data['commissionRuleAmount'] as num?)?.toDouble() ?? 0,
       manualCommissionTotal:
@@ -63,6 +84,18 @@ class SalaryModel {
           (data['commissionTotal'] as num?)?.toDouble() ?? 0,
       netSalary:
           (data['netSalary'] as num?)?.toDouble() ?? 0,
+      monthWorkingDays:
+          (data['monthWorkingDays'] as num?)?.toInt() ?? 0,
+      requiredAttendanceDays:
+          (data['requiredAttendanceDays'] as num?)?.toInt() ?? 0,
+      presentDays: (data['presentDays'] as num?)?.toInt() ?? 0,
+      approvedLeaveDays:
+          (data['approvedLeaveDays'] as num?)?.toInt() ?? 0,
+      absentDays: (data['absentDays'] as num?)?.toInt() ?? 0,
+      attendancePercentage:
+          (data['attendancePercentage'] as num?)?.toDouble() ?? 100,
+      attendanceThresholdPercent:
+          (data['attendanceThresholdPercent'] as num?)?.toDouble() ?? 98,
       isApproved: data['isApproved'] as bool? ?? false,
       approvedAt: data['approvedAt'] != null
           ? (data['approvedAt'] as Timestamp).toDate()
@@ -87,10 +120,19 @@ class SalaryModel {
       'basicSalary': basicSalary,
       'additions': additions,
       'deductions': deductions,
+      'attendanceDeduction': attendanceDeduction,
+      'totalDeductions': totalDeductions,
       'commissionRuleAmount': commissionRuleAmount,
       'manualCommissionTotal': manualCommissionTotal,
       'commissionTotal': commissionTotal,
       'netSalary': netSalary,
+      'monthWorkingDays': monthWorkingDays,
+      'requiredAttendanceDays': requiredAttendanceDays,
+      'presentDays': presentDays,
+      'approvedLeaveDays': approvedLeaveDays,
+      'absentDays': absentDays,
+      'attendancePercentage': attendancePercentage,
+      'attendanceThresholdPercent': attendanceThresholdPercent,
       'isApproved': isApproved,
       'approvedAt': approvedAt != null ? Timestamp.fromDate(approvedAt!) : null,
       'approvedByAdminId': approvedByAdminId,

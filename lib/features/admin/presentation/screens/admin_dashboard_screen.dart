@@ -7,6 +7,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../auth/application/auth_providers.dart';
+import '../../../notifications/presentation/widgets/notifications_icon_button.dart';
 import '../../application/admin_dashboard_providers.dart';
 import '../admin_shell_scaffold.dart';
 
@@ -29,10 +30,7 @@ class AdminDashboardScreen extends ConsumerWidget {
         ),
         title: Text(l10n.adminDashboard),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
-          ),
+          const NotificationsIconButton(),
           PopupMenuButton(
             icon: CircleAvatar(
               radius: 16,

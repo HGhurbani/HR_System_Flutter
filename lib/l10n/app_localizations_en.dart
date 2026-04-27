@@ -9,10 +9,10 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'HR System';
+  String get appName => 'ATHAR - HR';
 
   @override
-  String get appTagline => 'Domestic Worker Recruitment Management';
+  String get appTagline => 'Human Resources Management';
 
   @override
   String get loading => 'Loading...';
@@ -428,6 +428,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assignedTo => 'Assigned To';
 
   @override
+  String get reservedBy => 'Reserved By';
+
+  @override
   String get createdBy => 'Created By';
 
   @override
@@ -704,6 +707,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commissionDetails => 'Commission Details';
+
+  @override
+  String get commissionType => 'Commission Type';
+
+  @override
+  String get commissionRuleNone => 'None';
+
+  @override
+  String get commissionRuleFixed => 'Fixed';
+
+  @override
+  String get commissionRulePercentage => 'Percentage';
+
+  @override
+  String get commissionSourceManualAdjustment => 'Manual adjustment';
+
+  @override
+  String get commissionSourcePerformance => 'Performance';
+
+  @override
+  String get commissionSourceCandidateConversion => 'Candidate conversion';
 
   @override
   String get noCommission => 'No commissions';

@@ -12,7 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'HR System';
 
   @override
-  String get appTagline => 'Domestic Worker Recruitment Management';
+  String get appTagline => 'Human Resources Management';
 
   @override
   String get loading => 'Loading...';
@@ -427,6 +427,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assignedTo => 'Assigned To';
+
+  @override
+  String get reservedBy => 'Reserved By';
 
   @override
   String get createdBy => 'Created By';

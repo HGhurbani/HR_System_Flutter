@@ -18,8 +18,8 @@ class AppTheme {
       brightness: Brightness.light,
       primary: AppColors.primary,
       onPrimary: Colors.white,
-      secondary: AppColors.secondary,
-      onSecondary: Colors.white,
+      secondary: AppColors.gold,
+      onSecondary: AppColors.primaryDark,
       surface: AppColors.cardLight,
       onSurface: AppColors.textPrimary,
       error: AppColors.error,
@@ -31,14 +31,14 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.backgroundLight,
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.goldLight,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
           fontFamily: font,
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: Colors.white,
+          color: AppColors.goldLight,
         ),
       ),
       cardTheme: CardThemeData(
@@ -53,7 +53,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.goldLight,
           elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -67,7 +67,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary),
+          side: const BorderSide(color: AppColors.gold),
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           textStyle: TextStyle(
@@ -79,7 +79,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: AppColors.goldDark,
           textStyle: TextStyle(
             fontFamily: font,
             fontSize: 14,
@@ -151,16 +151,16 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.cardLight,
-        selectedItemColor: AppColors.primary,
+        selectedItemColor: AppColors.goldDark,
         unselectedItemColor: AppColors.textSecondary,
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
       // TabBar على خلفية فاتحة (داخل body)
       tabBarTheme: TabBarThemeData(
-        labelColor: AppColors.primary,
+        labelColor: AppColors.goldDark,
         unselectedLabelColor: AppColors.textSecondary,
-        indicatorColor: AppColors.primary,
+        indicatorColor: AppColors.gold,
         dividerColor: AppColors.dividerLight,
         labelStyle: TextStyle(
           fontFamily: font,
@@ -176,20 +176,20 @@ class AppTheme {
       // NavigationBar (Material 3) لا يعتمد على BottomNavigationBarTheme
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.cardLight,
-        indicatorColor: AppColors.primary.withValues(alpha: 0.14),
+        indicatorColor: AppColors.gold.withValues(alpha: 0.20),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return TextStyle(
             fontFamily: font,
             fontSize: 12,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-            color: selected ? AppColors.primary : AppColors.textSecondary,
+            color: selected ? AppColors.goldDark : AppColors.textSecondary,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
-            color: selected ? AppColors.primary : AppColors.textSecondary,
+            color: selected ? AppColors.goldDark : AppColors.textSecondary,
             size: 24,
           );
         }),
@@ -197,8 +197,8 @@ class AppTheme {
       textTheme: _buildTextTheme(font, AppColors.textPrimary),
       iconTheme: const IconThemeData(color: AppColors.textSecondary),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.gold,
+        foregroundColor: AppColors.primaryDark,
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
@@ -215,8 +215,8 @@ class AppTheme {
       brightness: Brightness.dark,
       primary: AppColors.primaryLight,
       onPrimary: Colors.white,
-      secondary: AppColors.secondary,
-      onSecondary: Colors.white,
+      secondary: AppColors.gold,
+      onSecondary: AppColors.primaryDark,
       surface: AppColors.cardDark,
       onSurface: AppColors.textOnDark,
       error: AppColors.error,
@@ -227,15 +227,15 @@ class AppTheme {
       fontFamily: font,
       scaffoldBackgroundColor: AppColors.backgroundDark,
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.cardDark,
-        foregroundColor: AppColors.textOnDark,
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.goldLight,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
           fontFamily: font,
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: AppColors.textOnDark,
+          color: AppColors.goldLight,
         ),
       ),
       cardTheme: CardThemeData(
@@ -249,8 +249,8 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryLight,
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.gold,
+          foregroundColor: AppColors.primaryDark,
           elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -313,14 +313,14 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.cardDark,
-        selectedItemColor: AppColors.primaryLight,
+        selectedItemColor: AppColors.goldLight,
         unselectedItemColor: AppColors.textSecondary,
         type: BottomNavigationBarType.fixed,
       ),
       tabBarTheme: TabBarThemeData(
-        labelColor: AppColors.primaryLight,
+        labelColor: AppColors.goldLight,
         unselectedLabelColor: AppColors.textSecondary,
-        indicatorColor: AppColors.primaryLight,
+        indicatorColor: AppColors.gold,
         dividerColor: AppColors.dividerDark,
         labelStyle: TextStyle(
           fontFamily: font,
@@ -335,28 +335,28 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.cardDark,
-        indicatorColor: AppColors.primaryLight.withValues(alpha: 0.22),
+        indicatorColor: AppColors.gold.withValues(alpha: 0.26),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return TextStyle(
             fontFamily: font,
             fontSize: 12,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-            color: selected ? AppColors.primaryLight : AppColors.textSecondary,
+            color: selected ? AppColors.goldLight : AppColors.textSecondary,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
-            color: selected ? AppColors.primaryLight : AppColors.textSecondary,
+            color: selected ? AppColors.goldLight : AppColors.textSecondary,
             size: 24,
           );
         }),
       ),
       textTheme: _buildTextTheme(font, AppColors.textOnDark),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.primaryLight,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.gold,
+        foregroundColor: AppColors.primaryDark,
       ),
     );
   }
