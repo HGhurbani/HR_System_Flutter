@@ -364,7 +364,7 @@ class _WorkScheduleEditorSheetState
             const SizedBox(height: 8),
             Text(
               context.isArabic
-                  ? 'فعّل يومًا لتحديد أوقات مختلفة عن الجدول الافتراضي'
+                  ? 'فعّل يوماً لتحديد أوقات مختلفة عن الجدول الافتراضي'
                   : 'Enable a day to use different times than the default schedule',
               style: TextStyle(color: Theme.of(context).hintColor),
             ),
