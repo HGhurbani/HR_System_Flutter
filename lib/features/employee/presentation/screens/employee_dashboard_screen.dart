@@ -44,8 +44,7 @@ class EmployeeDashboardScreen extends ConsumerWidget {
             itemBuilder: (_) => [
               PopupMenuItem(
                 child: Text(l10n.logout),
-                onTap: () =>
-                    ref.read(authNotifierProvider.notifier).signOut(),
+                onTap: () => ref.read(authNotifierProvider.notifier).signOut(),
               ),
             ],
           ),
@@ -78,15 +77,14 @@ class EmployeeDashboardScreen extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     DateFormat('EEEE, d MMMM yyyy').format(now),
-                    style: const TextStyle(
-                        color: Colors.white70, fontSize: 13),
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                   if (user?.position != null) ...[
                     const SizedBox(height: 4),
                     Text(
                       user!.position!,
-                      style: const TextStyle(
-                          color: Colors.white60, fontSize: 13),
+                      style:
+                          const TextStyle(color: Colors.white60, fontSize: 13),
                     ),
                   ],
                 ],
@@ -95,14 +93,12 @@ class EmployeeDashboardScreen extends ConsumerWidget {
             const SizedBox(height: 20),
 
             // Today Attendance Card
-            Text(l10n.todayAttendance,
-                style: context.textTheme.titleLarge),
+            Text(l10n.todayAttendance, style: context.textTheme.titleLarge),
             const SizedBox(height: 12),
 
             todayAttAsync.when(
               loading: () => const ShimmerCard(height: 100),
-              error: (e, _) =>
-                  Text('${l10n.error}: $e'),
+              error: (e, _) => Text('${l10n.error}: $e'),
               data: (attendance) => _AttendanceCard(
                 attendance: attendance,
                 l10n: l10n,
@@ -111,8 +107,7 @@ class EmployeeDashboardScreen extends ConsumerWidget {
             const SizedBox(height: 20),
 
             // Quick Links
-            Text(l10n.quickStats,
-                style: context.textTheme.titleLarge),
+            Text(l10n.quickStats, style: context.textTheme.titleLarge),
             const SizedBox(height: 12),
             _buildQuickLinks(context, l10n),
           ],
@@ -156,20 +151,29 @@ class EmployeeDashboardScreen extends ConsumerWidget {
           .map((link) => Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: link.color.withOpacity(0.08),
+                  color: AppColors.adaptiveForegroundColor(context, link.color)
+                      .withOpacity(0.08),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                      color: link.color.withOpacity(0.2)),
+                      color:
+                          AppColors.adaptiveForegroundColor(context, link.color)
+                              .withOpacity(0.2)),
                 ),
                 child: Row(
                   children: [
-                    Icon(link.icon, color: link.color, size: 26),
+                    Icon(
+                      link.icon,
+                      color: AppColors.adaptiveForegroundColor(
+                          context, link.color),
+                      size: 26,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         link.label,
                         style: TextStyle(
-                          color: link.color,
+                          color: AppColors.adaptiveForegroundColor(
+                              context, link.color),
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
@@ -248,8 +252,7 @@ class _AttendanceCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.check_circle_rounded,
-                  color: statusColor, size: 32),
+              Icon(Icons.check_circle_rounded, color: statusColor, size: 32),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -266,8 +269,7 @@ class _AttendanceCard extends StatelessWidget {
                       Text(
                         '${l10n.latenessMinutes}: ${attendance!.latenessMinutes}',
                         style: TextStyle(
-                            color: statusColor.withOpacity(0.7),
-                            fontSize: 13),
+                            color: statusColor.withOpacity(0.7), fontSize: 13),
                       ),
                   ],
                 ),
@@ -319,8 +321,7 @@ class _TimeChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(10),
@@ -334,16 +335,13 @@ class _TimeChip extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                      fontSize: 10,
-                      color: AppColors.textSecondary),
+                  style:
+                      TextStyle(fontSize: 10, color: AppColors.textSecondary),
                 ),
                 Text(
                   time,
                   style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: color,
-                      fontSize: 14),
+                      fontWeight: FontWeight.w700, color: color, fontSize: 14),
                 ),
               ],
             ),

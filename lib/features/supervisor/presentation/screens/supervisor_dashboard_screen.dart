@@ -18,8 +18,8 @@ class SupervisorDashboardScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final now = DateTime.now();
 
-    final candidatesAsync = ref.watch(
-        supervisorCandidatesProvider(const CandidateFilter()));
+    final candidatesAsync =
+        ref.watch(supervisorCandidatesProvider(const CandidateFilter()));
 
     return Scaffold(
       appBar: AppBar(
@@ -41,8 +41,7 @@ class SupervisorDashboardScreen extends ConsumerWidget {
             itemBuilder: (_) => [
               PopupMenuItem(
                 child: Text(l10n.logout),
-                onTap: () =>
-                    ref.read(authNotifierProvider.notifier).signOut(),
+                onTap: () => ref.read(authNotifierProvider.notifier).signOut(),
               ),
             ],
           ),
@@ -92,8 +91,7 @@ class SupervisorDashboardScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 20),
 
-                Text(l10n.quickStats,
-                    style: context.textTheme.titleLarge),
+                Text(l10n.quickStats, style: context.textTheme.titleLarge),
                 const SizedBox(height: 12),
 
                 _StatRow(
@@ -123,8 +121,7 @@ class SupervisorDashboardScreen extends ConsumerWidget {
                       style: context.textTheme.titleLarge),
                   const SizedBox(height: 12),
                   ...candidates.take(5).map((c) => Padding(
-                        padding:
-                            const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
                           tileColor: Theme.of(context).cardColor,
                           shape: RoundedRectangleBorder(
@@ -139,16 +136,13 @@ class SupervisorDashboardScreen extends ConsumerWidget {
                                 : null,
                           ),
                           title: Text(c.fullName),
-                          subtitle:
-                              Text(c.nationality.value),
+                          subtitle: Text(c.nationality.value),
                           trailing: Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: _statusColor(c.status)
-                                  .withOpacity(0.12),
-                              borderRadius:
-                                  BorderRadius.circular(8),
+                              color: _statusColor(c.status).withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               _cvStatusLabel(c.status, l10n),
@@ -204,12 +198,14 @@ class _StatRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = AppColors.adaptiveForegroundColor(context, color);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: effectiveColor.withOpacity(0.2)),
       ),
       child: Row(
         children: [
@@ -217,10 +213,10 @@ class _StatRow extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: effectiveColor.withOpacity(0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: effectiveColor, size: 20),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -234,7 +230,7 @@ class _StatRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              color: color,
+              color: effectiveColor,
             ),
           ),
         ],

@@ -43,14 +43,11 @@ class AdminLeavesScreen extends ConsumerWidget {
             ]),
             Expanded(
               child: leavesAsync.when(
-                loading: () =>
-                    const ShimmerList(count: 5, itemHeight: 100),
-                error: (e, _) =>
-                    Center(child: Text('${l10n.error}: $e')),
+                loading: () => const ShimmerList(count: 5, itemHeight: 100),
+                error: (e, _) => Center(child: Text('${l10n.error}: $e')),
                 data: (leaves) {
                   final pending = leaves
-                      .where((l) =>
-                          l.status == LeaveRequestStatus.pending)
+                      .where((l) => l.status == LeaveRequestStatus.pending)
                       .toList();
 
                   return TabBarView(
@@ -124,8 +121,7 @@ class _LeaveList extends ConsumerWidget {
       padding: const EdgeInsets.all(16),
       itemCount: leaves.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
-      itemBuilder: (_, i) =>
-          _AdminLeaveCard(request: leaves[i]),
+      itemBuilder: (_, i) => _AdminLeaveCard(request: leaves[i]),
     );
   }
 }
@@ -140,6 +136,8 @@ class _AdminLeaveCard extends ConsumerWidget {
     final l10n = context.l10n;
     final dateFormat = DateFormat('d MMM yyyy');
     final isPending = request.status == LeaveRequestStatus.pending;
+    final brandColor =
+        AppColors.adaptiveForegroundColor(context, AppColors.primary);
 
     return Card(
       child: Padding(
@@ -150,14 +148,13 @@ class _AdminLeaveCard extends ConsumerWidget {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundColor: brandColor.withOpacity(0.1),
                   child: Text(
                     request.employeeName?.isNotEmpty == true
                         ? request.employeeName![0].toUpperCase()
                         : '?',
-                    style: const TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                        color: brandColor, fontWeight: FontWeight.w700),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -180,8 +177,7 @@ class _AdminLeaveCard extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 10),
-            Text(request.reason,
-                style: context.textTheme.bodyMedium),
+            Text(request.reason, style: context.textTheme.bodyMedium),
             if (isPending) ...[
               const SizedBox(height: 12),
               const Divider(height: 1),
@@ -190,26 +186,22 @@ class _AdminLeaveCard extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () => _handleAction(
-                          context, ref, request,
-                          approve: false),
+                      onPressed: () =>
+                          _handleAction(context, ref, request, approve: false),
                       icon: const Icon(Icons.close_rounded,
                           color: AppColors.error),
                       label: Text(l10n.reject,
-                          style: const TextStyle(
-                              color: AppColors.error)),
+                          style: const TextStyle(color: AppColors.error)),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(
-                            color: AppColors.error),
+                        side: const BorderSide(color: AppColors.error),
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () => _handleAction(
-                          context, ref, request,
-                          approve: true),
+                      onPressed: () =>
+                          _handleAction(context, ref, request, approve: true),
                       icon: const Icon(Icons.check_rounded),
                       label: Text(l10n.approve),
                       style: ElevatedButton.styleFrom(
@@ -252,8 +244,7 @@ class _AdminLeaveCard extends ConsumerWidget {
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  approve ? AppColors.success : AppColors.error,
+              backgroundColor: approve ? AppColors.success : AppColors.error,
             ),
             child: Text(approve ? l10n.approve : l10n.reject),
           ),
@@ -264,17 +255,15 @@ class _AdminLeaveCard extends ConsumerWidget {
     if (confirmed == true) {
       final adminUser = ref.read(currentUserProvider);
       await ref.read(leavesNotifierProvider.notifier).updateRequestStatus(
-        requestId: request.id,
-        status: approve
-            ? LeaveRequestStatus.approved
-            : LeaveRequestStatus.rejected,
-        adminNote: noteController.text.trim(),
-        adminId: adminUser?.uid,
-      );
+            requestId: request.id,
+            status: approve
+                ? LeaveRequestStatus.approved
+                : LeaveRequestStatus.rejected,
+            adminNote: noteController.text.trim(),
+            adminId: adminUser?.uid,
+          );
       if (context.mounted) {
-        context.showSnackBar(approve
-            ? l10n.leaveApproved
-            : l10n.leaveRejected);
+        context.showSnackBar(approve ? l10n.leaveApproved : l10n.leaveRejected);
       }
     }
   }
@@ -306,16 +295,15 @@ class _StatusBadge extends StatelessWidget {
     }
 
     return Container(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         label,
-        style: TextStyle(
-            fontSize: 12, fontWeight: FontWeight.w600, color: color),
+        style:
+            TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color),
       ),
     );
   }

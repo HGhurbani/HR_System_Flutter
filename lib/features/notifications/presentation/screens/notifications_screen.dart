@@ -66,7 +66,9 @@ class _NotificationTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dateFormat = DateFormat('d MMM yyyy - hh:mm a');
-    final color = notification.isRead ? AppColors.textSecondary : AppColors.primary;
+    final color = notification.isRead
+        ? AppColors.textSecondary
+        : Theme.of(context).colorScheme.primary;
 
     return Card(
       child: ListTile(

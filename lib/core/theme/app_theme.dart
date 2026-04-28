@@ -56,7 +56,8 @@ class AppTheme {
           foregroundColor: AppColors.goldLight,
           elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           textStyle: TextStyle(
             fontFamily: font,
             fontSize: 16,
@@ -69,7 +70,8 @@ class AppTheme {
           foregroundColor: AppColors.primary,
           side: const BorderSide(color: AppColors.gold),
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           textStyle: TextStyle(
             fontFamily: font,
             fontSize: 16,
@@ -90,7 +92,8 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceLight,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: AppColors.borderLight),
@@ -211,10 +214,10 @@ class AppTheme {
   static ThemeData darkTheme({bool isArabic = true}) {
     final font = _fontFamily(isArabic);
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
+      seedColor: AppColors.gold,
       brightness: Brightness.dark,
-      primary: AppColors.primaryLight,
-      onPrimary: Colors.white,
+      primary: AppColors.goldLight,
+      onPrimary: AppColors.primaryDark,
       secondary: AppColors.gold,
       onSecondary: AppColors.primaryDark,
       surface: AppColors.cardDark,
@@ -253,7 +256,8 @@ class AppTheme {
           foregroundColor: AppColors.primaryDark,
           elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           textStyle: TextStyle(
             fontFamily: font,
             fontSize: 16,
@@ -264,7 +268,8 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceDark,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: AppColors.borderDark),
@@ -275,7 +280,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.primaryLight, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.gold, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -295,7 +300,7 @@ class AppTheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surfaceDark,
-        selectedColor: AppColors.primaryLight.withValues(alpha: 0.22),
+        selectedColor: AppColors.gold.withValues(alpha: 0.22),
         labelStyle: TextStyle(
           fontFamily: font,
           fontSize: 13,

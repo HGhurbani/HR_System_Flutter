@@ -44,13 +44,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     final l10n = context.l10n;
+    final brandColor = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.primary,
+        foregroundColor: brandColor,
       ),
       body: SafeArea(
         child: Center(
@@ -64,20 +65,20 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: brandColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(18),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.lock_reset_rounded,
                       size: 36,
-                      color: AppColors.primary,
+                      color: brandColor,
                     ),
                   ),
                   const SizedBox(height: 20),
                   Text(
                     l10n.forgotPasswordTitle,
                     style: context.textTheme.headlineMedium?.copyWith(
-                      color: AppColors.primary,
+                      color: brandColor,
                     ),
                     textAlign: TextAlign.center,
                   ),

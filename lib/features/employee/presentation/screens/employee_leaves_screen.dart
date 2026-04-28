@@ -48,8 +48,7 @@ class EmployeeLeavesScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             itemCount: leaves.length,
             separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (_, i) =>
-                _LeaveRequestTile(request: leaves[i]),
+            itemBuilder: (_, i) => _LeaveRequestTile(request: leaves[i]),
           );
         },
       ),
@@ -82,6 +81,8 @@ class _LeaveRequestTile extends StatelessWidget {
     final l10n = context.l10n;
     final dateFormat = DateFormat('d MMM');
     final statusColor = _statusColor(request.status);
+    final typeColor =
+        AppColors.adaptiveForegroundColor(context, AppColors.primary);
 
     return Card(
       child: Padding(
@@ -92,24 +93,24 @@ class _LeaveRequestTile extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: typeColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     _typeLabel(request.type, l10n),
-                    style: const TextStyle(
-                        color: AppColors.primary,
+                    style: TextStyle(
+                        color: typeColor,
                         fontWeight: FontWeight.w600,
                         fontSize: 12),
                   ),
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -163,13 +164,11 @@ class _LeaveRequestTile extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                      color: statusColor.withOpacity(0.2)),
+                  border: Border.all(color: statusColor.withOpacity(0.2)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.comment_outlined,
-                        size: 14, color: statusColor),
+                    Icon(Icons.comment_outlined, size: 14, color: statusColor),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(

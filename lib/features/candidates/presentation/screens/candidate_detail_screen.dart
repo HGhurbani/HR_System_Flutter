@@ -510,9 +510,8 @@ class _CandidateDetailBody extends ConsumerWidget {
                             );
                         if (context.mounted) {
                           Navigator.pop(context);
-                          context.showSnackBar(success
-                              ? l10n.updateSuccess
-                              : l10n.errorGeneral);
+                          context.showSnackBar(
+                              success ? l10n.updateSuccess : l10n.errorGeneral);
                         }
                       },
                     ),
@@ -575,6 +574,10 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveValueColor = valueColor == null
+        ? null
+        : AppColors.adaptiveForegroundColor(context, valueColor!);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -595,7 +598,7 @@ class _InfoRow extends StatelessWidget {
               value,
               style: context.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
-                color: valueColor,
+                color: effectiveValueColor,
               ),
               textAlign: TextAlign.end,
             ),

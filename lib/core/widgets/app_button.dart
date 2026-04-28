@@ -26,7 +26,11 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final effectiveColor = color ?? AppColors.primary;
+    final effectiveColor = color == null
+        ? theme.colorScheme.primary
+        : AppColors.adaptiveForegroundColor(context, color!);
+    final effectiveForegroundColor =
+        color == null ? theme.colorScheme.onPrimary : Colors.white;
 
     Widget child = isLoading
         ? const SizedBox(
@@ -71,7 +75,7 @@ class AppButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: effectiveColor,
-          foregroundColor: Colors.white,
+          foregroundColor: effectiveForegroundColor,
           disabledBackgroundColor: effectiveColor.withOpacity(0.6),
         ),
         child: child,

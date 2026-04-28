@@ -94,15 +94,13 @@ class AdminDashboardScreen extends ConsumerWidget {
           const SizedBox(height: 20),
 
           // Stats Grid
-          Text(l10n.quickStats,
-              style: context.textTheme.titleLarge),
+          Text(l10n.quickStats, style: context.textTheme.titleLarge),
           const SizedBox(height: 12),
           _buildStatsGrid(context, stats, l10n),
           const SizedBox(height: 20),
 
           // Candidate Status Summary
-          Text(l10n.candidates,
-              style: context.textTheme.titleLarge),
+          Text(l10n.candidates, style: context.textTheme.titleLarge),
           const SizedBox(height: 12),
           _buildCandidateStatusCards(context, stats, l10n),
           const SizedBox(height: 24),
@@ -111,7 +109,8 @@ class AdminDashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildWelcomeBanner(BuildContext context, user, String greeting, l10n) {
+  Widget _buildWelcomeBanner(
+      BuildContext context, user, String greeting, l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -326,12 +325,14 @@ class _MiniStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = AppColors.adaptiveForegroundColor(context, color);
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: effectiveColor.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -341,10 +342,10 @@ class _MiniStatCard extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: effectiveColor.withOpacity(0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: effectiveColor, size: 20),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,7 +355,7 @@ class _MiniStatCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: color,
+                  color: effectiveColor,
                 ),
               ),
               Text(

@@ -64,16 +64,16 @@ class EmployeeProfileScreen extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       user!.position!,
-                      style: const TextStyle(
-                          color: Colors.white70, fontSize: 14),
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ],
                   if (user?.employeeCode != null) ...[
                     const SizedBox(height: 4),
                     Text(
                       '#${user!.employeeCode}',
-                      style: const TextStyle(
-                          color: Colors.white60, fontSize: 13),
+                      style:
+                          const TextStyle(color: Colors.white60, fontSize: 13),
                     ),
                   ],
                 ],
@@ -108,8 +108,8 @@ class EmployeeProfileScreen extends ConsumerWidget {
                         _ProfileItem(
                           icon: Icons.calendar_today_outlined,
                           label: l10n.hireDate,
-                          value: DateFormat('d MMMM yyyy')
-                              .format(user!.hireDate!),
+                          value:
+                              DateFormat('d MMMM yyyy').format(user!.hireDate!),
                         ),
                     ],
                   ),
@@ -119,19 +119,15 @@ class EmployeeProfileScreen extends ConsumerWidget {
                       leading: const Icon(Icons.logout_rounded,
                           color: AppColors.error),
                       title: Text(l10n.logout,
-                          style: const TextStyle(
-                              color: AppColors.error)),
+                          style: const TextStyle(color: AppColors.error)),
                       onTap: () async {
-                        final confirm =
-                            await context.showConfirmDialog(
+                        final confirm = await context.showConfirmDialog(
                           title: l10n.logout,
                           message: l10n.logoutConfirm,
                           isDanger: true,
                         );
                         if (confirm == true) {
-                          ref
-                              .read(authNotifierProvider.notifier)
-                              .signOut();
+                          ref.read(authNotifierProvider.notifier).signOut();
                         }
                       },
                     ),
@@ -161,8 +157,7 @@ class _ProfileCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Align(
               alignment: AlignmentDirectional.centerStart,
-              child: Text(title,
-                  style: context.textTheme.titleMedium),
+              child: Text(title, style: context.textTheme.titleMedium),
             ),
           ),
           const Divider(height: 1),
@@ -186,8 +181,11 @@ class _ProfileItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final iconColor =
+        AppColors.adaptiveForegroundColor(context, AppColors.primary);
+
     return ListTile(
-      leading: Icon(icon, color: AppColors.primary),
+      leading: Icon(icon, color: iconColor),
       title: Text(label,
           style: context.textTheme.bodySmall
               ?.copyWith(color: AppColors.textSecondary)),

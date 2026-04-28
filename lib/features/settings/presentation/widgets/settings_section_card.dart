@@ -15,6 +15,9 @@ class SettingsSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final titleColor =
+        AppColors.adaptiveForegroundColor(context, AppColors.primary);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -22,8 +25,8 @@ class SettingsSectionCard extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
           child: Text(
             title,
-            style: const TextStyle(
-              color: AppColors.primary,
+            style: TextStyle(
+              color: titleColor,
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),

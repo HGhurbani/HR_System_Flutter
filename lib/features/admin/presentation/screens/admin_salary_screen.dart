@@ -661,6 +661,7 @@ class _CommissionSheetState extends ConsumerState<_CommissionSheet> {
   final _notesController = TextEditingController();
   UserModel? _selectedEmployee;
   String _source = 'manual_adjustment';
+  DateTime? _selectedMonthDate;
 
   @override
   void dispose() {
@@ -733,11 +734,15 @@ class _CommissionSheetState extends ConsumerState<_CommissionSheet> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _monthController,
+                readOnly: true,
+                showCursor: false,
+                enableInteractiveSelection: false,
                 decoration: InputDecoration(
                   labelText: l10n.commissionMonth,
                   hintText: 'yyyy-MM',
                   prefixIcon: const Icon(Icons.calendar_month_outlined),
                 ),
+                onTap: () => _pickMonth(context),
                 validator: (value) =>
                     value?.trim().isEmpty == true ? l10n.required : null,
               ),
@@ -804,6 +809,26 @@ class _CommissionSheetState extends ConsumerState<_CommissionSheet> {
       ),
     );
   }
+
+  Future<void> _pickMonth(BuildContext context) async {
+    FocusScope.of(context).unfocus();
+    final now = DateTime.now();
+    final initial = _selectedMonthDate ?? DateTime(now.year, now.month, 1);
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(now.year - 10, 1, 1),
+      lastDate: DateTime(now.year + 10, 12, 31),
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+    );
+
+    if (!mounted || picked == null) return;
+
+    final normalized = DateTime(picked.year, picked.month, 1);
+    setState(() => _selectedMonthDate = normalized);
+    _monthController.text = _formatYearMonth(normalized);
+  }
 }
 
 class _SalarySheet extends ConsumerStatefulWidget {
@@ -821,6 +846,7 @@ class _SalarySheetState extends ConsumerState<_SalarySheet> {
   final _notesController = TextEditingController();
   UserModel? _selectedEmployee;
   bool _approveNow = true;
+  DateTime? _selectedMonthDate;
 
   @override
   void dispose() {
@@ -893,11 +919,15 @@ class _SalarySheetState extends ConsumerState<_SalarySheet> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _monthController,
+                readOnly: true,
+                showCursor: false,
+                enableInteractiveSelection: false,
                 decoration: InputDecoration(
                   labelText: l10n.salaryMonth,
                   hintText: 'yyyy-MM',
                   prefixIcon: const Icon(Icons.calendar_month_outlined),
                 ),
+                onTap: () => _pickMonth(context),
                 validator: (value) =>
                     value?.trim().isEmpty == true ? l10n.required : null,
               ),
@@ -946,4 +976,30 @@ class _SalarySheetState extends ConsumerState<_SalarySheet> {
       ),
     );
   }
+
+  Future<void> _pickMonth(BuildContext context) async {
+    FocusScope.of(context).unfocus();
+    final now = DateTime.now();
+    final initial = _selectedMonthDate ?? DateTime(now.year, now.month, 1);
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(now.year - 10, 1, 1),
+      lastDate: DateTime(now.year + 10, 12, 31),
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+    );
+
+    if (!mounted || picked == null) return;
+
+    final normalized = DateTime(picked.year, picked.month, 1);
+    setState(() => _selectedMonthDate = normalized);
+    _monthController.text = _formatYearMonth(normalized);
+  }
+}
+
+String _formatYearMonth(DateTime date) {
+  final year = date.year.toString().padLeft(4, '0');
+  final month = date.month.toString().padLeft(2, '0');
+  return '$year-$month';
 }

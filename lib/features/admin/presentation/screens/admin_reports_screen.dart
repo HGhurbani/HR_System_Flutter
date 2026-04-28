@@ -29,26 +29,19 @@ class AdminReportsScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.quickStats,
-                  style: context.textTheme.titleLarge),
+              Text(l10n.quickStats, style: context.textTheme.titleLarge),
               const SizedBox(height: 16),
               _ReportCard(
                 title: l10n.candidateReport,
                 icon: Icons.folder_special_rounded,
                 color: AppColors.accent,
                 items: [
-                  _ReportItem(
-                      l10n.totalCandidates,
-                      '${stats.totalCandidates}'),
-                  _ReportItem(
-                      l10n.statusAvailable,
+                  _ReportItem(l10n.totalCandidates, '${stats.totalCandidates}'),
+                  _ReportItem(l10n.statusAvailable,
                       '${stats.candidateStatusCounts['available'] ?? 0}'),
-                  _ReportItem(
-                      l10n.statusReserved,
+                  _ReportItem(l10n.statusReserved,
                       '${stats.candidateStatusCounts['reserved'] ?? 0}'),
-                  _ReportItem(
-                      l10n.statusHired,
-                      '${stats.hiredCandidates}'),
+                  _ReportItem(l10n.statusHired, '${stats.hiredCandidates}'),
                 ],
               ),
               const SizedBox(height: 16),
@@ -57,12 +50,9 @@ class AdminReportsScreen extends ConsumerWidget {
                 icon: Icons.people_rounded,
                 color: AppColors.primary,
                 items: [
+                  _ReportItem(l10n.totalEmployees, '${stats.totalEmployees}'),
                   _ReportItem(
-                      l10n.totalEmployees,
-                      '${stats.totalEmployees}'),
-                  _ReportItem(
-                      l10n.totalSupervisors,
-                      '${stats.totalSupervisors}'),
+                      l10n.totalSupervisors, '${stats.totalSupervisors}'),
                 ],
               ),
               const SizedBox(height: 16),
@@ -71,9 +61,7 @@ class AdminReportsScreen extends ConsumerWidget {
                 icon: Icons.event_note_rounded,
                 color: AppColors.warning,
                 items: [
-                  _ReportItem(
-                      l10n.pendingLeaves,
-                      '${stats.pendingLeaves}'),
+                  _ReportItem(l10n.pendingLeaves, '${stats.pendingLeaves}'),
                 ],
               ),
               const SizedBox(height: 16),
@@ -115,6 +103,8 @@ class _ReportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = AppColors.adaptiveForegroundColor(context, color);
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -123,10 +113,9 @@ class _ReportCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, color: color, size: 22),
+                Icon(icon, color: effectiveColor, size: 22),
                 const SizedBox(width: 8),
-                Text(title,
-                    style: context.textTheme.titleMedium),
+                Text(title, style: context.textTheme.titleMedium),
               ],
             ),
             const Divider(height: 20),
@@ -143,7 +132,7 @@ class _ReportCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: color,
+                          color: effectiveColor,
                         ),
                       ),
                     ],

@@ -22,6 +22,7 @@ class StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final effectiveColor = AppColors.adaptiveForegroundColor(context, color);
 
     return Card(
       child: InkWell(
@@ -35,10 +36,10 @@ class StatCard extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
+                  color: effectiveColor.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(icon, color: color, size: 26),
+                child: Icon(icon, color: effectiveColor, size: 26),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -59,7 +60,7 @@ class StatCard extends StatelessWidget {
                       value,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: color,
+                        color: effectiveColor,
                       ),
                     ),
                     if (subtitle != null) ...[
@@ -102,17 +103,19 @@ class StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = AppColors.adaptiveForegroundColor(context, color);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: effectiveColor.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: effectiveColor.withOpacity(0.3)),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: color,
+          color: effectiveColor,
           fontSize: fontSize,
           fontWeight: FontWeight.w600,
         ),

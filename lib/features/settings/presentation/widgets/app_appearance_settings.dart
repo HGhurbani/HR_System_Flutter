@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../application/settings_providers.dart';
 import 'settings_section_card.dart';
@@ -29,7 +28,7 @@ class AppAppearanceSettings extends ConsumerWidget {
                 isArabic ? 'اللغة الحالية: عربي' : 'Current language: English',
               ),
               value: isArabic,
-              activeThumbColor: AppColors.primary,
+              activeThumbColor: Theme.of(context).colorScheme.primary,
               onChanged: (_) =>
                   ref.read(languageProvider.notifier).toggleLanguage(),
               secondary: const Icon(Icons.language_rounded),
@@ -41,12 +40,10 @@ class AppAppearanceSettings extends ConsumerWidget {
           children: [
             SwitchListTile(
               title: Text(
-                themeMode == ThemeMode.dark
-                    ? l10n.darkMode
-                    : l10n.lightMode,
+                themeMode == ThemeMode.dark ? l10n.darkMode : l10n.lightMode,
               ),
               value: themeMode == ThemeMode.dark,
-              activeThumbColor: AppColors.primary,
+              activeThumbColor: Theme.of(context).colorScheme.primary,
               onChanged: (_) =>
                   ref.read(themeModeProvider.notifier).toggleTheme(),
               secondary: Icon(

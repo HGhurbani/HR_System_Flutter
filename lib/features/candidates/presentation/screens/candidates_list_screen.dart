@@ -23,8 +23,7 @@ class CandidatesListScreen extends ConsumerStatefulWidget {
       _CandidatesListScreenState();
 }
 
-class _CandidatesListScreenState
-    extends ConsumerState<CandidatesListScreen> {
+class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
   final _searchController = TextEditingController();
 
   @override
@@ -114,24 +113,20 @@ class _CandidatesListScreenState
           if (filter.hasActiveFilters)
             _ActiveFiltersBar(
               filter: filter,
-              onClear: () => ref
-                  .read(candidateFilterProvider.notifier)
-                  .state = const CandidateFilter(),
+              onClear: () => ref.read(candidateFilterProvider.notifier).state =
+                  const CandidateFilter(),
             ),
           Expanded(
             child: candidatesAsync.when(
               loading: () => const ShimmerList(count: 8, itemHeight: 100),
-              error: (e, _) =>
-                  Center(child: Text('${l10n.error}: $e')),
+              error: (e, _) => Center(child: Text('${l10n.error}: $e')),
               data: (candidates) {
                 final searchQuery = filter.searchQuery;
                 final filtered = searchQuery.isEmpty
                     ? candidates
                     : candidates
                         .where((c) =>
-                            c.fullName
-                                .toLowerCase()
-                                .contains(searchQuery) ||
+                            c.fullName.toLowerCase().contains(searchQuery) ||
                             c.nationality.value
                                 .toLowerCase()
                                 .contains(searchQuery))
@@ -144,11 +139,9 @@ class _CandidatesListScreenState
                     actionLabel: l10n.addCandidate,
                     onAction: () {
                       if (widget.isAdminView) {
-                        context
-                            .push('${AppRoutes.adminCandidates}/add');
+                        context.push('${AppRoutes.adminCandidates}/add');
                       } else {
-                        context.push(
-                            '${AppRoutes.supervisorCandidates}/add');
+                        context.push('${AppRoutes.supervisorCandidates}/add');
                       }
                     },
                   );
@@ -157,8 +150,7 @@ class _CandidatesListScreenState
                 return ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: filtered.length,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: 10),
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (_, i) => _CandidateCard(
                     candidate: filtered[i],
                     isAdminView: widget.isAdminView,
@@ -197,8 +189,7 @@ class _ActiveFiltersBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          Icon(Icons.filter_alt_rounded,
-              size: 16, color: AppColors.accent),
+          Icon(Icons.filter_alt_rounded, size: 16, color: AppColors.accent),
           const SizedBox(width: 8),
           Expanded(
             child: Wrap(
@@ -269,6 +260,8 @@ class _CandidateCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final statusColor = _statusColor(candidate.status);
+    final assignedColor =
+        AppColors.adaptiveForegroundColor(context, AppColors.primary);
 
     return Card(
       child: InkWell(
@@ -334,15 +327,13 @@ class _CandidateCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             candidate.fullName,
-                            style:
-                                context.textTheme.titleMedium,
+                            style: context.textTheme.titleMedium,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         StatusBadge(
-                          label: _statusLabel(
-                              candidate.status, l10n),
+                          label: _statusLabel(candidate.status, l10n),
                           color: statusColor,
                         ),
                       ],
@@ -352,26 +343,21 @@ class _CandidateCard extends ConsumerWidget {
                       Row(
                         children: [
                           const Icon(Icons.flag_outlined,
-                              size: 14,
-                              color: AppColors.textSecondary),
+                              size: 14, color: AppColors.textSecondary),
                           const SizedBox(width: 4),
                           Text(
-                            _nationalityLabel(
-                                candidate.nationality, l10n),
-                            style: context.textTheme.bodySmall
-                                ?.copyWith(
+                            _nationalityLabel(candidate.nationality, l10n),
+                            style: context.textTheme.bodySmall?.copyWith(
                               color: AppColors.textSecondary,
                             ),
                           ),
                           const SizedBox(width: 12),
                           const Icon(Icons.cake_outlined,
-                              size: 14,
-                              color: AppColors.textSecondary),
+                              size: 14, color: AppColors.textSecondary),
                           const SizedBox(width: 4),
                           Text(
                             '${candidate.age} ${l10n.year}',
-                            style: context.textTheme.bodySmall
-                                ?.copyWith(
+                            style: context.textTheme.bodySmall?.copyWith(
                               color: AppColors.textSecondary,
                             ),
                           ),
@@ -383,14 +369,12 @@ class _CandidateCard extends ConsumerWidget {
                       Row(
                         children: [
                           const Icon(Icons.person_pin_outlined,
-                              size: 14,
-                              color: AppColors.textSecondary),
+                              size: 14, color: AppColors.textSecondary),
                           const SizedBox(width: 4),
                           Text(
                             '${l10n.assignedTo}: ${candidate.assignedEmployeeName}',
-                            style: context.textTheme.bodySmall
-                                ?.copyWith(
-                              color: AppColors.primary,
+                            style: context.textTheme.bodySmall?.copyWith(
+                              color: assignedColor,
                               fontWeight: FontWeight.w500,
                             ),
                             maxLines: 1,
@@ -399,13 +383,13 @@ class _CandidateCard extends ConsumerWidget {
                         ],
                       ),
                     ],
-                    if (isAdminView && candidate.reservedByUserName != null) ...[
+                    if (isAdminView &&
+                        candidate.reservedByUserName != null) ...[
                       const SizedBox(height: 4),
                       Row(
                         children: [
                           const Icon(Icons.lock_outline_rounded,
-                              size: 14,
-                              color: AppColors.textSecondary),
+                              size: 14, color: AppColors.textSecondary),
                           const SizedBox(width: 4),
                           Text(
                             '${l10n.reservedBy}: ${candidate.reservedByUserName}',
@@ -471,8 +455,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
               return FilterChip(
                 label: Text(label),
                 selected: _status == s,
-                onSelected: (v) =>
-                    setState(() => _status = v ? s : null),
+                onSelected: (v) => setState(() => _status = v ? s : null),
               );
             }).toList(),
           ),

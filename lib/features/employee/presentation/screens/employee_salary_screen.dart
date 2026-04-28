@@ -40,10 +40,8 @@ class EmployeeSalaryScreen extends ConsumerWidget {
               child: TabBarView(
                 children: [
                   salariesAsync.when(
-                    loading: () =>
-                        const ShimmerList(count: 4, itemHeight: 130),
-                    error: (e, _) =>
-                        Center(child: Text('${l10n.error}: $e')),
+                    loading: () => const ShimmerList(count: 4, itemHeight: 130),
+                    error: (e, _) => Center(child: Text('${l10n.error}: $e')),
                     data: (salaries) {
                       if (salaries.isEmpty) {
                         return EmptyState(
@@ -60,10 +58,8 @@ class EmployeeSalaryScreen extends ConsumerWidget {
                     },
                   ),
                   commissionsAsync.when(
-                    loading: () =>
-                        const ShimmerList(count: 4, itemHeight: 80),
-                    error: (e, _) =>
-                        Center(child: Text('${l10n.error}: $e')),
+                    loading: () => const ShimmerList(count: 4, itemHeight: 80),
+                    error: (e, _) => Center(child: Text('${l10n.error}: $e')),
                     data: (commissions) {
                       if (commissions.isEmpty) {
                         return EmptyState(
@@ -98,6 +94,8 @@ class _SalaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final brandColor =
+        AppColors.adaptiveForegroundColor(context, AppColors.primary);
 
     return Card(
       child: Padding(
@@ -113,13 +111,13 @@ class _SalaryCard extends StatelessWidget {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: brandColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     salary.month,
-                    style: const TextStyle(
-                      color: AppColors.primary,
+                    style: TextStyle(
+                      color: brandColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -135,10 +133,13 @@ class _SalaryCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    salary.isApproved ? l10n.approvedStatus : l10n.pendingStatus,
+                    salary.isApproved
+                        ? l10n.approvedStatus
+                        : l10n.pendingStatus,
                     style: TextStyle(
-                      color:
-                          salary.isApproved ? AppColors.success : AppColors.warning,
+                      color: salary.isApproved
+                          ? AppColors.success
+                          : AppColors.warning,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -149,7 +150,7 @@ class _SalaryCard extends StatelessWidget {
             _SalaryRow(
               label: l10n.basicSalary,
               amount: salary.basicSalary,
-              color: AppColors.primary,
+              color: brandColor,
               currency: l10n.currency,
             ),
             if (salary.additions > 0)
@@ -314,6 +315,8 @@ class _SalaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = AppColors.adaptiveForegroundColor(context, color);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -329,7 +332,7 @@ class _SalaryRow extends StatelessWidget {
             '${prefix ?? ''}${amount.toStringAsFixed(0)} $currency',
             style: TextStyle(
               fontWeight: FontWeight.w600,
-              color: color,
+              color: effectiveColor,
             ),
           ),
         ],

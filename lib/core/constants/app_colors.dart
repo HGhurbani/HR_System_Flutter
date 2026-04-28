@@ -66,6 +66,14 @@ class AppColors {
   static const Color textOnPrimary = Color(0xFFFFFFFF);
   static const Color textOnDark = Color(0xFFE9ECEF);
 
+  static Color adaptiveForegroundColor(BuildContext context, Color color) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isBrandGreen =
+        color == primary || color == primaryLight || color == primaryDark;
+
+    return isDark && isBrandGreen ? goldLight : color;
+  }
+
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [primaryDark, primary],
