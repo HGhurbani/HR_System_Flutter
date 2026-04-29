@@ -863,31 +863,31 @@ abstract class AppLocalizations {
   /// No description provided for @cvImageSectionTitle.
   ///
   /// In ar, this message translates to:
-  /// **'صورة السيفي'**
+  /// **'ملف السيفي'**
   String get cvImageSectionTitle;
 
   /// No description provided for @cvImageSectionSubtitle.
   ///
   /// In ar, this message translates to:
-  /// **'ارفع صورة واضحة للسيفي (يمكن تصوير ورقة السيفي بالكاميرا).'**
+  /// **'ارفع ملف السيفي كصورة أو PDF، أو صوّر ورقة السيفي بالكاميرا.'**
   String get cvImageSectionSubtitle;
 
   /// No description provided for @cvImagePlaceholder.
   ///
   /// In ar, this message translates to:
-  /// **'اضغط لإضافة صورة السيفي'**
+  /// **'اضغط لإضافة ملف السيفي'**
   String get cvImagePlaceholder;
 
   /// No description provided for @cvImageRequired.
   ///
   /// In ar, this message translates to:
-  /// **'يجب إضافة صورة السيفي'**
+  /// **'يجب إضافة ملف السيفي'**
   String get cvImageRequired;
 
   /// No description provided for @cvImageSourceTitle.
   ///
   /// In ar, this message translates to:
-  /// **'اختر طريقة إضافة صورة السيفي'**
+  /// **'اختر طريقة إضافة ملف السيفي'**
   String get cvImageSourceTitle;
 
   /// No description provided for @pickCvFromFiles.
@@ -899,8 +899,20 @@ abstract class AppLocalizations {
   /// No description provided for @pickCvFromFilesSubtitle.
   ///
   /// In ar, this message translates to:
-  /// **'اختر صورة السيفي من ملفات الجهاز'**
+  /// **'اختر صورة أو PDF من ملفات الجهاز'**
   String get pickCvFromFilesSubtitle;
+
+  /// No description provided for @pickCvFromGallery.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختيار من المعرض'**
+  String get pickCvFromGallery;
+
+  /// No description provided for @pickCvFromGallerySubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر صورة السيفي من معرض الصور'**
+  String get pickCvFromGallerySubtitle;
 
   /// No description provided for @captureCvWithCamera.
   ///
@@ -913,6 +925,24 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'التقط صورة جديدة للسيفي مباشرة'**
   String get captureCvWithCameraSubtitle;
+
+  /// No description provided for @cvFileRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'يجب إضافة ملف السيفي'**
+  String get cvFileRequired;
+
+  /// No description provided for @unsupportedCvFileType.
+  ///
+  /// In ar, this message translates to:
+  /// **'نوع الملف غير مدعوم. اختر صورة أو PDF'**
+  String get unsupportedCvFileType;
+
+  /// No description provided for @cvFileTooLarge.
+  ///
+  /// In ar, this message translates to:
+  /// **'حجم الملف أكبر من الحد المسموح'**
+  String get cvFileTooLarge;
 
   /// No description provided for @cvFile.
   ///

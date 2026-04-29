@@ -40,7 +40,8 @@ service firebase.storage {
       allow read: if isActiveUser();
       allow create, update: if isAdminOrSupervisor()
         && request.resource != null
-        && request.resource.size <= 10 * 1024 * 1024;
+        && request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType == 'application/pdf';
       allow delete: if hasRole('admin');
     }
 

@@ -391,32 +391,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileImage => 'CV Photo';
 
   @override
-  String get cvImageSectionTitle => 'CV image';
+  String get cvImageSectionTitle => 'CV file';
 
   @override
   String get cvImageSectionSubtitle =>
-      'Upload a clear photo of the CV (you can photograph a paper document).';
+      'Upload the CV as an image or PDF, or photograph the paper CV with the camera.';
 
   @override
-  String get cvImagePlaceholder => 'Tap to add CV image';
+  String get cvImagePlaceholder => 'Tap to add CV file';
 
   @override
-  String get cvImageRequired => 'CV image is required';
+  String get cvImageRequired => 'CV file is required';
 
   @override
-  String get cvImageSourceTitle => 'Choose how to add the CV image';
+  String get cvImageSourceTitle => 'Choose how to add the CV file';
 
   @override
   String get pickCvFromFiles => 'Upload from files';
 
   @override
-  String get pickCvFromFilesSubtitle => 'Choose the CV image from device files';
+  String get pickCvFromFilesSubtitle =>
+      'Choose an image or PDF from device files';
+
+  @override
+  String get pickCvFromGallery => 'Choose from gallery';
+
+  @override
+  String get pickCvFromGallerySubtitle =>
+      'Choose a CV image from the photo gallery';
 
   @override
   String get captureCvWithCamera => 'Take photo with camera';
 
   @override
   String get captureCvWithCameraSubtitle => 'Capture a new CV image directly';
+
+  @override
+  String get cvFileRequired => 'CV file is required';
+
+  @override
+  String get unsupportedCvFileType =>
+      'Unsupported file type. Choose an image or PDF';
+
+  @override
+  String get cvFileTooLarge => 'The file is larger than the allowed limit';
 
   @override
   String get cvFile => 'CV File';

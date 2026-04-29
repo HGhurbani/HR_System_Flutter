@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/extensions/context_extensions.dart';
@@ -13,7 +12,7 @@ import '../../../auth/application/auth_providers.dart';
 import '../../application/candidates_providers.dart';
 import '../../data/models/candidate_model.dart';
 import '../../domain/entities/candidate_status.dart';
-import '../widgets/candidate_cv_image_viewer.dart';
+import '../widgets/candidate_cv_file_viewer.dart';
 
 class CandidateDetailScreen extends ConsumerWidget {
   final String candidateId;
@@ -74,7 +73,7 @@ class _CandidateDetailBody extends ConsumerWidget {
 
     return Column(
       children: [
-        Expanded(child: _buildImageViewer()),
+        Expanded(child: _buildFileViewer(context)),
         SafeArea(
           top: false,
           child: Padding(
@@ -96,34 +95,41 @@ class _CandidateDetailBody extends ConsumerWidget {
     );
   }
 
-  Widget _buildImageViewer() {
+  Widget _buildFileViewer(BuildContext context) {
     final imageUrl = candidate.imageUrl;
+    final pdfUrl = candidate.cvFileUrl;
+    final hasFile = imageUrl?.isNotEmpty == true || pdfUrl?.isNotEmpty == true;
 
     return ColoredBox(
       color: Colors.black,
-      child: imageUrl == null || imageUrl.isEmpty
+      child: !hasFile
           ? const Center(
               child: Icon(
-                Icons.broken_image_outlined,
+                Icons.description_outlined,
                 size: 56,
                 color: Colors.white,
               ),
             )
-          : InteractiveViewer(
-              minScale: 0.8,
-              maxScale: 5,
-              child: Center(
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.contain,
-                  loadingBuilder: (context, child, progress) {
-                    if (progress == null) return child;
-                    return const Center(child: CircularProgressIndicator());
-                  },
-                  errorBuilder: (_, __, ___) => const Icon(
-                    Icons.broken_image_outlined,
-                    size: 56,
-                    color: Colors.white,
+          : Center(
+              child: CandidateCvFileViewer(
+                imageUrl: imageUrl,
+                pdfUrl: pdfUrl,
+                width: double.infinity,
+                height: double.infinity,
+                borderRadius: BorderRadius.zero,
+                fit: BoxFit.contain,
+                placeholder: const ColoredBox(
+                  color: Colors.black,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                errorWidget: const ColoredBox(
+                  color: Colors.black,
+                  child: Center(
+                    child: Icon(
+                      Icons.broken_image_outlined,
+                      size: 56,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -192,201 +198,6 @@ class _CandidateDetailBody extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, dynamic l10n) {
-    final statusColor = _statusColor(candidate.status);
-
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: AppColors.primaryGradient,
-      ),
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: candidate.imageUrl == null
-                ? null
-                : () =>
-                    showCandidateCvImageViewer(context, candidate.imageUrl!),
-            child: Container(
-              width: double.infinity,
-              constraints: const BoxConstraints(maxHeight: 320),
-              height: 260,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.white.withOpacity(0.2),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: candidate.imageUrl != null
-                  ? Image.network(
-                      candidate.imageUrl!,
-                      fit: BoxFit.contain,
-                      width: double.infinity,
-                      errorBuilder: (_, __, ___) => const Icon(
-                        Icons.broken_image_outlined,
-                        size: 48,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.person_rounded,
-                      size: 50, color: Colors.white),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            candidate.fullName,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          StatusBadge(
-            label: _statusLabel(candidate.status, l10n),
-            color: statusColor,
-            fontSize: 13,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoCard(BuildContext context, dynamic l10n) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.candidateDetails, style: context.textTheme.titleMedium),
-            const SizedBox(height: 12),
-            _InfoRow(
-              icon: Icons.flag_outlined,
-              label: l10n.nationality,
-              value: _nationalityLabel(candidate.nationality, l10n),
-            ),
-            _InfoRow(
-              icon: Icons.cake_outlined,
-              label: l10n.age,
-              value: '${candidate.age} ${l10n.year}',
-            ),
-            _InfoRow(
-              icon: Icons.work_outline,
-              label: l10n.experience,
-              value: '${candidate.experienceYears} ${l10n.year}',
-            ),
-            if (candidate.jobType?.isNotEmpty == true)
-              _InfoRow(
-                icon: Icons.business_center_outlined,
-                label: l10n.jobType,
-                value: candidate.jobType!,
-              ),
-            if (candidate.spokenLanguages.isNotEmpty)
-              _InfoRow(
-                icon: Icons.translate_outlined,
-                label: l10n.spokenLanguages,
-                value: candidate.spokenLanguages.join(', '),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPersonalCard(BuildContext context, dynamic l10n) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.maritalStatus, style: context.textTheme.titleMedium),
-            const SizedBox(height: 12),
-            if (!candidate.isImageOnlyProfile) ...[
-              if (candidate.religion != null)
-                _InfoRow(
-                  icon: Icons.church_outlined,
-                  label: l10n.religion,
-                  value: candidate.religion!,
-                ),
-              if (candidate.maritalStatus != null)
-                _InfoRow(
-                  icon: Icons.favorite_outline,
-                  label: l10n.maritalStatus,
-                  value: candidate.maritalStatus!,
-                ),
-            ],
-            if (candidate.assignedEmployeeName != null)
-              _InfoRow(
-                icon: Icons.person_pin_outlined,
-                label: l10n.assignedTo,
-                value: candidate.assignedEmployeeName!,
-                valueColor: AppColors.primary,
-              ),
-            if (candidate.reservedByUserName != null)
-              _InfoRow(
-                icon: Icons.lock_outline_rounded,
-                label: l10n.reservedBy,
-                value: candidate.reservedByUserName!,
-              ),
-            if (candidate.convertedEmployeeId != null)
-              _InfoRow(
-                icon: Icons.badge_outlined,
-                label: l10n.employeeCode,
-                value: candidate.convertedEmployeeId!,
-                valueColor: AppColors.statusCompleted,
-              ),
-            if (candidate.createdBySupervisorName != null)
-              _InfoRow(
-                icon: Icons.supervisor_account_outlined,
-                label: l10n.createdBy,
-                value: candidate.createdBySupervisorName!,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMediaCard(BuildContext context, dynamic l10n) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.details, style: context.textTheme.titleMedium),
-            const SizedBox(height: 12),
-            if (candidate.cvFileUrl?.isNotEmpty == true)
-              OutlinedButton.icon(
-                onPressed: () => launchUrlString(candidate.cvFileUrl!),
-                icon: const Icon(Icons.picture_as_pdf_outlined),
-                label: Text(l10n.cvFile),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNotesCard(BuildContext context, dynamic l10n) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.notes, style: context.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(candidate.notes!, style: context.textTheme.bodyMedium),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildActionsCard(BuildContext context, WidgetRef ref, dynamic l10n) {
     return Card(
       child: Padding(
@@ -427,7 +238,7 @@ class _CandidateDetailBody extends ConsumerWidget {
             ...CandidateStatus.values.map(
               (status) => ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: _statusColor(status).withOpacity(0.15),
+                  backgroundColor: _statusColor(status).withValues(alpha: 0.15),
                   radius: 16,
                   child: Icon(
                     Icons.circle,
@@ -437,7 +248,7 @@ class _CandidateDetailBody extends ConsumerWidget {
                 ),
                 title: Text(_statusLabel(status, l10n)),
                 selected: candidate.status == status,
-                selectedTileColor: _statusColor(status).withOpacity(0.08),
+                selectedTileColor: _statusColor(status).withValues(alpha: 0.08),
                 onTap: () async {
                   Navigator.pop(ctx);
                   await ref
@@ -540,21 +351,6 @@ class _CandidateDetailBody extends ConsumerWidget {
         return l10n.statusAvailable;
       case CandidateStatus.reserved:
         return l10n.statusReserved;
-    }
-  }
-
-  String _nationalityLabel(CandidateNationality n, dynamic l10n) {
-    switch (n) {
-      case CandidateNationality.philippines:
-        return l10n.nationalityPhilippines;
-      case CandidateNationality.kenya:
-        return l10n.nationalityKenya;
-      case CandidateNationality.uganda:
-        return l10n.nationalityUganda;
-      case CandidateNationality.ethiopia:
-        return l10n.nationalityEthiopia;
-      case CandidateNationality.bangladesh:
-        return l10n.nationalityBangladesh;
     }
   }
 }

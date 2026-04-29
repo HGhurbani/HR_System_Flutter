@@ -391,32 +391,47 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileImage => 'صورة السيفي';
 
   @override
-  String get cvImageSectionTitle => 'صورة السيفي';
+  String get cvImageSectionTitle => 'ملف السيفي';
 
   @override
   String get cvImageSectionSubtitle =>
-      'ارفع صورة واضحة للسيفي (يمكن تصوير ورقة السيفي بالكاميرا).';
+      'ارفع ملف السيفي كصورة أو PDF، أو صوّر ورقة السيفي بالكاميرا.';
 
   @override
-  String get cvImagePlaceholder => 'اضغط لإضافة صورة السيفي';
+  String get cvImagePlaceholder => 'اضغط لإضافة ملف السيفي';
 
   @override
-  String get cvImageRequired => 'يجب إضافة صورة السيفي';
+  String get cvImageRequired => 'يجب إضافة ملف السيفي';
 
   @override
-  String get cvImageSourceTitle => 'اختر طريقة إضافة صورة السيفي';
+  String get cvImageSourceTitle => 'اختر طريقة إضافة ملف السيفي';
 
   @override
   String get pickCvFromFiles => 'رفع من الملفات';
 
   @override
-  String get pickCvFromFilesSubtitle => 'اختر صورة السيفي من ملفات الجهاز';
+  String get pickCvFromFilesSubtitle => 'اختر صورة أو PDF من ملفات الجهاز';
+
+  @override
+  String get pickCvFromGallery => 'اختيار من المعرض';
+
+  @override
+  String get pickCvFromGallerySubtitle => 'اختر صورة السيفي من معرض الصور';
 
   @override
   String get captureCvWithCamera => 'تصوير بالكاميرا';
 
   @override
   String get captureCvWithCameraSubtitle => 'التقط صورة جديدة للسيفي مباشرة';
+
+  @override
+  String get cvFileRequired => 'يجب إضافة ملف السيفي';
+
+  @override
+  String get unsupportedCvFileType => 'نوع الملف غير مدعوم. اختر صورة أو PDF';
+
+  @override
+  String get cvFileTooLarge => 'حجم الملف أكبر من الحد المسموح';
 
   @override
   String get cvFile => 'ملف السيرة الذاتية';

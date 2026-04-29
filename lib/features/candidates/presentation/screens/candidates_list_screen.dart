@@ -10,7 +10,7 @@ import '../../../../core/widgets/stat_card.dart';
 import '../../application/candidates_providers.dart';
 import '../../data/models/candidate_model.dart';
 import '../../domain/entities/candidate_status.dart';
-import '../widgets/candidate_cv_image_viewer.dart';
+import '../widgets/candidate_cv_file_viewer.dart';
 import '../../../admin/presentation/admin_shell_scaffold.dart';
 
 class CandidatesListScreen extends ConsumerStatefulWidget {
@@ -43,8 +43,8 @@ class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: widget.isAdminView
-            ? IconButton(
-                icon: const Icon(Icons.menu_rounded),
+            ? const IconButton(
+                icon: Icon(Icons.menu_rounded),
                 onPressed: openAdminShellDrawer,
               )
             : null,
@@ -189,7 +189,8 @@ class _ActiveFiltersBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          Icon(Icons.filter_alt_rounded, size: 16, color: AppColors.accent),
+          const Icon(Icons.filter_alt_rounded,
+              size: 16, color: AppColors.accent),
           const SizedBox(width: 8),
           Expanded(
             child: Wrap(
@@ -276,7 +277,6 @@ class _CandidateCard extends ConsumerWidget {
           padding: const EdgeInsets.all(14),
           child: Row(
             children: [
-              // Profile Image
               Container(
                 width: 60,
                 height: 60,
@@ -284,14 +284,15 @@ class _CandidateCard extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12),
                   color: AppColors.backgroundLight,
                 ),
-                child: candidate.imageUrl == null
-                    ? Icon(
-                        Icons.person_outline,
+                child: candidate.imageUrl == null && candidate.cvFileUrl == null
+                    ? const Icon(
+                        Icons.description_outlined,
                         color: AppColors.textDisabled,
                         size: 28,
                       )
-                    : CandidateCvImageViewer(
-                        imageUrl: candidate.imageUrl!,
+                    : CandidateCvFileViewer(
+                        imageUrl: candidate.imageUrl,
+                        pdfUrl: candidate.cvFileUrl,
                         width: 60,
                         height: 60,
                         borderRadius: BorderRadius.circular(12),

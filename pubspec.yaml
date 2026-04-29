@@ -1,7 +1,7 @@
 name: hr_sys
 description: Internal HR & Recruitment Operations System - Bilingual (AR/EN)
 publish_to: "none"
-version: 1.0.0+4
+version: 1.0.0+5
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -49,6 +49,7 @@ dependencies:
   flutter_svg: ^2.0.10+1
   image_picker: ^1.1.2
   file_picker: ^8.1.2
+  pdfrx: ^2.2.24
   lottie: ^3.1.2
 
   # Utilities
