@@ -259,6 +259,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailNotFound => 'Email not found in the system';
 
   @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get changePasswordSubtitle => 'Update the password used to sign in';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get updatePassword => 'Update Password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get passwordUpdated => 'Password updated successfully';
+
+  @override
+  String get currentPasswordIncorrect => 'Current password is incorrect';
+
+  @override
+  String get recentLoginRequired =>
+      'Please sign in again before updating your password';
+
+  @override
+  String get weakPassword => 'Password is too weak';
+
+  @override
   String get roleAdmin => 'System Admin';
 
   @override

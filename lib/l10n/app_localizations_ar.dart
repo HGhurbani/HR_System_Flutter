@@ -259,6 +259,41 @@ class AppLocalizationsAr extends AppLocalizations {
   String get emailNotFound => 'البريد الإلكتروني غير مسجل في النظام';
 
   @override
+  String get changePassword => 'تغيير كلمة المرور';
+
+  @override
+  String get changePasswordSubtitle =>
+      'حدّث كلمة المرور المستخدمة لتسجيل الدخول';
+
+  @override
+  String get currentPassword => 'كلمة المرور الحالية';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get confirmNewPassword => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get updatePassword => 'تحديث كلمة المرور';
+
+  @override
+  String get passwordsDoNotMatch => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get passwordUpdated => 'تم تحديث كلمة المرور بنجاح';
+
+  @override
+  String get currentPasswordIncorrect => 'كلمة المرور الحالية غير صحيحة';
+
+  @override
+  String get recentLoginRequired =>
+      'يرجى تسجيل الدخول مرة أخرى قبل تحديث كلمة المرور';
+
+  @override
+  String get weakPassword => 'كلمة المرور ضعيفة جداً';
+
+  @override
   String get roleAdmin => 'مدير النظام';
 
   @override

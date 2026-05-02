@@ -59,6 +59,10 @@ class AppException implements Exception {
         return 'Invalid email address';
       case 'email-already-in-use':
         return 'Email is already registered';
+      case 'weak-password':
+        return 'Password is too weak';
+      case 'requires-recent-login':
+        return 'Please sign in again before updating your password';
       case 'network-request-failed':
         return 'Network connection error';
       default:

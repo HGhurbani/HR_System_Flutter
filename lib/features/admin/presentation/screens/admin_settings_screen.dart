@@ -12,6 +12,7 @@ import '../../../auth/application/auth_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../holidays/application/company_holidays_providers.dart';
 import '../../../settings/presentation/widgets/app_appearance_settings.dart';
+import '../../../settings/presentation/widgets/password_settings_section.dart';
 import '../../../settings/presentation/widgets/settings_section_card.dart';
 import '../admin_shell_scaffold.dart';
 import '../widgets/admin_work_schedule_section.dart';
@@ -51,7 +52,9 @@ class AdminSettingsScreen extends ConsumerWidget {
                 ListTile(
                   leading: const Icon(Icons.event_available_outlined),
                   title: Text(
-                    context.isArabic ? 'إدارة العطلات الرسمية' : 'Manage holidays',
+                    context.isArabic
+                        ? 'إدارة العطلات الرسمية'
+                        : 'Manage holidays',
                   ),
                   subtitle: Text(
                     context.isArabic
@@ -118,8 +121,7 @@ class AdminSettingsScreen extends ConsumerWidget {
                     padding: EdgeInsets.all(16),
                     child: LinearProgressIndicator(),
                   ),
-                  error: (e, _) =>
-                      ListTile(title: Text('${l10n.error}: $e')),
+                  error: (e, _) => ListTile(title: Text('${l10n.error}: $e')),
                   data: (locations) {
                     if (locations.isEmpty) {
                       return ListTile(
@@ -155,7 +157,8 @@ class AdminSettingsScreen extends ConsumerWidget {
                                         _toggleLocation(context, ref, location),
                                   ),
                                   IconButton(
-                                    tooltip: context.isArabic ? 'حذف' : 'Delete',
+                                    tooltip:
+                                        context.isArabic ? 'حذف' : 'Delete',
                                     icon: const Icon(Icons.delete_outline),
                                     color: AppColors.error,
                                     onPressed: () => _deleteLocation(
@@ -186,6 +189,8 @@ class AdminSettingsScreen extends ConsumerWidget {
             SettingsSectionCard(
               title: l10n.profile,
               children: [
+                const PasswordSettingsSection(),
+                const Divider(height: 1),
                 ListTile(
                   leading:
                       const Icon(Icons.logout_rounded, color: AppColors.error),
@@ -290,7 +295,9 @@ class _AttendancePolicySection extends ConsumerWidget {
     final policyAsync = ref.watch(attendancePolicyProvider);
 
     return SettingsSectionCard(
-      title: context.isArabic ? 'سياسة الحضور والرواتب' : 'Attendance Payroll Policy',
+      title: context.isArabic
+          ? 'سياسة الحضور والرواتب'
+          : 'Attendance Payroll Policy',
       children: [
         policyAsync.when(
           loading: () => const Padding(
@@ -313,7 +320,8 @@ class _AttendancePolicyEditor extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final restDays = policy.weeklyRestDays.toSet();
-    final title = context.isArabic ? 'أيام الراحة الأسبوعية' : 'Weekly rest days';
+    final title =
+        context.isArabic ? 'أيام الراحة الأسبوعية' : 'Weekly rest days';
     final thresholdLabel = context.isArabic
         ? 'حد نسبة الحضور للخصم'
         : 'Attendance threshold for deduction';
@@ -323,7 +331,8 @@ class _AttendancePolicyEditor extends ConsumerWidget {
         ListTile(
           leading: const Icon(Icons.percent_rounded),
           title: Text(thresholdLabel),
-          subtitle: Text('${policy.attendanceThresholdPercent.toStringAsFixed(0)}%'),
+          subtitle:
+              Text('${policy.attendanceThresholdPercent.toStringAsFixed(0)}%'),
         ),
         const Divider(height: 1),
         Padding(
@@ -340,7 +349,8 @@ class _AttendancePolicyEditor extends ConsumerWidget {
           final day = DateTime.monday + index;
           return CheckboxListTile(
             value: restDays.contains(day),
-            onChanged: (selected) => _toggleRestDay(context, ref, day, selected),
+            onChanged: (selected) =>
+                _toggleRestDay(context, ref, day, selected),
             title: Text(_dayLabel(context, day)),
             controlAffinity: ListTileControlAffinity.leading,
           );
@@ -506,7 +516,8 @@ class _LocationEditorSheetState extends ConsumerState<_LocationEditorSheet> {
     final l10n = context.l10n;
 
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(

@@ -596,6 +596,72 @@ abstract class AppLocalizations {
   /// **'البريد الإلكتروني غير مسجل في النظام'**
   String get emailNotFound;
 
+  /// No description provided for @changePassword.
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير كلمة المرور'**
+  String get changePassword;
+
+  /// No description provided for @changePasswordSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدّث كلمة المرور المستخدمة لتسجيل الدخول'**
+  String get changePasswordSubtitle;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلمة المرور الحالية'**
+  String get currentPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلمة المرور الجديدة'**
+  String get newPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In ar, this message translates to:
+  /// **'تأكيد كلمة المرور الجديدة'**
+  String get confirmNewPassword;
+
+  /// No description provided for @updatePassword.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحديث كلمة المرور'**
+  String get updatePassword;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلمتا المرور غير متطابقتين'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @passwordUpdated.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تحديث كلمة المرور بنجاح'**
+  String get passwordUpdated;
+
+  /// No description provided for @currentPasswordIncorrect.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلمة المرور الحالية غير صحيحة'**
+  String get currentPasswordIncorrect;
+
+  /// No description provided for @recentLoginRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'يرجى تسجيل الدخول مرة أخرى قبل تحديث كلمة المرور'**
+  String get recentLoginRequired;
+
+  /// No description provided for @weakPassword.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلمة المرور ضعيفة جداً'**
+  String get weakPassword;
+
   /// No description provided for @roleAdmin.
   ///
   /// In ar, this message translates to:

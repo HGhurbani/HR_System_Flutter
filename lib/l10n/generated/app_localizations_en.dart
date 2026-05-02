@@ -259,6 +259,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailNotFound => 'Email not found in the system';
 
   @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get changePasswordSubtitle => 'Update the password used to sign in';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get updatePassword => 'Update Password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get passwordUpdated => 'Password updated successfully';
+
+  @override
+  String get currentPasswordIncorrect => 'Current password is incorrect';
+
+  @override
+  String get recentLoginRequired =>
+      'Please sign in again before updating your password';
+
+  @override
+  String get weakPassword => 'Password is too weak';
+
+  @override
   String get roleAdmin => 'System Admin';
 
   @override
@@ -416,8 +450,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get captureCvWithCamera => 'Take photo with camera';
 
   @override
-  String get captureCvWithCameraSubtitle =>
-      'Capture a new CV image directly';
+  String get captureCvWithCameraSubtitle => 'Capture a new CV image directly';
 
   @override
   String get cvFile => 'CV File';
@@ -652,8 +685,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Emergency leave is limited to 3 consecutive days';
 
   @override
-  String get emergencyLeaveExceedsMax =>
-      'Emergency leave cannot exceed 3 days';
+  String get emergencyLeaveExceedsMax => 'Emergency leave cannot exceed 3 days';
 
   @override
   String get salary => 'Salary';
@@ -773,8 +805,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationLeaveUpdate => 'Leave request status updated';
 
   @override
-  String get notificationCvAssigned =>
-      'A new CV has been assigned to you';
+  String get notificationCvAssigned => 'A new CV has been assigned to you';
 
   @override
   String get notificationAttendanceReminder => 'Attendance check-in reminder';

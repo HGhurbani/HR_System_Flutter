@@ -44,7 +44,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       final user = await _fetchUser(credential.user!.uid);
       if (user == null) {
-        throw AppException(
+        throw const AppException(
           message: 'User profile not found',
           code: 'user-profile-not-found',
         );
@@ -52,7 +52,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       if (!user.isActive) {
         await _auth.signOut();
-        throw AppException(
+        throw const AppException(
           message: 'Account is disabled',
           code: 'user-disabled',
         );
@@ -74,6 +74,36 @@ class AuthRepositoryImpl implements AuthRepository {
       await _auth.sendPasswordResetEmail(email: email.trim());
     } on FirebaseAuthException catch (e) {
       throw AppException.auth(e.code);
+    } catch (e) {
+      throw AppException.unknown(e);
+    }
+  }
+
+  @override
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final firebaseUser = _auth.currentUser;
+      final email = firebaseUser?.email;
+      if (firebaseUser == null || email == null || email.trim().isEmpty) {
+        throw const AppException(
+          message: 'Authentication failed',
+          code: 'missing-current-user',
+        );
+      }
+
+      final credential = EmailAuthProvider.credential(
+        email: email,
+        password: currentPassword,
+      );
+      await firebaseUser.reauthenticateWithCredential(credential);
+      await firebaseUser.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw AppException.auth(e.code);
+    } on AppException {
+      rethrow;
     } catch (e) {
       throw AppException.unknown(e);
     }
