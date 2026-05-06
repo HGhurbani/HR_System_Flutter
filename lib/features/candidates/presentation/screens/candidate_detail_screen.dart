@@ -39,6 +39,17 @@ class CandidateDetailScreen extends ConsumerWidget {
                 context.push('$basePath/$candidateId/edit');
               },
             ),
+          if (currentUser?.role.isAdmin == true)
+            candidateAsync.maybeWhen(
+              data: (candidate) => candidate == null
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded),
+                      onPressed: () =>
+                          _deleteCandidate(context, ref, candidate),
+                    ),
+              orElse: () => const SizedBox.shrink(),
+            ),
         ],
       ),
       body: candidateAsync.when(
@@ -55,6 +66,33 @@ class CandidateDetailScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  Future<void> _deleteCandidate(
+    BuildContext context,
+    WidgetRef ref,
+    CandidateModel candidate,
+  ) async {
+    final confirmed = await context.showConfirmDialog(
+      title: context.l10n.confirmDelete,
+      message: context.l10n.confirmDeleteMessage,
+      confirmLabel: context.l10n.delete,
+      isDanger: true,
+    );
+    if (confirmed != true) return;
+
+    final success = await ref.read(candidatesNotifierProvider.notifier).deleteCandidate(
+          candidate.id,
+          imageUrl: candidate.imageUrl,
+          cvFileUrl: candidate.cvFileUrl,
+        );
+    if (!context.mounted) return;
+    if (success) {
+      context.showSnackBar(context.l10n.deleteSuccess);
+      context.go(AppRoutes.adminCandidates);
+    } else {
+      context.showSnackBar(context.l10n.errorGeneral, isError: true);
+    }
   }
 }
 

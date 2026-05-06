@@ -37,6 +37,7 @@ class AppConstants {
   static const String storageCandidateImages = 'candidate_images';
   static const String storageCandidateCVs = 'candidate_cvs';
   static const String storageCandidateVideos = 'candidate_videos';
+  static const String storageLeaveMedicalReports = 'leave_medical_reports';
 
   // Default Geofence Radius (meters)
   static const double defaultGeofenceRadius = 200.0;
@@ -58,6 +59,7 @@ class AppConstants {
   // Max file sizes (bytes)
   static const int maxImageSize = 5 * 1024 * 1024; // 5 MB
   static const int maxCvSize = 10 * 1024 * 1024; // 10 MB
+  static const int maxMedicalReportSize = 10 * 1024 * 1024; // 10 MB
   static const int maxVideoSize = 50 * 1024 * 1024; // 50 MB
 
   // App version

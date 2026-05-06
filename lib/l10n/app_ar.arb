@@ -133,6 +133,8 @@
   "supervisors": "المشرفون",
   "supervisorManagement": "إدارة المشرفين",
   "addSupervisor": "إضافة مشرف",
+  "editSupervisor": "تعديل المشرف",
+  "supervisorDetails": "بيانات المشرف",
   "noSupervisors": "لا يوجد مشرفون",
 
   "candidates": "السيفيهات",
@@ -233,6 +235,9 @@
   "reason": "السبب",
   "leaveStatus": "حالة الطلب",
   "adminNote": "ملاحظة المدير",
+  "medicalReport": "تقرير العذر الطبي",
+  "medicalReportRequired": "يجب إضافة تقرير العذر الطبي للإجازة المرضية",
+  "medicalReportRequiredHint": "أضف تقرير العذر الطبي",
   "approve": "قبول",
   "reject": "رفض",
   "pendingStatus": "قيد المراجعة",
@@ -242,6 +247,7 @@
   "leaveSubmitted": "تم تقديم الطلب بنجاح",
   "leaveApproved": "تم قبول طلب الإجازة",
   "leaveRejected": "تم رفض طلب الإجازة",
+  "editLeaveRequest": "تعديل طلب الإجازة",
 
   "leaveTypeAnnual": "إجازة رسمية",
   "leaveTypeSick": "إجازة مرضية",
@@ -327,6 +333,10 @@
   "deleteSuccess": "تم الحذف بنجاح",
   "saveSuccess": "تم الحفظ بنجاح",
   "updateSuccess": "تم التحديث بنجاح",
+  "disableAccount": "تعطيل الحساب",
+  "disableAccountMessage": "سيبقى المستخدم وسجلاته محفوظة، لكنه لن يستطيع تسجيل الدخول.",
+  "createdAt": "تاريخ الإنشاء",
+  "updatedAt": "آخر تحديث",
 
   "single": "أعزب",
   "married": "متزوج",

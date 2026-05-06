@@ -70,7 +70,8 @@ final employeeCompensationProfilesProvider =
 });
 
 final employeeCompensationProvider =
-    StreamProvider.family<EmployeeCompensationModel?, String>((ref, employeeId) {
+    StreamProvider.family<EmployeeCompensationModel?, String>(
+        (ref, employeeId) {
   final firestore = ref.watch(firestoreProvider);
   return firestore
       .collection(AppConstants.employeeCompensationCollection)
@@ -112,14 +113,17 @@ class SalaryAdminNotifier extends StateNotifier<AsyncValue<void>> {
           .collection(AppConstants.employeeCompensationCollection)
           .doc(profile.employeeId)
           .set(
-        profile.copyWith(
-          createdAt: createdAt,
-          updatedAt: DateTime.now(),
-        ).toMap(),
-      );
+            profile
+                .copyWith(
+                  createdAt: createdAt,
+                  updatedAt: DateTime.now(),
+                )
+                .toMap(),
+          );
       await _notify(
         title: 'تم تحديث تفاصيل راتب',
-        body: 'تم حفظ تفاصيل راتب ${profile.employeeName ?? profile.employeeId}',
+        body:
+            'تم حفظ تفاصيل راتب ${profile.employeeName ?? profile.employeeId}',
         type: 'salary_profile_saved',
         targetUserId: adminNotificationTarget,
       );
@@ -141,9 +145,8 @@ class SalaryAdminNotifier extends StateNotifier<AsyncValue<void>> {
   }) async {
     state = const AsyncValue.loading();
     try {
-      final doc = _firestore
-          .collection(AppConstants.commissionsCollection)
-          .doc();
+      final doc =
+          _firestore.collection(AppConstants.commissionsCollection).doc();
       final now = DateTime.now();
       final commission = CommissionModel(
         id: doc.id,
@@ -162,7 +165,8 @@ class SalaryAdminNotifier extends StateNotifier<AsyncValue<void>> {
       await doc.set(commission.toMap());
       await _notify(
         title: 'تمت إضافة عمولة',
-        body: 'تمت إضافة عمولة ${amount.toStringAsFixed(0)} لـ ${employee.fullName}',
+        body:
+            'تمت إضافة عمولة ${amount.toStringAsFixed(0)} لـ ${employee.fullName}',
         type: 'commission_created',
         targetUserId: employee.uid,
       );
@@ -196,8 +200,7 @@ class SalaryAdminNotifier extends StateNotifier<AsyncValue<void>> {
         );
       }
 
-      final profile =
-          EmployeeCompensationModel.fromFirestore(compensationDoc);
+      final profile = EmployeeCompensationModel.fromFirestore(compensationDoc);
 
       final commissionsSnap = await _firestore
           .collection(AppConstants.commissionsCollection)
@@ -207,8 +210,7 @@ class SalaryAdminNotifier extends StateNotifier<AsyncValue<void>> {
 
       final manualCommissionTotal = commissionsSnap.docs.fold<double>(
         0,
-        (sum, doc) =>
-            sum + ((doc.data()['amount'] as num?)?.toDouble() ?? 0),
+        (sum, doc) => sum + ((doc.data()['amount'] as num?)?.toDouble() ?? 0),
       );
 
       final attendanceSummary = await _calculateAttendanceSummary(
@@ -218,7 +220,8 @@ class SalaryAdminNotifier extends StateNotifier<AsyncValue<void>> {
       );
       final ruleAmount = profile.calculateRuleCommission();
       final commissionTotal = manualCommissionTotal + ruleAmount;
-      final totalDeductions = deductions + attendanceSummary.attendanceDeduction;
+      final totalDeductions =
+          deductions + attendanceSummary.attendanceDeduction;
       final netSalary =
           profile.basicSalary + additions + commissionTotal - totalDeductions;
 
@@ -287,6 +290,9 @@ class SalaryAdminNotifier extends StateNotifier<AsyncValue<void>> {
         .doc(AppConstants.companyAttendancePolicyDocId)
         .get();
     final policy = AttendancePolicyModel.fromMap(policyDoc.data());
+    final effectivePolicy = policy.copyWith(
+      weeklyRestDays: employee.effectiveWeeklyRestDays(policy.weeklyRestDays),
+    );
 
     final attendanceSnap = await _firestore
         .collection(AppConstants.attendanceLogsCollection)
@@ -299,8 +305,7 @@ class SalaryAdminNotifier extends StateNotifier<AsyncValue<void>> {
 
     final holidaysSnap = await _firestore
         .collection(AppConstants.companyHolidaysCollection)
-        .where('date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(range.start))
+        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(range.start))
         .where('date', isLessThan: Timestamp.fromDate(range.end))
         .orderBy('date', descending: false)
         .get();
@@ -318,14 +323,15 @@ class SalaryAdminNotifier extends StateNotifier<AsyncValue<void>> {
     final approvedLeaves = leavesSnap.docs
         .map(LeaveRequestModel.fromFirestore)
         .where((leave) =>
-            leave.endDate.isAfter(range.start.subtract(const Duration(days: 1))) &&
+            leave.endDate
+                .isAfter(range.start.subtract(const Duration(days: 1))) &&
             leave.startDate.isBefore(range.end))
         .toList();
 
     return AttendanceSalaryCalculator.calculate(
       month: month,
       basicSalary: basicSalary,
-      policy: policy,
+      policy: effectivePolicy,
       attendanceLogs: attendanceLogs,
       approvedLeaves: approvedLeaves,
       holidayDayKeys: holidayDayKeys,
@@ -379,8 +385,7 @@ extension on EmployeeCompensationModel {
       employeeCode: employeeCode ?? this.employeeCode,
       position: position ?? this.position,
       basicSalary: basicSalary ?? this.basicSalary,
-      isCommissionEligible:
-          isCommissionEligible ?? this.isCommissionEligible,
+      isCommissionEligible: isCommissionEligible ?? this.isCommissionEligible,
       commissionRuleType: commissionRuleType ?? this.commissionRuleType,
       commissionRuleValue: commissionRuleValue ?? this.commissionRuleValue,
       notes: notes ?? this.notes,

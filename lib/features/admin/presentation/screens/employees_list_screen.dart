@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../admin/application/admin_user_management_providers.dart';
@@ -222,6 +224,7 @@ class _UserTile extends StatelessWidget {
       child: ListTile(
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        onTap: () => context.push('${AppRoutes.adminEmployees}/${user.uid}'),
         leading: CircleAvatar(
           radius: 22,
           backgroundColor: accentColor.withOpacity(0.15),

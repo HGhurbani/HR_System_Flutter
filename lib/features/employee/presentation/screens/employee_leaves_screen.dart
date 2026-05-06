@@ -8,6 +8,7 @@ import '../../../../core/widgets/loading_widget.dart';
 import '../../../leaves/application/leaves_providers.dart';
 import '../../../leaves/data/models/leave_request_model.dart';
 import '../../../leaves/presentation/widgets/leave_request_form_sheet.dart';
+import '../../../candidates/presentation/widgets/candidate_cv_file_viewer.dart';
 import '../employee_shell_scaffold.dart';
 
 class EmployeeLeavesScreen extends ConsumerWidget {
@@ -157,6 +158,16 @@ class _LeaveRequestTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ],
+            if (request.medicalReportUrl?.isNotEmpty == true) ...[
+              const SizedBox(height: 6),
+              TextButton.icon(
+                onPressed: () => _openMedicalReport(context, request),
+                icon: const Icon(Icons.description_outlined),
+                label: Text(
+                  request.medicalReportFileName ?? l10n.medicalReport,
+                ),
+              ),
+            ],
             if (request.adminNote?.isNotEmpty == true) ...[
               const SizedBox(height: 8),
               Container(
@@ -184,6 +195,18 @@ class _LeaveRequestTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _openMedicalReport(BuildContext context, LeaveRequestModel request) {
+    final contentType = request.medicalReportContentType ?? '';
+    final url = request.medicalReportUrl ?? '';
+    final isPdf = contentType == 'application/pdf' ||
+        url.toLowerCase().contains('.pdf');
+    showCandidateCvFileViewer(
+      context,
+      imageUrl: !isPdf && url.isNotEmpty ? url : null,
+      pdfUrl: isPdf ? url : null,
     );
   }
 

@@ -29,4 +29,18 @@ void main() {
 
     expect(profile.calculateRuleCommission(), 400);
   });
+
+  test('commission disabled returns zero even with a fixed value', () {
+    final profile = EmployeeCompensationModel(
+      employeeId: 'emp-1',
+      basicSalary: 4000,
+      isCommissionEligible: false,
+      commissionRuleType: CommissionRuleType.fixed,
+      commissionRuleValue: 500,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+
+    expect(profile.calculateRuleCommission(), 0);
+  });
 }

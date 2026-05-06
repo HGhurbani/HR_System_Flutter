@@ -37,6 +37,8 @@ exports.processManagedUserCreation = onDocumentCreated(
         department: emptyToNull(data.department),
         employeeCode: emptyToNull(data.employeeCode),
         hireDate: data.hireDate || null,
+        weeklyRestDaysMode: normalizeWeeklyRestDaysMode(data.weeklyRestDaysMode),
+        customWeeklyRestDays: sanitizeWeeklyRestDays(data.customWeeklyRestDays),
         languagePreference: 'ar',
         isActive: data.isActive !== false,
         mustChangePassword: data.mustChangePassword !== false,
@@ -65,4 +67,18 @@ function emptyToNull(value) {
   if (typeof value !== 'string') return value || null;
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function normalizeWeeklyRestDaysMode(value) {
+  return value === 'custom' ? 'custom' : 'company';
+}
+
+function sanitizeWeeklyRestDays(value) {
+  if (!Array.isArray(value)) return [];
+  const days = [...new Set(
+    value
+      .map((day) => Number(day))
+      .filter((day) => Number.isInteger(day) && day >= 1 && day <= 7),
+  )].sort((a, b) => a - b);
+  return days.length >= 7 ? [] : days;
 }

@@ -121,6 +121,78 @@ void main() {
     expect(defaultPolicy.attendanceThresholdPercent, 98);
     expect(summary.attendanceDeduction, 100);
   });
+
+  test('custom Friday and Saturday rest days reduce required working days', () {
+    const customPolicy = AttendancePolicyModel(
+      weeklyRestDays: [DateTime.friday, DateTime.saturday],
+      attendanceThresholdPercent: 98,
+      lateCountsAsPresent: true,
+    );
+    final logs = _workingDays(
+      '2026-04',
+      restDays: customPolicy.weeklyRestDays,
+    ).map((day) => _attendance(day, AttendanceStatus.present)).toList();
+
+    final summary = AttendanceSalaryCalculator.calculate(
+      month: '2026-04',
+      basicSalary: 2200,
+      policy: customPolicy,
+      attendanceLogs: logs,
+      approvedLeaves: const [],
+    );
+
+    expect(summary.monthWorkingDays, 22);
+    expect(summary.requiredAttendanceDays, 22);
+    expect(summary.presentDays, 22);
+    expect(summary.attendancePercentage, 100);
+    expect(summary.attendanceDeduction, 0);
+  });
+
+  test('holidays and approved leave reduce only required working days', () {
+    const customPolicy = AttendancePolicyModel(
+      weeklyRestDays: [DateTime.friday, DateTime.saturday],
+      attendanceThresholdPercent: 98,
+      lateCountsAsPresent: true,
+    );
+    final workingDays = _workingDays(
+      '2026-04',
+      restDays: customPolicy.weeklyRestDays,
+    );
+    final holidayDay = workingDays[0];
+    final leaveDay = workingDays[1];
+    final logs = workingDays
+        .skip(2)
+        .map((day) => _attendance(day, AttendanceStatus.present))
+        .toList();
+
+    final summary = AttendanceSalaryCalculator.calculate(
+      month: '2026-04',
+      basicSalary: 2200,
+      policy: customPolicy,
+      attendanceLogs: logs,
+      approvedLeaves: [
+        LeaveRequestModel(
+          id: 'leave-1',
+          employeeId: 'emp-1',
+          type: LeaveType.official,
+          startDate: leaveDay,
+          endDate: leaveDay,
+          reason: 'annual',
+          status: LeaveRequestStatus.approved,
+          createdAt: leaveDay,
+          updatedAt: leaveDay,
+        ),
+      ],
+      holidayDayKeys: {_dayKey(holidayDay)},
+    );
+
+    expect(summary.monthWorkingDays, 21);
+    expect(summary.approvedLeaveDays, 1);
+    expect(summary.requiredAttendanceDays, 20);
+    expect(summary.presentDays, 20);
+    expect(summary.attendancePercentage, 100);
+    expect(summary.attendanceDeduction, 0);
+  });
 }
 
 AttendanceModel _attendance(DateTime day, AttendanceStatus status) {
@@ -135,15 +207,23 @@ AttendanceModel _attendance(DateTime day, AttendanceStatus status) {
   );
 }
 
-List<DateTime> _workingDays(String month) {
+List<DateTime> _workingDays(
+  String month, {
+  List<int> restDays = const [DateTime.friday],
+}) {
   final range = AttendanceSalaryCalculator.monthRange(month);
   final days = <DateTime>[];
+  final restDaySet = restDays.toSet();
   var day = range.start;
   while (day.isBefore(range.end)) {
-    if (day.weekday != DateTime.friday) {
+    if (!restDaySet.contains(day.weekday)) {
       days.add(day);
     }
     day = day.add(const Duration(days: 1));
   }
   return days;
 }
+
+String _dayKey(DateTime day) => '${day.year.toString().padLeft(4, '0')}-'
+    '${day.month.toString().padLeft(2, '0')}-'
+    '${day.day.toString().padLeft(2, '0')}';

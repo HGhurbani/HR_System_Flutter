@@ -64,6 +64,7 @@ class LeavesNotifier extends StateNotifier<AsyncValue<void>> {
         super(const AsyncValue.data(null));
 
   Future<bool> submitLeaveRequest({
+    String? requestId,
     required LeaveType type,
     required DateTime startDate,
     required DateTime endDate,
@@ -73,6 +74,9 @@ class LeavesNotifier extends StateNotifier<AsyncValue<void>> {
     LeaveRequestStatus initialStatus = LeaveRequestStatus.pending,
     String? adminNote,
     String? adminId,
+    String? medicalReportUrl,
+    String? medicalReportFileName,
+    String? medicalReportContentType,
   }) async {
     if (type == LeaveType.emergency &&
         LeaveRequestModel.calendarDurationDays(startDate, endDate) >
@@ -85,7 +89,7 @@ class LeavesNotifier extends StateNotifier<AsyncValue<void>> {
       final now = DateTime.now();
       final doc = _firestore
           .collection(AppConstants.leaveRequestsCollection)
-          .doc();
+          .doc(requestId);
 
       final request = LeaveRequestModel(
         id: doc.id,
@@ -98,6 +102,9 @@ class LeavesNotifier extends StateNotifier<AsyncValue<void>> {
         status: initialStatus,
         adminNote: adminNote,
         approvedByAdminId: adminId,
+        medicalReportUrl: medicalReportUrl,
+        medicalReportFileName: medicalReportFileName,
+        medicalReportContentType: medicalReportContentType,
         createdAt: now,
         updatedAt: now,
       );
@@ -160,6 +167,62 @@ class LeavesNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
+  Future<bool> updateLeaveRequest({
+    required String requestId,
+    required LeaveType type,
+    required DateTime startDate,
+    required DateTime endDate,
+    required String reason,
+    required LeaveRequestStatus status,
+    required String employeeId,
+    String? employeeName,
+    String? adminNote,
+    String? adminId,
+    String? medicalReportUrl,
+    String? medicalReportFileName,
+    String? medicalReportContentType,
+  }) async {
+    if (type == LeaveType.emergency &&
+        LeaveRequestModel.calendarDurationDays(startDate, endDate) >
+            LeaveRequestModel.emergencyLeaveMaxDays) {
+      return false;
+    }
+
+    state = const AsyncValue.loading();
+    try {
+      await _firestore
+          .collection(AppConstants.leaveRequestsCollection)
+          .doc(requestId)
+          .update({
+        'employeeId': employeeId,
+        'employeeName': employeeName,
+        'type': _typeValue(type),
+        'startDate': Timestamp.fromDate(startDate),
+        'endDate': Timestamp.fromDate(endDate),
+        'reason': reason.trim(),
+        'status': _statusValue(status),
+        'adminNote': adminNote,
+        'approvedByAdminId':
+            status == LeaveRequestStatus.pending ? null : adminId,
+        'medicalReportUrl': medicalReportUrl,
+        'medicalReportFileName': medicalReportFileName,
+        'medicalReportContentType': medicalReportContentType,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      await _notify(
+        title: 'تم تحديث طلب إجازة',
+        body: 'تم تحديث بيانات طلب الإجازة',
+        type: 'leave_updated',
+        targetUserId: employeeId,
+      );
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return false;
+    }
+  }
+
   Future<void> _notify({
     required String title,
     required String body,
@@ -174,6 +237,28 @@ class LeavesNotifier extends StateNotifier<AsyncValue<void>> {
         targetUserId: targetUserId,
       );
     } catch (_) {}
+  }
+}
+
+String _typeValue(LeaveType type) {
+  switch (type) {
+    case LeaveType.official:
+      return 'official';
+    case LeaveType.sick:
+      return 'sick';
+    case LeaveType.emergency:
+      return 'emergency';
+  }
+}
+
+String _statusValue(LeaveRequestStatus status) {
+  switch (status) {
+    case LeaveRequestStatus.approved:
+      return 'approved';
+    case LeaveRequestStatus.rejected:
+      return 'rejected';
+    case LeaveRequestStatus.pending:
+      return 'pending';
   }
 }
 

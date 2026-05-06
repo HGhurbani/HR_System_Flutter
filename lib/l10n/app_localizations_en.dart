@@ -377,6 +377,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addSupervisor => 'Add Supervisor';
 
   @override
+  String get editSupervisor => 'Edit Supervisor';
+
+  @override
+  String get supervisorDetails => 'Supervisor Details';
+
+  @override
   String get noSupervisors => 'No supervisors found';
 
   @override
@@ -664,6 +670,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminNote => 'Admin Note';
 
   @override
+  String get medicalReport => 'Medical excuse report';
+
+  @override
+  String get medicalReportRequired =>
+      'Medical excuse report is required for sick leave';
+
+  @override
+  String get medicalReportRequiredHint => 'Add the medical excuse report';
+
+  @override
   String get approve => 'Approve';
 
   @override
@@ -689,6 +705,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leaveRejected => 'Leave request rejected';
+
+  @override
+  String get editLeaveRequest => 'Edit Leave Request';
 
   @override
   String get leaveTypeAnnual => 'Official leave';
@@ -919,6 +938,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateSuccess => 'Updated successfully';
+
+  @override
+  String get disableAccount => 'Disable Account';
+
+  @override
+  String get disableAccountMessage =>
+      'The user and historical records stay saved, but the user cannot sign in.';
+
+  @override
+  String get createdAt => 'Created At';
+
+  @override
+  String get updatedAt => 'Updated At';
 
   @override
   String get single => 'Single';

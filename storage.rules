@@ -30,6 +30,15 @@ service firebase.storage {
         && request.resource.contentType.matches('image/.*');
     }
 
+    function isMedicalReportUpload() {
+      return request.resource != null
+        && request.resource.size <= 10 * 1024 * 1024
+        && (
+          request.resource.contentType.matches('image/.*')
+          || request.resource.contentType == 'application/pdf'
+        );
+    }
+
     match /candidate_images/{fileName} {
       allow read: if isActiveUser();
       allow create, update: if isAdminOrSupervisor() && isImageUpload();
@@ -52,6 +61,13 @@ service firebase.storage {
         && request.resource.size <= 50 * 1024 * 1024
         && request.resource.contentType.matches('video/.*');
       allow delete: if hasRole('admin');
+    }
+
+    match /leave_medical_reports/{employeeId}/{fileName} {
+      allow read: if hasRole('admin') || (isActiveUser() && request.auth.uid == employeeId);
+      allow create, update: if (hasRole('admin') || (isActiveUser() && request.auth.uid == employeeId))
+        && isMedicalReportUpload();
+      allow delete: if hasRole('admin') || (isActiveUser() && request.auth.uid == employeeId);
     }
 
     match /avatars/{userId}/{fileName} {

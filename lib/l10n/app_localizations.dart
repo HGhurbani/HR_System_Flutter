@@ -830,6 +830,18 @@ abstract class AppLocalizations {
   /// **'إضافة مشرف'**
   String get addSupervisor;
 
+  /// No description provided for @editSupervisor.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعديل المشرف'**
+  String get editSupervisor;
+
+  /// No description provided for @supervisorDetails.
+  ///
+  /// In ar, this message translates to:
+  /// **'بيانات المشرف'**
+  String get supervisorDetails;
+
   /// No description provided for @noSupervisors.
   ///
   /// In ar, this message translates to:
@@ -1394,6 +1406,24 @@ abstract class AppLocalizations {
   /// **'ملاحظة المدير'**
   String get adminNote;
 
+  /// No description provided for @medicalReport.
+  ///
+  /// In ar, this message translates to:
+  /// **'تقرير العذر الطبي'**
+  String get medicalReport;
+
+  /// No description provided for @medicalReportRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'يجب إضافة تقرير العذر الطبي للإجازة المرضية'**
+  String get medicalReportRequired;
+
+  /// No description provided for @medicalReportRequiredHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف تقرير العذر الطبي'**
+  String get medicalReportRequiredHint;
+
   /// No description provided for @approve.
   ///
   /// In ar, this message translates to:
@@ -1447,6 +1477,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تم رفض طلب الإجازة'**
   String get leaveRejected;
+
+  /// No description provided for @editLeaveRequest.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعديل طلب الإجازة'**
+  String get editLeaveRequest;
 
   /// No description provided for @leaveTypeAnnual.
   ///
@@ -1903,6 +1939,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تم التحديث بنجاح'**
   String get updateSuccess;
+
+  /// No description provided for @disableAccount.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعطيل الحساب'**
+  String get disableAccount;
+
+  /// No description provided for @disableAccountMessage.
+  ///
+  /// In ar, this message translates to:
+  /// **'سيبقى المستخدم وسجلاته محفوظة، لكنه لن يستطيع تسجيل الدخول.'**
+  String get disableAccountMessage;
+
+  /// No description provided for @createdAt.
+  ///
+  /// In ar, this message translates to:
+  /// **'تاريخ الإنشاء'**
+  String get createdAt;
+
+  /// No description provided for @updatedAt.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر تحديث'**
+  String get updatedAt;
 
   /// No description provided for @single.
   ///

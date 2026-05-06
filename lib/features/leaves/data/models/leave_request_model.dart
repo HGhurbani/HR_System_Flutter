@@ -19,6 +19,9 @@ class LeaveRequestModel {
   final LeaveRequestStatus status;
   final String? adminNote;
   final String? approvedByAdminId;
+  final String? medicalReportUrl;
+  final String? medicalReportFileName;
+  final String? medicalReportContentType;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -33,6 +36,9 @@ class LeaveRequestModel {
     required this.status,
     this.adminNote,
     this.approvedByAdminId,
+    this.medicalReportUrl,
+    this.medicalReportFileName,
+    this.medicalReportContentType,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -52,6 +58,9 @@ class LeaveRequestModel {
       status: _parseStatus(data['status'] as String? ?? 'pending'),
       adminNote: data['adminNote'] as String?,
       approvedByAdminId: data['approvedByAdminId'] as String?,
+      medicalReportUrl: data['medicalReportUrl'] as String?,
+      medicalReportFileName: data['medicalReportFileName'] as String?,
+      medicalReportContentType: data['medicalReportContentType'] as String?,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
@@ -68,6 +77,9 @@ class LeaveRequestModel {
       'status': _statusString(status),
       'adminNote': adminNote,
       'approvedByAdminId': approvedByAdminId,
+      'medicalReportUrl': medicalReportUrl,
+      'medicalReportFileName': medicalReportFileName,
+      'medicalReportContentType': medicalReportContentType,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
@@ -137,5 +149,6 @@ class LeaveRequestModel {
   bool get exceedsEmergencyLimit =>
       type == LeaveType.emergency &&
       durationDays > emergencyLeaveMaxDays;
-}
 
+  bool get hasMedicalReport => medicalReportUrl?.isNotEmpty == true;
+}

@@ -10,6 +10,7 @@ import '../../../auth/application/auth_providers.dart';
 import '../../../leaves/application/leaves_providers.dart';
 import '../../../leaves/data/models/leave_request_model.dart';
 import '../../../leaves/presentation/widgets/leave_request_form_sheet.dart';
+import '../../../candidates/presentation/widgets/candidate_cv_file_viewer.dart';
 import '../admin_shell_scaffold.dart';
 
 class AdminLeavesScreen extends ConsumerWidget {
@@ -178,6 +179,25 @@ class _AdminLeaveCard extends ConsumerWidget {
             ),
             const SizedBox(height: 10),
             Text(request.reason, style: context.textTheme.bodyMedium),
+            if (request.medicalReportUrl?.isNotEmpty == true) ...[
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: () => _openMedicalReport(context, request),
+                icon: const Icon(Icons.description_outlined),
+                label: Text(
+                  request.medicalReportFileName ?? l10n.medicalReport,
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton.icon(
+                onPressed: () => _showEditSheet(context, ref, request),
+                icon: const Icon(Icons.edit_outlined),
+                label: Text(l10n.edit),
+              ),
+            ),
             if (isPending) ...[
               const SizedBox(height: 12),
               const Divider(height: 1),
@@ -216,6 +236,52 @@ class _AdminLeaveCard extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _openMedicalReport(BuildContext context, LeaveRequestModel request) {
+    final contentType = request.medicalReportContentType ?? '';
+    final url = request.medicalReportUrl ?? '';
+    final isPdf = contentType == 'application/pdf' ||
+        url.toLowerCase().contains('.pdf');
+    showCandidateCvFileViewer(
+      context,
+      imageUrl: !isPdf && url.isNotEmpty ? url : null,
+      pdfUrl: isPdf ? url : null,
+    );
+  }
+
+  Future<void> _showEditSheet(
+    BuildContext context,
+    WidgetRef ref,
+    LeaveRequestModel request,
+  ) async {
+    try {
+      final employees = await ref.read(employeesProvider.future);
+      final adminUser = ref.read(currentUserProvider);
+      if (!context.mounted) return;
+
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (_) => LeaveRequestFormSheet(
+          title: context.l10n.editLeaveRequest,
+          submitLabel: context.l10n.save,
+          employeeOptions: employees,
+          requireEmployeeSelection: true,
+          initialRequest: request,
+          allowStatusEditing: true,
+          adminId: adminUser?.uid,
+        ),
+      );
+    } catch (e) {
+      if (context.mounted) {
+        context.showSnackBar('${context.l10n.error}: $e', isError: true);
+      }
+    }
   }
 
   Future<void> _handleAction(

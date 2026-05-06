@@ -468,7 +468,6 @@ class _CompensationSheetState extends ConsumerState<_CompensationSheet> {
   final _notesController = TextEditingController();
   UserModel? _selectedEmployee;
   bool _isCommissionEligible = false;
-  CommissionRuleType _ruleType = CommissionRuleType.none;
 
   @override
   void initState() {
@@ -479,7 +478,6 @@ class _CompensationSheetState extends ConsumerState<_CompensationSheet> {
       _ruleValueController.text = profile.commissionRuleValue.toStringAsFixed(0);
       _notesController.text = profile.notes ?? '';
       _isCommissionEligible = profile.isCommissionEligible;
-      _ruleType = profile.commissionRuleType;
     }
   }
 
@@ -502,8 +500,12 @@ class _CompensationSheetState extends ConsumerState<_CompensationSheet> {
             position: _selectedEmployee!.position,
             basicSalary: double.tryParse(_basicController.text) ?? 0,
             isCommissionEligible: _isCommissionEligible,
-            commissionRuleType: _ruleType,
-            commissionRuleValue: double.tryParse(_ruleValueController.text) ?? 0,
+            commissionRuleType: _isCommissionEligible
+                ? CommissionRuleType.fixed
+                : CommissionRuleType.none,
+            commissionRuleValue: _isCommissionEligible
+                ? double.tryParse(_ruleValueController.text) ?? 0
+                : 0,
             notes: _notesController.text.trim(),
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
@@ -587,30 +589,13 @@ class _CompensationSheetState extends ConsumerState<_CompensationSheet> {
                     setState(() => _isCommissionEligible = value),
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<CommissionRuleType>(
-                value: _ruleType,
-                items: CommissionRuleType.values
-                    .map(
-                      (type) => DropdownMenuItem(
-                        value: type,
-                        child: Text(_commissionRuleLabel(l10n, type)),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) =>
-                    setState(() => _ruleType = value ?? CommissionRuleType.none),
-                decoration: InputDecoration(
-                  labelText: l10n.commissionDetails,
-                  prefixIcon: const Icon(Icons.tune_outlined),
-                ),
-              ),
-              const SizedBox(height: 12),
               TextFormField(
                 controller: _ruleValueController,
                 decoration: InputDecoration(
                   labelText: l10n.commissionAmount,
-                  prefixIcon: const Icon(Icons.percent_rounded),
+                  prefixIcon: const Icon(Icons.star_border_rounded),
                 ),
+                enabled: _isCommissionEligible,
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 12),
@@ -634,16 +619,6 @@ class _CompensationSheetState extends ConsumerState<_CompensationSheet> {
     );
   }
 
-  String _commissionRuleLabel(dynamic l10n, CommissionRuleType type) {
-    switch (type) {
-      case CommissionRuleType.fixed:
-        return l10n.commissionRuleFixed;
-      case CommissionRuleType.percentage:
-        return l10n.commissionRulePercentage;
-      case CommissionRuleType.none:
-        return l10n.commissionRuleNone;
-    }
-  }
 }
 
 class _CommissionSheet extends ConsumerStatefulWidget {

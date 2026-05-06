@@ -1,6 +1,9 @@
 import 'user_role.dart';
 
 class AppUser {
+  static const String weeklyRestDaysModeCompany = 'company';
+  static const String weeklyRestDaysModeCustom = 'custom';
+
   final String uid;
   final String fullName;
   final String email;
@@ -13,6 +16,8 @@ class AppUser {
   final String? department;
   final String? position;
   final DateTime? hireDate;
+  final String weeklyRestDaysMode;
+  final List<int> customWeeklyRestDays;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -29,9 +34,38 @@ class AppUser {
     this.department,
     this.position,
     this.hireDate,
+    this.weeklyRestDaysMode = weeklyRestDaysModeCompany,
+    this.customWeeklyRestDays = const [],
     required this.createdAt,
     required this.updatedAt,
   });
+
+  bool get usesCustomWeeklyRestDays =>
+      weeklyRestDaysMode == weeklyRestDaysModeCustom;
+
+  List<int> effectiveWeeklyRestDays(List<int> companyWeeklyRestDays) {
+    final customDays = sanitizeWeeklyRestDays(customWeeklyRestDays);
+    if (usesCustomWeeklyRestDays && customDays.isNotEmpty) {
+      return customDays;
+    }
+    return sanitizeWeeklyRestDays(companyWeeklyRestDays);
+  }
+
+  static String normalizeWeeklyRestDaysMode(String? mode) {
+    return mode == weeklyRestDaysModeCustom
+        ? weeklyRestDaysModeCustom
+        : weeklyRestDaysModeCompany;
+  }
+
+  static List<int> sanitizeWeeklyRestDays(Iterable<int> days) {
+    final sanitized = days
+        .where((day) => day >= DateTime.monday && day <= DateTime.sunday)
+        .toSet()
+        .toList()
+      ..sort();
+    if (sanitized.length >= 7) return const [];
+    return List.unmodifiable(sanitized);
+  }
 
   AppUser copyWith({
     String? uid,
@@ -46,6 +80,8 @@ class AppUser {
     String? department,
     String? position,
     DateTime? hireDate,
+    String? weeklyRestDaysMode,
+    List<int>? customWeeklyRestDays,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -62,6 +98,8 @@ class AppUser {
       department: department ?? this.department,
       position: position ?? this.position,
       hireDate: hireDate ?? this.hireDate,
+      weeklyRestDaysMode: weeklyRestDaysMode ?? this.weeklyRestDaysMode,
+      customWeeklyRestDays: customWeeklyRestDays ?? this.customWeeklyRestDays,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -75,5 +113,6 @@ class AppUser {
   int get hashCode => uid.hashCode;
 
   @override
-  String toString() => 'AppUser(uid: $uid, name: $fullName, role: ${role.value})';
+  String toString() =>
+      'AppUser(uid: $uid, name: $fullName, role: ${role.value})';
 }

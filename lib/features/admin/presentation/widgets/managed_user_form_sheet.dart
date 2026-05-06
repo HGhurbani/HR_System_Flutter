@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../admin/application/admin_user_management_providers.dart';
 import '../../../auth/data/models/user_model.dart';
+import '../../../auth/domain/entities/app_user.dart';
 import '../../../auth/domain/entities/user_role.dart';
 
 class ManagedUserFormData {
@@ -14,6 +15,8 @@ class ManagedUserFormData {
   final String department;
   final String employeeCode;
   final DateTime? hireDate;
+  final String weeklyRestDaysMode;
+  final List<int> customWeeklyRestDays;
   final bool isActive;
 
   const ManagedUserFormData({
@@ -24,8 +27,25 @@ class ManagedUserFormData {
     required this.department,
     required this.employeeCode,
     required this.hireDate,
+    this.weeklyRestDaysMode = AppUser.weeklyRestDaysModeCompany,
+    this.customWeeklyRestDays = const [],
     required this.isActive,
   });
+
+  factory ManagedUserFormData.fromUser(UserModel user) {
+    return ManagedUserFormData(
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone ?? '',
+      position: user.position ?? '',
+      department: user.department ?? '',
+      employeeCode: user.employeeCode ?? '',
+      hireDate: user.hireDate,
+      weeklyRestDaysMode: user.weeklyRestDaysMode,
+      customWeeklyRestDays: user.customWeeklyRestDays,
+      isActive: user.isActive,
+    );
+  }
 
   UserModel toUserModel(UserRole role, String uid) {
     final now = DateTime.now();
@@ -39,6 +59,8 @@ class ManagedUserFormData {
       department: department.isEmpty ? null : department,
       position: position.isEmpty ? null : position,
       hireDate: hireDate,
+      weeklyRestDaysMode: weeklyRestDaysMode,
+      customWeeklyRestDays: customWeeklyRestDays,
       isActive: isActive,
       createdAt: now,
       updatedAt: now,
@@ -49,6 +71,7 @@ class ManagedUserFormData {
 class ManagedUserFormSheet extends ConsumerStatefulWidget {
   final UserRole role;
   final ManagedUserFormData? initialData;
+  final UserModel? editingUser;
   final String? title;
   final Future<void> Function(
     UserModel createdUser,
@@ -60,6 +83,7 @@ class ManagedUserFormSheet extends ConsumerStatefulWidget {
     super.key,
     required this.role,
     this.initialData,
+    this.editingUser,
     this.title,
     this.onCreated,
   });
@@ -80,20 +104,32 @@ class _ManagedUserFormSheetState extends ConsumerState<ManagedUserFormSheet> {
   bool _isActive = true;
   bool _isSubmitting = false;
   DateTime? _hireDate;
+  String _weeklyRestDaysMode = AppUser.weeklyRestDaysModeCompany;
+  Set<int> _customWeeklyRestDays = {DateTime.friday};
+  bool get _isEditing => widget.editingUser != null;
+  bool get _isEmployee => widget.role == UserRole.employee;
 
   @override
   void initState() {
     super.initState();
-    final data = widget.initialData;
+    final data = widget.initialData ??
+        (widget.editingUser != null
+            ? ManagedUserFormData.fromUser(widget.editingUser!)
+            : null);
     _nameController = TextEditingController(text: data?.fullName ?? '');
     _emailController = TextEditingController(text: data?.email ?? '');
     _phoneController = TextEditingController(text: data?.phone ?? '');
     _positionController = TextEditingController(text: data?.position ?? '');
-    _departmentController =
-        TextEditingController(text: data?.department ?? '');
+    _departmentController = TextEditingController(text: data?.department ?? '');
     _employeeCodeController =
         TextEditingController(text: data?.employeeCode ?? '');
     _hireDate = data?.hireDate;
+    _weeklyRestDaysMode =
+        AppUser.normalizeWeeklyRestDaysMode(data?.weeklyRestDaysMode);
+    _customWeeklyRestDays = (data?.customWeeklyRestDays.isNotEmpty == true
+            ? data!.customWeeklyRestDays
+            : const [DateTime.friday])
+        .toSet();
     _isActive = data?.isActive ?? true;
   }
 
@@ -122,6 +158,28 @@ class _ManagedUserFormSheetState extends ConsumerState<ManagedUserFormSheet> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_isEmployee &&
+        _weeklyRestDaysMode == AppUser.weeklyRestDaysModeCustom &&
+        _customWeeklyRestDays.isEmpty) {
+      context.showSnackBar(
+        context.isArabic
+            ? 'اختر يوم راحة واحد على الأقل أو استخدم إعدادات الشركة'
+            : 'Select at least one rest day or use company settings',
+        isError: true,
+      );
+      return;
+    }
+    if (_isEmployee &&
+        _weeklyRestDaysMode == AppUser.weeklyRestDaysModeCustom &&
+        _customWeeklyRestDays.length >= 7) {
+      context.showSnackBar(
+        context.isArabic
+            ? 'يجب أن يبقى يوم عمل واحد على الأقل'
+            : 'At least one working day must remain',
+        isError: true,
+      );
+      return;
+    }
     setState(() => _isSubmitting = true);
 
     final formData = ManagedUserFormData(
@@ -132,10 +190,35 @@ class _ManagedUserFormSheetState extends ConsumerState<ManagedUserFormSheet> {
       department: _departmentController.text.trim(),
       employeeCode: _employeeCodeController.text.trim(),
       hireDate: _hireDate,
+      weeklyRestDaysMode:
+          _isEmployee ? _weeklyRestDaysMode : AppUser.weeklyRestDaysModeCompany,
+      customWeeklyRestDays: _isEmployee
+          ? (AppUser.sanitizeWeeklyRestDays(_customWeeklyRestDays))
+          : const [],
       isActive: _isActive,
     );
 
     try {
+      if (_isEditing) {
+        await ref.read(managedUserServiceProvider).updateManagedUser(
+              userId: widget.editingUser!.uid,
+              fullName: formData.fullName,
+              phone: formData.phone,
+              position: formData.position,
+              department: formData.department,
+              employeeCode: formData.employeeCode,
+              hireDate: formData.hireDate,
+              weeklyRestDaysMode: formData.weeklyRestDaysMode,
+              customWeeklyRestDays: formData.customWeeklyRestDays,
+              isActive: formData.isActive,
+            );
+
+        if (!mounted) return;
+        Navigator.of(context).pop(true);
+        context.showSnackBar(context.l10n.saveSuccess);
+        return;
+      }
+
       final result =
           await ref.read(managedUserServiceProvider).createManagedUser(
                 role: widget.role,
@@ -146,6 +229,8 @@ class _ManagedUserFormSheetState extends ConsumerState<ManagedUserFormSheet> {
                 department: formData.department,
                 employeeCode: formData.employeeCode,
                 hireDate: formData.hireDate,
+                weeklyRestDaysMode: formData.weeklyRestDaysMode,
+                customWeeklyRestDays: formData.customWeeklyRestDays,
                 isActive: formData.isActive,
               );
 
@@ -190,12 +275,17 @@ class _ManagedUserFormSheetState extends ConsumerState<ManagedUserFormSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final title = widget.title ??
-        (widget.role == UserRole.supervisor
-            ? l10n.addSupervisor
-            : l10n.addEmployee);
+        (_isEditing
+            ? (widget.role == UserRole.supervisor
+                ? l10n.editSupervisor
+                : l10n.editEmployee)
+            : widget.role == UserRole.supervisor
+                ? l10n.addSupervisor
+                : l10n.addEmployee);
 
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -218,6 +308,7 @@ class _ManagedUserFormSheetState extends ConsumerState<ManagedUserFormSheet> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _emailController,
+                readOnly: _isEditing,
                 decoration: InputDecoration(
                   labelText: l10n.email,
                   prefixIcon: const Icon(Icons.email_outlined),
@@ -283,6 +374,27 @@ class _ManagedUserFormSheetState extends ConsumerState<ManagedUserFormSheet> {
                 value: _isActive,
                 onChanged: (value) => setState(() => _isActive = value),
               ),
+              if (_isEmployee) ...[
+                const SizedBox(height: 12),
+                _WeeklyRestDaysSection(
+                  mode: _weeklyRestDaysMode,
+                  customRestDays: _customWeeklyRestDays,
+                  onModeChanged: (mode) {
+                    setState(() => _weeklyRestDaysMode = mode);
+                  },
+                  onDayChanged: (day, selected) {
+                    setState(() {
+                      final next = Set<int>.from(_customWeeklyRestDays);
+                      if (selected) {
+                        next.add(day);
+                      } else {
+                        next.remove(day);
+                      }
+                      _customWeeklyRestDays = next;
+                    });
+                  },
+                ),
+              ],
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submit,
@@ -302,5 +414,104 @@ class _ManagedUserFormSheetState extends ConsumerState<ManagedUserFormSheet> {
         ),
       ),
     );
+  }
+}
+
+class _WeeklyRestDaysSection extends StatelessWidget {
+  final String mode;
+  final Set<int> customRestDays;
+  final ValueChanged<String> onModeChanged;
+  final void Function(int day, bool selected) onDayChanged;
+
+  const _WeeklyRestDaysSection({
+    required this.mode,
+    required this.customRestDays,
+    required this.onModeChanged,
+    required this.onDayChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isCustom = mode == AppUser.weeklyRestDaysModeCustom;
+
+    return InputDecorator(
+      decoration: InputDecoration(
+        labelText:
+            context.isArabic ? 'أيام الراحة الأسبوعية' : 'Weekly rest days',
+        prefixIcon: const Icon(Icons.event_busy_outlined),
+        border: const OutlineInputBorder(),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SegmentedButton<String>(
+            segments: [
+              ButtonSegment<String>(
+                value: AppUser.weeklyRestDaysModeCompany,
+                icon: const Icon(Icons.business_outlined),
+                label: Text(
+                  context.isArabic ? 'حسب إعدادات الشركة' : 'Company settings',
+                ),
+              ),
+              ButtonSegment<String>(
+                value: AppUser.weeklyRestDaysModeCustom,
+                icon: const Icon(Icons.tune_outlined),
+                label: Text(context.isArabic ? 'مخصص' : 'Custom'),
+              ),
+            ],
+            selected: {mode},
+            showSelectedIcon: false,
+            onSelectionChanged: (selected) {
+              onModeChanged(selected.first);
+            },
+            style: const ButtonStyle(
+              visualDensity: VisualDensity.compact,
+            ),
+          ),
+          if (isCustom) ...[
+            const Divider(height: 12),
+            for (final day in const [
+              DateTime.monday,
+              DateTime.tuesday,
+              DateTime.wednesday,
+              DateTime.thursday,
+              DateTime.friday,
+              DateTime.saturday,
+              DateTime.sunday,
+            ])
+              CheckboxListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: Text(_dayLabel(context, day)),
+                value: customRestDays.contains(day),
+                controlAffinity: ListTileControlAffinity.leading,
+                onChanged: (selected) => onDayChanged(day, selected == true),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  String _dayLabel(BuildContext context, int day) {
+    const ar = {
+      DateTime.monday: 'الاثنين',
+      DateTime.tuesday: 'الثلاثاء',
+      DateTime.wednesday: 'الأربعاء',
+      DateTime.thursday: 'الخميس',
+      DateTime.friday: 'الجمعة',
+      DateTime.saturday: 'السبت',
+      DateTime.sunday: 'الأحد',
+    };
+    const en = {
+      DateTime.monday: 'Monday',
+      DateTime.tuesday: 'Tuesday',
+      DateTime.wednesday: 'Wednesday',
+      DateTime.thursday: 'Thursday',
+      DateTime.friday: 'Friday',
+      DateTime.saturday: 'Saturday',
+      DateTime.sunday: 'Sunday',
+    };
+    return context.isArabic ? ar[day]! : en[day]!;
   }
 }

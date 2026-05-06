@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../auth/application/auth_providers.dart';
@@ -206,9 +207,15 @@ class CandidatesNotifier extends StateNotifier<AsyncValue<void>> {
     return success;
   }
 
-  Future<bool> deleteCandidate(String id) async {
+  Future<bool> deleteCandidate(
+    String id, {
+    String? imageUrl,
+    String? cvFileUrl,
+  }) async {
     state = const AsyncValue.loading();
     try {
+      await _deleteStorageFile(imageUrl);
+      await _deleteStorageFile(cvFileUrl);
       await _firestore
           .collection(AppConstants.candidateProfilesCollection)
           .doc(id)
@@ -224,6 +231,15 @@ class CandidatesNotifier extends StateNotifier<AsyncValue<void>> {
     } catch (e, st) {
       state = AsyncValue.error(e, st);
       return false;
+    }
+  }
+
+  Future<void> _deleteStorageFile(String? url) async {
+    if (url?.isNotEmpty != true) return;
+    try {
+      await FirebaseStorage.instance.refFromURL(url!).delete();
+    } on FirebaseException catch (e) {
+      if (e.code != 'object-not-found') rethrow;
     }
   }
 

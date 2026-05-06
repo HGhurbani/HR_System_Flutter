@@ -131,6 +131,8 @@
   "supervisors": "Supervisors",
   "supervisorManagement": "Supervisor Management",
   "addSupervisor": "Add Supervisor",
+  "editSupervisor": "Edit Supervisor",
+  "supervisorDetails": "Supervisor Details",
   "noSupervisors": "No supervisors found",
 
   "candidates": "CVs",
@@ -231,6 +233,9 @@
   "reason": "Reason",
   "leaveStatus": "Request Status",
   "adminNote": "Admin Note",
+  "medicalReport": "Medical excuse report",
+  "medicalReportRequired": "Medical excuse report is required for sick leave",
+  "medicalReportRequiredHint": "Add the medical excuse report",
   "approve": "Approve",
   "reject": "Reject",
   "pendingStatus": "Pending",
@@ -240,6 +245,7 @@
   "leaveSubmitted": "Request submitted successfully",
   "leaveApproved": "Leave request approved",
   "leaveRejected": "Leave request rejected",
+  "editLeaveRequest": "Edit Leave Request",
 
   "leaveTypeAnnual": "Official leave",
   "leaveTypeSick": "Sick leave",
@@ -325,6 +331,10 @@
   "deleteSuccess": "Deleted successfully",
   "saveSuccess": "Saved successfully",
   "updateSuccess": "Updated successfully",
+  "disableAccount": "Disable Account",
+  "disableAccountMessage": "The user and historical records stay saved, but the user cannot sign in.",
+  "createdAt": "Created At",
+  "updatedAt": "Updated At",
 
   "single": "Single",
   "married": "Married",

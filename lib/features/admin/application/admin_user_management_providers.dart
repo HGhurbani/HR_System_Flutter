@@ -8,6 +8,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../auth/data/models/user_model.dart';
+import '../../auth/domain/entities/app_user.dart';
 import '../../auth/domain/entities/user_role.dart';
 import '../../notifications/application/notifications_providers.dart';
 
@@ -29,6 +30,16 @@ final supervisorsProvider = StreamProvider<List<UserModel>>((ref) {
       .orderBy('fullName')
       .snapshots()
       .map((snap) => snap.docs.map(UserModel.fromFirestore).toList());
+});
+
+final managedUserProvider =
+    StreamProvider.family<UserModel?, String>((ref, userId) {
+  final firestore = ref.watch(firestoreProvider);
+  return firestore
+      .collection(AppConstants.usersCollection)
+      .doc(userId)
+      .snapshots()
+      .map((doc) => doc.exists ? UserModel.fromFirestore(doc) : null);
 });
 
 class ManagedUserCreationResult {
@@ -68,6 +79,8 @@ class ManagedUserService {
     String? department,
     String? employeeCode,
     DateTime? hireDate,
+    String weeklyRestDaysMode = AppUser.weeklyRestDaysModeCompany,
+    List<int> customWeeklyRestDays = const [],
     bool isActive = true,
     bool mustChangePassword = true,
     Duration timeout = const Duration(seconds: 90),
@@ -93,6 +106,10 @@ class ManagedUserService {
       'department': department?.trim(),
       'employeeCode': employeeCode?.trim(),
       'hireDate': hireDate != null ? Timestamp.fromDate(hireDate) : null,
+      'weeklyRestDaysMode':
+          AppUser.normalizeWeeklyRestDaysMode(weeklyRestDaysMode),
+      'customWeeklyRestDays':
+          AppUser.sanitizeWeeklyRestDays(customWeeklyRestDays),
       'temporaryPassword': temporaryPassword,
       'mustChangePassword': mustChangePassword,
       'isActive': isActive,
@@ -126,8 +143,8 @@ class ManagedUserService {
       if (status == 'failed' && !completer.isCompleted) {
         completer.completeError(
           AppException(
-            message:
-                data['errorMessage'] as String? ?? 'Managed user creation failed',
+            message: data['errorMessage'] as String? ??
+                'Managed user creation failed',
             code: 'managed-user-create-failed',
           ),
         );
@@ -157,6 +174,63 @@ class ManagedUserService {
     } finally {
       await subscription.cancel();
     }
+  }
+
+  Future<void> updateManagedUser({
+    required String userId,
+    required String fullName,
+    String? phone,
+    String? position,
+    String? department,
+    String? employeeCode,
+    DateTime? hireDate,
+    String weeklyRestDaysMode = AppUser.weeklyRestDaysModeCompany,
+    List<int> customWeeklyRestDays = const [],
+    required bool isActive,
+  }) async {
+    await _firestore
+        .collection(AppConstants.usersCollection)
+        .doc(userId)
+        .update({
+      'fullName': fullName.trim(),
+      'phone': phone?.trim().isEmpty == true ? null : phone?.trim(),
+      'position': position?.trim().isEmpty == true ? null : position?.trim(),
+      'department':
+          department?.trim().isEmpty == true ? null : department?.trim(),
+      'employeeCode':
+          employeeCode?.trim().isEmpty == true ? null : employeeCode?.trim(),
+      'hireDate': hireDate != null ? Timestamp.fromDate(hireDate) : null,
+      'weeklyRestDaysMode':
+          AppUser.normalizeWeeklyRestDaysMode(weeklyRestDaysMode),
+      'customWeeklyRestDays':
+          AppUser.sanitizeWeeklyRestDays(customWeeklyRestDays),
+      'isActive': isActive,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    try {
+      await _notifications.create(
+        title: 'تم تحديث مستخدم',
+        body: 'تم تحديث بيانات $fullName',
+        type: 'user_updated',
+        targetUserId: adminNotificationTarget,
+      );
+    } catch (_) {}
+  }
+
+  Future<void> disableManagedUser(UserModel user) async {
+    await updateManagedUser(
+      userId: user.uid,
+      fullName: user.fullName,
+      phone: user.phone,
+      position: user.position,
+      department: user.department,
+      employeeCode: user.employeeCode,
+      hireDate: user.hireDate,
+      weeklyRestDaysMode: user.weeklyRestDaysMode,
+      customWeeklyRestDays: user.customWeeklyRestDays,
+      isActive: false,
+    );
   }
 
   String _generateTemporaryPassword() {

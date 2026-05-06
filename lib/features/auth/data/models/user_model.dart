@@ -16,6 +16,8 @@ class UserModel extends AppUser {
     super.department,
     super.position,
     super.hireDate,
+    super.weeklyRestDaysMode,
+    super.customWeeklyRestDays,
     required super.createdAt,
     required super.updatedAt,
   });
@@ -39,6 +41,10 @@ class UserModel extends AppUser {
       hireDate: data['hireDate'] != null
           ? (data['hireDate'] as Timestamp).toDate()
           : null,
+      weeklyRestDaysMode: AppUser.normalizeWeeklyRestDaysMode(
+        data['weeklyRestDaysMode'] as String?,
+      ),
+      customWeeklyRestDays: _parseWeeklyRestDays(data['customWeeklyRestDays']),
       createdAt: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
@@ -64,6 +70,10 @@ class UserModel extends AppUser {
       hireDate: data['hireDate'] != null
           ? (data['hireDate'] as Timestamp).toDate()
           : null,
+      weeklyRestDaysMode: AppUser.normalizeWeeklyRestDaysMode(
+        data['weeklyRestDaysMode'] as String?,
+      ),
+      customWeeklyRestDays: _parseWeeklyRestDays(data['customWeeklyRestDays']),
       createdAt: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
@@ -86,6 +96,8 @@ class UserModel extends AppUser {
       'department': department,
       'position': position,
       'hireDate': hireDate != null ? Timestamp.fromDate(hireDate!) : null,
+      'weeklyRestDaysMode': weeklyRestDaysMode,
+      'customWeeklyRestDays': customWeeklyRestDays,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
@@ -104,7 +116,16 @@ class UserModel extends AppUser {
         department: user.department,
         position: user.position,
         hireDate: user.hireDate,
+        weeklyRestDaysMode: user.weeklyRestDaysMode,
+        customWeeklyRestDays: user.customWeeklyRestDays,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       );
+
+  static List<int> _parseWeeklyRestDays(Object? rawRestDays) {
+    if (rawRestDays is! Iterable) return const [];
+    return AppUser.sanitizeWeeklyRestDays(
+      rawRestDays.whereType<num>().map((day) => day.toInt()),
+    );
+  }
 }

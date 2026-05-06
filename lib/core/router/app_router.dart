@@ -16,6 +16,7 @@ import '../../features/admin/presentation/screens/admin_salary_screen.dart';
 import '../../features/admin/presentation/screens/admin_reports_screen.dart';
 import '../../features/admin/presentation/screens/admin_settings_screen.dart';
 import '../../features/admin/presentation/screens/admin_holidays_screen.dart';
+import '../../features/admin/presentation/screens/managed_user_detail_screen.dart';
 import '../../features/supervisor/presentation/screens/supervisor_shell.dart';
 import '../../features/supervisor/presentation/screens/supervisor_dashboard_screen.dart';
 import '../../features/candidates/presentation/screens/candidates_list_screen.dart';
@@ -149,6 +150,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(
               path: AppRoutes.adminEmployees,
               builder: (context, state) => const EmployeesListScreen(),
+              routes: [
+                GoRoute(
+                  path: ':id',
+                  builder: (context, state) => ManagedUserDetailScreen(
+                    userId: state.pathParameters['id']!,
+                  ),
+                ),
+              ],
             ),
           ]),
           StatefulShellBranch(routes: [

@@ -8,7 +8,6 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../holidays/application/company_holidays_providers.dart';
 import '../../../holidays/data/models/company_holiday_model.dart';
-import '../admin_shell_scaffold.dart';
 
 class AdminHolidaysScreen extends ConsumerWidget {
   const AdminHolidaysScreen({super.key});

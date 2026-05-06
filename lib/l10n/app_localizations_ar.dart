@@ -378,6 +378,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addSupervisor => 'إضافة مشرف';
 
   @override
+  String get editSupervisor => 'تعديل المشرف';
+
+  @override
+  String get supervisorDetails => 'بيانات المشرف';
+
+  @override
   String get noSupervisors => 'لا يوجد مشرفون';
 
   @override
@@ -662,6 +668,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminNote => 'ملاحظة المدير';
 
   @override
+  String get medicalReport => 'تقرير العذر الطبي';
+
+  @override
+  String get medicalReportRequired =>
+      'يجب إضافة تقرير العذر الطبي للإجازة المرضية';
+
+  @override
+  String get medicalReportRequiredHint => 'أضف تقرير العذر الطبي';
+
+  @override
   String get approve => 'قبول';
 
   @override
@@ -687,6 +703,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get leaveRejected => 'تم رفض طلب الإجازة';
+
+  @override
+  String get editLeaveRequest => 'تعديل طلب الإجازة';
 
   @override
   String get leaveTypeAnnual => 'إجازة رسمية';
@@ -917,6 +936,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get updateSuccess => 'تم التحديث بنجاح';
+
+  @override
+  String get disableAccount => 'تعطيل الحساب';
+
+  @override
+  String get disableAccountMessage =>
+      'سيبقى المستخدم وسجلاته محفوظة، لكنه لن يستطيع تسجيل الدخول.';
+
+  @override
+  String get createdAt => 'تاريخ الإنشاء';
+
+  @override
+  String get updatedAt => 'آخر تحديث';
 
   @override
   String get single => 'أعزب';
