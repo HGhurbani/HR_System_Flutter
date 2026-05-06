@@ -450,7 +450,7 @@ class _WeeklyRestDaysSection extends StatelessWidget {
                 value: AppUser.weeklyRestDaysModeCompany,
                 icon: const Icon(Icons.business_outlined),
                 label: Text(
-                  context.isArabic ? 'حسب إعدادات الشركة' : 'Company settings',
+                  context.isArabic ? 'افتراضي' : 'Default',
                 ),
               ),
               ButtonSegment<String>(
