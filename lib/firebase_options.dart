@@ -36,7 +36,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCjtlFVwOP1gEfrHUqn7JJhucOtuSpulBQ',
-    appId: '1:737044049717:ios:a2b248b1629990b3b2667c',
+    appId: '1:737044049717:ios:9aacde32b0f7f487b2667c',
     messagingSenderId: '737044049717',
     projectId: 'hr-sys-fa9d3',
     storageBucket: 'hr-sys-fa9d3.firebasestorage.app',
