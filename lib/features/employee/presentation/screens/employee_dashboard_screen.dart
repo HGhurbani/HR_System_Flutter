@@ -5,8 +5,12 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../auth/application/auth_providers.dart';
+import '../../../attendance/application/lateness_utils.dart';
 import '../../../attendance/application/attendance_providers.dart';
+import '../../../attendance/data/models/company_work_schedule.dart';
 import '../../../attendance/data/models/attendance_model.dart';
+import '../../../permissions/application/permissions_providers.dart';
+import '../../../permissions/data/models/permission_request_model.dart';
 import '../../../notifications/presentation/widgets/notifications_icon_button.dart';
 import '../employee_shell_scaffold.dart';
 
@@ -16,9 +20,16 @@ class EmployeeDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
-    final todayAttAsync = ref.watch(todayAttendanceProvider);
-    final l10n = context.l10n;
     final now = DateTime.now();
+    final todayAttAsync = ref.watch(todayAttendanceProvider);
+    final approvedPermissionsAsync = ref.watch(
+      approvedPermissionRequestsForDayProvider((
+        employeeId: user?.uid ?? '',
+        day: now,
+      )),
+    );
+    final workScheduleAsync = ref.watch(workScheduleProvider);
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
@@ -101,6 +112,10 @@ class EmployeeDashboardScreen extends ConsumerWidget {
               error: (e, _) => Text('${l10n.error}: $e'),
               data: (attendance) => _AttendanceCard(
                 attendance: attendance,
+                approvedPermissions:
+                    approvedPermissionsAsync.valueOrNull ?? const [],
+                workSchedule: workScheduleAsync.valueOrNull ??
+                    const CompanyWorkSchedule(),
                 l10n: l10n,
               ),
             ),
@@ -189,9 +204,16 @@ class EmployeeDashboardScreen extends ConsumerWidget {
 
 class _AttendanceCard extends StatelessWidget {
   final AttendanceModel? attendance;
+  final List<PermissionRequestModel> approvedPermissions;
+  final CompanyWorkSchedule workSchedule;
   final dynamic l10n;
 
-  const _AttendanceCard({required this.attendance, required this.l10n});
+  const _AttendanceCard({
+    required this.attendance,
+    required this.approvedPermissions,
+    required this.workSchedule,
+    required this.l10n,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -240,6 +262,11 @@ class _AttendanceCard extends StatelessWidget {
     final statusLabel = attendance!.status == AttendanceStatus.late
         ? l10n.attendanceLate
         : l10n.attendancePresent;
+    final effectiveLateMinutes = effectiveLatenessMinutes(
+      attendance: attendance!,
+      workSchedule: workSchedule,
+      approvedPermissions: approvedPermissions,
+    );
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -265,9 +292,11 @@ class _AttendanceCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           fontSize: 16),
                     ),
-                    if (attendance!.latenessMinutes > 0)
+                    if (effectiveLateMinutes > 0)
                       Text(
-                        '${l10n.latenessMinutes}: ${attendance!.latenessMinutes}',
+                        '${l10n.latenessMinutes}: '
+                        '${formatLatenessDuration(effectiveLateMinutes)} '
+                        '${l10n.hours}',
                         style: TextStyle(
                             color: statusColor.withOpacity(0.7), fontSize: 13),
                       ),

@@ -10,6 +10,8 @@ import '../../../auth/application/auth_providers.dart';
 import '../../../leaves/application/leaves_providers.dart';
 import '../../../leaves/data/models/leave_request_model.dart';
 import '../../../leaves/presentation/widgets/leave_request_form_sheet.dart';
+import '../../../permissions/application/permissions_providers.dart';
+import '../../../permissions/data/models/permission_request_model.dart';
 import '../../../candidates/presentation/widgets/candidate_cv_file_viewer.dart';
 import '../admin_shell_scaffold.dart';
 
@@ -20,6 +22,7 @@ class AdminLeavesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final leavesAsync = ref.watch(allLeaveRequestsProvider);
+    final permissionsAsync = ref.watch(allPermissionRequestsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -35,29 +38,54 @@ class AdminLeavesScreen extends ConsumerWidget {
         label: Text(l10n.addLeaveRequest),
       ),
       body: DefaultTabController(
-        length: 2,
+        length: 4,
         child: Column(
           children: [
-            TabBar(tabs: [
-              Tab(text: l10n.pendingStatus),
-              Tab(text: l10n.all),
-            ]),
+            TabBar(
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              tabs: [
+                Tab(text: '${l10n.leaves} - ${l10n.pendingStatus}'),
+                Tab(text: '${l10n.leaves} - ${l10n.all}'),
+                Tab(text: '${l10n.permissionRequest} - ${l10n.pendingStatus}'),
+                Tab(text: '${l10n.permissionRequest} - ${l10n.all}'),
+              ],
+            ),
             Expanded(
-              child: leavesAsync.when(
-                loading: () => const ShimmerList(count: 5, itemHeight: 100),
-                error: (e, _) => Center(child: Text('${l10n.error}: $e')),
-                data: (leaves) {
-                  final pending = leaves
-                      .where((l) => l.status == LeaveRequestStatus.pending)
-                      .toList();
-
-                  return TabBarView(
-                    children: [
-                      _LeaveList(leaves: pending, isAdmin: true),
-                      _LeaveList(leaves: leaves, isAdmin: true),
-                    ],
-                  );
-                },
+              child: TabBarView(
+                children: [
+                  leavesAsync.when(
+                    loading: () => const ShimmerList(count: 5, itemHeight: 100),
+                    error: (e, _) => Center(child: Text('${l10n.error}: $e')),
+                    data: (leaves) => _LeaveList(
+                      leaves: leaves
+                          .where((l) => l.status == LeaveRequestStatus.pending)
+                          .toList(),
+                      isAdmin: true,
+                    ),
+                  ),
+                  leavesAsync.when(
+                    loading: () => const ShimmerList(count: 5, itemHeight: 100),
+                    error: (e, _) => Center(child: Text('${l10n.error}: $e')),
+                    data: (leaves) => _LeaveList(leaves: leaves, isAdmin: true),
+                  ),
+                  permissionsAsync.when(
+                    loading: () => const ShimmerList(count: 5, itemHeight: 100),
+                    error: (e, _) => Center(child: Text('${l10n.error}: $e')),
+                    data: (permissions) => _PermissionList(
+                      permissions: permissions
+                          .where((p) =>
+                              p.status == PermissionRequestStatus.pending)
+                          .toList(),
+                    ),
+                  ),
+                  permissionsAsync.when(
+                    loading: () => const ShimmerList(count: 5, itemHeight: 100),
+                    error: (e, _) => Center(child: Text('${l10n.error}: $e')),
+                    data: (permissions) =>
+                        _PermissionList(permissions: permissions),
+                  ),
+                ],
               ),
             ),
           ],
@@ -96,6 +124,198 @@ class AdminLeavesScreen extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         context.showSnackBar('${context.l10n.error}: $e', isError: true);
+      }
+    }
+  }
+}
+
+class _PermissionList extends StatelessWidget {
+  final List<PermissionRequestModel> permissions;
+
+  const _PermissionList({required this.permissions});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    if (permissions.isEmpty) {
+      return EmptyState(
+        message: l10n.noPermissions,
+        icon: Icons.schedule_outlined,
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: permissions.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (_, i) => _AdminPermissionCard(request: permissions[i]),
+    );
+  }
+}
+
+class _AdminPermissionCard extends ConsumerWidget {
+  final PermissionRequestModel request;
+
+  const _AdminPermissionCard({required this.request});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final dateFormat = DateFormat('d MMM yyyy');
+    final timeFormat = DateFormat('hh:mm a');
+    final isPending = request.status == PermissionRequestStatus.pending;
+    final brandColor =
+        AppColors.adaptiveForegroundColor(context, AppColors.primary);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: brandColor.withOpacity(0.1),
+                  child: Text(
+                    request.employeeName?.isNotEmpty == true
+                        ? request.employeeName![0].toUpperCase()
+                        : '?',
+                    style: TextStyle(
+                      color: brandColor,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(request.employeeName ?? '-',
+                          style: context.textTheme.titleMedium),
+                      Text(
+                        '${dateFormat.format(request.date)} - '
+                        '${timeFormat.format(request.startTime)} - '
+                        '${timeFormat.format(request.endTime)}',
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _PermissionStatusBadge(status: request.status),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              '${l10n.permissionHours}: '
+              '${(request.durationMinutes / 60).toStringAsFixed(1)}',
+              style: context.textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(request.reason, style: context.textTheme.bodyMedium),
+            if (request.adminNote?.isNotEmpty == true) ...[
+              const SizedBox(height: 8),
+              Text(
+                '${l10n.adminNote}: ${request.adminNote}',
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+            if (isPending) ...[
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () =>
+                          _handleAction(context, ref, request, approve: false),
+                      icon: const Icon(Icons.close_rounded,
+                          color: AppColors.error),
+                      label: Text(l10n.reject,
+                          style: const TextStyle(color: AppColors.error)),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.error),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () =>
+                          _handleAction(context, ref, request, approve: true),
+                      icon: const Icon(Icons.check_rounded),
+                      label: Text(l10n.approve),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.success,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleAction(
+    BuildContext context,
+    WidgetRef ref,
+    PermissionRequestModel request, {
+    required bool approve,
+  }) async {
+    final l10n = context.l10n;
+    final noteController = TextEditingController();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(approve ? l10n.approve : l10n.reject),
+        content: TextField(
+          controller: noteController,
+          decoration: InputDecoration(labelText: l10n.adminNote),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: approve ? AppColors.success : AppColors.error,
+            ),
+            child: Text(approve ? l10n.approve : l10n.reject),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final adminUser = ref.read(currentUserProvider);
+      await ref.read(permissionsNotifierProvider.notifier).updateRequestStatus(
+            requestId: request.id,
+            status: approve
+                ? PermissionRequestStatus.approved
+                : PermissionRequestStatus.rejected,
+            adminNote: noteController.text.trim(),
+            adminId: adminUser?.uid,
+          );
+      if (context.mounted) {
+        context.showSnackBar(
+          approve ? l10n.permissionApproved : l10n.permissionRejected,
+        );
       }
     }
   }
@@ -241,8 +461,8 @@ class _AdminLeaveCard extends ConsumerWidget {
   void _openMedicalReport(BuildContext context, LeaveRequestModel request) {
     final contentType = request.medicalReportContentType ?? '';
     final url = request.medicalReportUrl ?? '';
-    final isPdf = contentType == 'application/pdf' ||
-        url.toLowerCase().contains('.pdf');
+    final isPdf =
+        contentType == 'application/pdf' || url.toLowerCase().contains('.pdf');
     showCandidateCvFileViewer(
       context,
       imageUrl: !isPdf && url.isNotEmpty ? url : null,
@@ -356,6 +576,46 @@ class _StatusBadge extends StatelessWidget {
         label = l10n.rejectedStatus;
         break;
       default:
+        color = AppColors.leavePending;
+        label = l10n.pendingStatus;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style:
+            TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color),
+      ),
+    );
+  }
+}
+
+class _PermissionStatusBadge extends StatelessWidget {
+  final PermissionRequestStatus status;
+
+  const _PermissionStatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    Color color;
+    String label;
+
+    switch (status) {
+      case PermissionRequestStatus.approved:
+        color = AppColors.leaveApproved;
+        label = l10n.approvedStatus;
+        break;
+      case PermissionRequestStatus.rejected:
+        color = AppColors.leaveRejected;
+        label = l10n.rejectedStatus;
+        break;
+      case PermissionRequestStatus.pending:
         color = AppColors.leavePending;
         label = l10n.pendingStatus;
     }

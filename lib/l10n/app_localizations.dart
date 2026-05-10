@@ -326,6 +326,18 @@ abstract class AppLocalizations {
   /// **'الوقت'**
   String get time;
 
+  /// No description provided for @startTime.
+  ///
+  /// In ar, this message translates to:
+  /// **'وقت البداية'**
+  String get startTime;
+
+  /// No description provided for @hours.
+  ///
+  /// In ar, this message translates to:
+  /// **'ساعات'**
+  String get hours;
+
   /// No description provided for @month.
   ///
   /// In ar, this message translates to:
@@ -1058,6 +1070,30 @@ abstract class AppLocalizations {
   /// **'إسناد السيفي'**
   String get assignCandidate;
 
+  /// No description provided for @reserveCandidate.
+  ///
+  /// In ar, this message translates to:
+  /// **'حجز السيفي'**
+  String get reserveCandidate;
+
+  /// No description provided for @candidateReserved.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حجز السيفي بنجاح'**
+  String get candidateReserved;
+
+  /// No description provided for @myReservedCandidates.
+  ///
+  /// In ar, this message translates to:
+  /// **'حجوزاتي'**
+  String get myReservedCandidates;
+
+  /// No description provided for @noReservedCandidates.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد سيفيهات محجوزة لك'**
+  String get noReservedCandidates;
+
   /// No description provided for @noCandidates.
   ///
   /// In ar, this message translates to:
@@ -1370,6 +1406,18 @@ abstract class AppLocalizations {
   /// **'تقديم طلب إذن'**
   String get addPermissionRequest;
 
+  /// No description provided for @permissionHours.
+  ///
+  /// In ar, this message translates to:
+  /// **'عدد الساعات'**
+  String get permissionHours;
+
+  /// No description provided for @invalidPermissionHours.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل عدد ساعات صحيح'**
+  String get invalidPermissionHours;
+
   /// No description provided for @leaveType.
   ///
   /// In ar, this message translates to:
@@ -1460,11 +1508,23 @@ abstract class AppLocalizations {
   /// **'لا يوجد طلبات إجازة'**
   String get noLeaves;
 
+  /// No description provided for @noPermissions.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يوجد طلبات إذن'**
+  String get noPermissions;
+
   /// No description provided for @leaveSubmitted.
   ///
   /// In ar, this message translates to:
   /// **'تم تقديم الطلب بنجاح'**
   String get leaveSubmitted;
+
+  /// No description provided for @permissionSubmitted.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تقديم طلب الإذن بنجاح'**
+  String get permissionSubmitted;
 
   /// No description provided for @leaveApproved.
   ///
@@ -1477,6 +1537,18 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تم رفض طلب الإجازة'**
   String get leaveRejected;
+
+  /// No description provided for @permissionApproved.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم قبول طلب الإذن'**
+  String get permissionApproved;
+
+  /// No description provided for @permissionRejected.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم رفض طلب الإذن'**
+  String get permissionRejected;
 
   /// No description provided for @editLeaveRequest.
   ///

@@ -1,23 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/loading_widget.dart';
+import '../../../candidates/presentation/widgets/candidate_cv_file_viewer.dart';
 import '../../../leaves/application/leaves_providers.dart';
 import '../../../leaves/data/models/leave_request_model.dart';
 import '../../../leaves/presentation/widgets/leave_request_form_sheet.dart';
-import '../../../candidates/presentation/widgets/candidate_cv_file_viewer.dart';
+import '../../../permissions/application/permissions_providers.dart';
+import '../../../permissions/data/models/permission_request_model.dart';
+import '../../../permissions/presentation/widgets/permission_request_form_sheet.dart';
 import '../employee_shell_scaffold.dart';
 
-class EmployeeLeavesScreen extends ConsumerWidget {
+class EmployeeLeavesScreen extends ConsumerStatefulWidget {
   const EmployeeLeavesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<EmployeeLeavesScreen> createState() =>
+      _EmployeeLeavesScreenState();
+}
+
+class _EmployeeLeavesScreenState extends ConsumerState<EmployeeLeavesScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final leavesAsync = ref.watch(myLeaveRequestsProvider);
+    final permissionsAsync = ref.watch(myPermissionRequestsProvider);
+    final showingPermissions = _tabController.index == 1;
 
     return Scaffold(
       appBar: AppBar(
@@ -25,38 +53,76 @@ class EmployeeLeavesScreen extends ConsumerWidget {
           icon: const Icon(Icons.menu_rounded),
           onPressed: openEmployeeShellDrawer,
         ),
-        title: Text(l10n.myLeaves),
+        title: Text(l10n.myRequests),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: l10n.leaves),
+            Tab(text: l10n.permissionRequest),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showSubmitSheet(context, ref),
+        onPressed: () => showingPermissions
+            ? _showPermissionSheet(context)
+            : _showLeaveSheet(context),
         icon: const Icon(Icons.add_rounded),
-        label: Text(l10n.addLeaveRequest),
+        label: Text(
+          showingPermissions ? l10n.addPermissionRequest : l10n.addLeaveRequest,
+        ),
       ),
-      body: leavesAsync.when(
-        loading: () => const ShimmerList(count: 5, itemHeight: 90),
-        error: (e, _) => Center(child: Text('${l10n.error}: $e')),
-        data: (leaves) {
-          if (leaves.isEmpty) {
-            return EmptyState(
-              message: l10n.noLeaves,
-              icon: Icons.event_busy_outlined,
-              actionLabel: l10n.addLeaveRequest,
-              onAction: () => _showSubmitSheet(context, ref),
-            );
-          }
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          leavesAsync.when(
+            loading: () => const ShimmerList(count: 5, itemHeight: 90),
+            error: (e, _) => Center(child: Text('${l10n.error}: $e')),
+            data: (leaves) {
+              if (leaves.isEmpty) {
+                return EmptyState(
+                  message: l10n.noLeaves,
+                  icon: Icons.event_busy_outlined,
+                  actionLabel: l10n.addLeaveRequest,
+                  onAction: () => _showLeaveSheet(context),
+                );
+              }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: leaves.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (_, i) => _LeaveRequestTile(request: leaves[i]),
-          );
-        },
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: leaves.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (_, i) => _LeaveRequestTile(request: leaves[i]),
+              );
+            },
+          ),
+          permissionsAsync.when(
+            loading: () => const ShimmerList(count: 5, itemHeight: 90),
+            error: (e, _) => Center(child: Text('${l10n.error}: $e')),
+            data: (permissions) {
+              if (permissions.isEmpty) {
+                return EmptyState(
+                  message: l10n.noPermissions,
+                  icon: Icons.schedule_outlined,
+                  actionLabel: l10n.addPermissionRequest,
+                  onAction: () => _showPermissionSheet(context),
+                );
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: permissions.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (_, i) =>
+                    _PermissionRequestTile(request: permissions[i]),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
 
-  void _showSubmitSheet(BuildContext context, WidgetRef ref) {
+  void _showLeaveSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -68,6 +134,18 @@ class EmployeeLeavesScreen extends ConsumerWidget {
         title: context.l10n.addLeaveRequest,
         submitLabel: context.l10n.submit,
       ),
+    );
+  }
+
+  void _showPermissionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => const PermissionRequestFormSheet(),
     );
   }
 }
@@ -103,26 +181,16 @@ class _LeaveRequestTile extends StatelessWidget {
                   child: Text(
                     _typeLabel(request.type, l10n),
                     style: TextStyle(
-                        color: typeColor,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12),
+                      color: typeColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
                 const Spacer(),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    _statusLabel(request.status, l10n),
-                    style: TextStyle(
-                        color: statusColor,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12),
-                  ),
+                _StatusBadge(
+                  label: _statusLabel(request.status, l10n),
+                  color: statusColor,
                 ),
               ],
             ),
@@ -133,7 +201,8 @@ class _LeaveRequestTile extends StatelessWidget {
                     size: 16, color: AppColors.textSecondary),
                 const SizedBox(width: 6),
                 Text(
-                  '${dateFormat.format(request.startDate)} - ${dateFormat.format(request.endDate)}',
+                  '${dateFormat.format(request.startDate)} - '
+                  '${dateFormat.format(request.endDate)}',
                   style: context.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
@@ -170,27 +239,7 @@ class _LeaveRequestTile extends StatelessWidget {
             ],
             if (request.adminNote?.isNotEmpty == true) ...[
               const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: statusColor.withOpacity(0.2)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.comment_outlined, size: 14, color: statusColor),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        request.adminNote!,
-                        style: context.textTheme.bodySmall
-                            ?.copyWith(color: statusColor),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _AdminNote(note: request.adminNote!, color: statusColor),
             ],
           ],
         ),
@@ -201,8 +250,8 @@ class _LeaveRequestTile extends StatelessWidget {
   void _openMedicalReport(BuildContext context, LeaveRequestModel request) {
     final contentType = request.medicalReportContentType ?? '';
     final url = request.medicalReportUrl ?? '';
-    final isPdf = contentType == 'application/pdf' ||
-        url.toLowerCase().contains('.pdf');
+    final isPdf =
+        contentType == 'application/pdf' || url.toLowerCase().contains('.pdf');
     showCandidateCvFileViewer(
       context,
       imageUrl: !isPdf && url.isNotEmpty ? url : null,
@@ -210,8 +259,8 @@ class _LeaveRequestTile extends StatelessWidget {
     );
   }
 
-  Color _statusColor(LeaveRequestStatus s) {
-    switch (s) {
+  Color _statusColor(LeaveRequestStatus status) {
+    switch (status) {
       case LeaveRequestStatus.approved:
         return AppColors.leaveApproved;
       case LeaveRequestStatus.rejected:
@@ -221,8 +270,8 @@ class _LeaveRequestTile extends StatelessWidget {
     }
   }
 
-  String _statusLabel(LeaveRequestStatus s, l10n) {
-    switch (s) {
+  String _statusLabel(LeaveRequestStatus status, dynamic l10n) {
+    switch (status) {
       case LeaveRequestStatus.approved:
         return l10n.approvedStatus;
       case LeaveRequestStatus.rejected:
@@ -232,8 +281,8 @@ class _LeaveRequestTile extends StatelessWidget {
     }
   }
 
-  String _typeLabel(LeaveType t, l10n) {
-    switch (t) {
+  String _typeLabel(LeaveType type, dynamic l10n) {
+    switch (type) {
       case LeaveType.official:
         return l10n.leaveTypeAnnual;
       case LeaveType.sick:
@@ -241,5 +290,158 @@ class _LeaveRequestTile extends StatelessWidget {
       case LeaveType.emergency:
         return l10n.leaveTypeEmergency;
     }
+  }
+}
+
+class _PermissionRequestTile extends StatelessWidget {
+  final PermissionRequestModel request;
+
+  const _PermissionRequestTile({required this.request});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final dateFormat = DateFormat('d MMM yyyy');
+    final timeFormat = DateFormat('hh:mm a');
+    final statusColor = _statusColor(request.status);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(l10n.permissionRequest,
+                    style: context.textTheme.titleMedium),
+                const Spacer(),
+                _StatusBadge(
+                  label: _statusLabel(request.status, l10n),
+                  color: statusColor,
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(Icons.event_outlined,
+                    size: 16, color: AppColors.textSecondary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    '${dateFormat.format(request.date)} - '
+                    '${timeFormat.format(request.startTime)} - '
+                    '${timeFormat.format(request.endTime)}',
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '${l10n.permissionHours}: '
+              '${(request.durationMinutes / 60).toStringAsFixed(1)}',
+              style: context.textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            if (request.reason.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(
+                request.reason,
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+            if (request.adminNote?.isNotEmpty == true) ...[
+              const SizedBox(height: 8),
+              _AdminNote(note: request.adminNote!, color: statusColor),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _statusColor(PermissionRequestStatus status) {
+    switch (status) {
+      case PermissionRequestStatus.approved:
+        return AppColors.leaveApproved;
+      case PermissionRequestStatus.rejected:
+        return AppColors.leaveRejected;
+      case PermissionRequestStatus.pending:
+        return AppColors.leavePending;
+    }
+  }
+
+  String _statusLabel(PermissionRequestStatus status, dynamic l10n) {
+    switch (status) {
+      case PermissionRequestStatus.approved:
+        return l10n.approvedStatus;
+      case PermissionRequestStatus.rejected:
+        return l10n.rejectedStatus;
+      case PermissionRequestStatus.pending:
+        return l10n.pendingStatus;
+    }
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _StatusBadge({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style:
+            TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 12),
+      ),
+    );
+  }
+}
+
+class _AdminNote extends StatelessWidget {
+  final String note;
+  final Color color;
+
+  const _AdminNote({required this.note, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.comment_outlined, size: 14, color: color),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              note,
+              style: context.textTheme.bodySmall?.copyWith(color: color),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

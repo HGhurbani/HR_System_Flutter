@@ -36,8 +36,7 @@ final candidateFilterProvider =
 
 // ─── Candidates Stream ────────────────────────────────────────────────────
 final candidatesStreamProvider =
-    StreamProvider.family<List<CandidateModel>, CandidateFilter>(
-        (ref, filter) {
+    StreamProvider.family<List<CandidateModel>, CandidateFilter>((ref, filter) {
   final firestore = ref.watch(firestoreProvider);
   Query<Map<String, dynamic>> query = firestore
       .collection(AppConstants.candidateProfilesCollection)
@@ -47,8 +46,9 @@ final candidatesStreamProvider =
     query = query.where('status', isEqualTo: filter.status!.value);
   }
 
-  return query.snapshots().map((snap) =>
-      snap.docs.map(CandidateModel.fromFirestore).toList());
+  return query
+      .snapshots()
+      .map((snap) => snap.docs.map(CandidateModel.fromFirestore).toList());
 });
 
 // ─── Single Candidate ─────────────────────────────────────────────────────
@@ -62,10 +62,41 @@ final candidateDetailProvider =
       .map((doc) => doc.exists ? CandidateModel.fromFirestore(doc) : null);
 });
 
+final employeeAvailableCandidatesProvider =
+    StreamProvider<List<CandidateModel>>((ref) {
+  final firestore = ref.watch(firestoreProvider);
+  return firestore
+      .collection(AppConstants.candidateProfilesCollection)
+      .where('status', isEqualTo: CandidateStatus.available.value)
+      .orderBy('createdAt', descending: true)
+      .snapshots()
+      .map((snap) => snap.docs.map(CandidateModel.fromFirestore).toList());
+});
+
+final myReservedCandidatesProvider =
+    StreamProvider<List<CandidateModel>>((ref) {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return const Stream.empty();
+
+  final firestore = ref.watch(firestoreProvider);
+  return firestore
+      .collection(AppConstants.candidateProfilesCollection)
+      .where('assignedEmployeeId', isEqualTo: user.uid)
+      .snapshots()
+      .map((snap) {
+    final candidates = snap.docs.map(CandidateModel.fromFirestore).toList()
+      ..sort((a, b) {
+        final aDate = a.reservedAt ?? a.updatedAt;
+        final bDate = b.reservedAt ?? b.updatedAt;
+        return bDate.compareTo(aDate);
+      });
+    return candidates;
+  });
+});
+
 // ─── Supervisor-scoped candidates ────────────────────────────────────────
 final supervisorCandidatesProvider =
-    StreamProvider.family<List<CandidateModel>, CandidateFilter>(
-        (ref, filter) {
+    StreamProvider.family<List<CandidateModel>, CandidateFilter>((ref, filter) {
   final firestore = ref.watch(firestoreProvider);
   final user = ref.watch(currentUserProvider);
   if (user == null) return const Stream.empty();
@@ -78,8 +109,9 @@ final supervisorCandidatesProvider =
     query = query.where('status', isEqualTo: filter.status!.value);
   }
 
-  return query.snapshots().map((snap) =>
-      snap.docs.map(CandidateModel.fromFirestore).toList());
+  return query
+      .snapshots()
+      .map((snap) => snap.docs.map(CandidateModel.fromFirestore).toList());
 });
 
 // ─── Candidates Notifier ──────────────────────────────────────────────────
@@ -205,6 +237,54 @@ class CandidatesNotifier extends StateNotifier<AsyncValue<void>> {
       );
     }
     return success;
+  }
+
+  Future<bool> reserveForCurrentEmployee(String candidateId) async {
+    if (_currentUserId.isEmpty) return false;
+    state = const AsyncValue.loading();
+    try {
+      final candidateRef = _firestore
+          .collection(AppConstants.candidateProfilesCollection)
+          .doc(candidateId);
+
+      await _firestore.runTransaction((transaction) async {
+        final snapshot = await transaction.get(candidateRef);
+        final data = snapshot.data();
+        if (!snapshot.exists || data == null) {
+          throw StateError('candidate-not-found');
+        }
+        final status = CandidateStatus.fromString(
+          data['status'] as String? ?? CandidateStatus.available.value,
+        );
+        final assignedEmployeeId = data['assignedEmployeeId'] as String?;
+        if (status != CandidateStatus.available ||
+            assignedEmployeeId?.isNotEmpty == true) {
+          throw StateError('candidate-not-available');
+        }
+
+        transaction.update(candidateRef, {
+          'assignedEmployeeId': _currentUserId,
+          'assignedEmployeeName': _currentUserName,
+          'reservedByUserId': _currentUserId,
+          'reservedByUserName': _currentUserName,
+          'reservedAt': FieldValue.serverTimestamp(),
+          'status': CandidateStatus.reserved.value,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      });
+
+      await _notify(
+        title: 'تم حجز سيفي',
+        body: 'حجز $_currentUserName سيفي لنفسه',
+        type: 'candidate_self_reserved',
+        targetUserId: adminNotificationTarget,
+      );
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return false;
+    }
   }
 
   Future<bool> deleteCandidate(

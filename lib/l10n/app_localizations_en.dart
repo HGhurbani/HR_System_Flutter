@@ -123,6 +123,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get time => 'Time';
 
   @override
+  String get startTime => 'Start Time';
+
+  @override
+  String get hours => 'hours';
+
+  @override
   String get month => 'Month';
 
   @override
@@ -495,6 +501,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assignCandidate => 'Assign CV';
 
   @override
+  String get reserveCandidate => 'Reserve CV';
+
+  @override
+  String get candidateReserved => 'CV reserved successfully';
+
+  @override
+  String get myReservedCandidates => 'My Reservations';
+
+  @override
+  String get noReservedCandidates => 'You have no reserved CVs';
+
+  @override
   String get noCandidates => 'No CVs found';
 
   @override
@@ -652,6 +670,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addPermissionRequest => 'Submit Permission Request';
 
   @override
+  String get permissionHours => 'Hours';
+
+  @override
+  String get invalidPermissionHours => 'Enter a valid number of hours';
+
+  @override
   String get leaveType => 'Leave Type';
 
   @override
@@ -698,13 +722,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noLeaves => 'No leave requests';
 
   @override
+  String get noPermissions => 'No permission requests';
+
+  @override
   String get leaveSubmitted => 'Request submitted successfully';
+
+  @override
+  String get permissionSubmitted => 'Permission request submitted successfully';
 
   @override
   String get leaveApproved => 'Leave request approved';
 
   @override
   String get leaveRejected => 'Leave request rejected';
+
+  @override
+  String get permissionApproved => 'Permission request approved';
+
+  @override
+  String get permissionRejected => 'Permission request rejected';
 
   @override
   String get editLeaveRequest => 'Edit Leave Request';

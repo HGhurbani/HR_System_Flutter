@@ -26,6 +26,7 @@ import '../../features/employee/presentation/screens/employee_shell.dart';
 import '../../features/employee/presentation/screens/employee_dashboard_screen.dart';
 import '../../features/employee/presentation/screens/employee_attendance_screen.dart';
 import '../../features/employee/presentation/screens/employee_salary_screen.dart';
+import '../../features/employee/presentation/screens/employee_candidates_screen.dart';
 import '../../features/employee/presentation/screens/employee_leaves_screen.dart';
 import '../../features/employee/presentation/screens/employee_profile_screen.dart';
 import '../../features/settings/presentation/screens/user_app_settings_screen.dart';
@@ -69,6 +70,7 @@ class AppRoutes {
   static const employeeDashboard = '/employee/dashboard';
   static const employeeAttendance = '/employee/attendance';
   static const employeeSalary = '/employee/salary';
+  static const employeeCandidates = '/employee/candidates';
   static const employeeLeaves = '/employee/leaves';
   static const employeeProfile = '/employee/profile';
   static const employeeSettings = '/employee/settings';
@@ -85,8 +87,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (authState.isLoading) return null;
 
       // Treat stream errors as signed-out for navigation (e.g. Firestore denied).
-      final user =
-          authState.hasError ? null : authState.valueOrNull;
+      final user = authState.hasError ? null : authState.valueOrNull;
       final isAuthenticated = user != null;
       final location = state.matchedLocation;
 
@@ -112,8 +113,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // Signed out: only login and forgot-password are allowed
-      if (location == AppRoutes.login ||
-          location == AppRoutes.forgotPassword) {
+      if (location == AppRoutes.login || location == AppRoutes.forgotPassword) {
         return null;
       }
       return AppRoutes.login;
@@ -294,6 +294,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(
               path: AppRoutes.employeeSalary,
               builder: (context, state) => const EmployeeSalaryScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: AppRoutes.employeeCandidates,
+              builder: (context, state) => const EmployeeCandidatesScreen(),
             ),
           ]),
           StatefulShellBranch(routes: [

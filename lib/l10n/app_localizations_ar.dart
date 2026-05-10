@@ -123,6 +123,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get time => 'الوقت';
 
   @override
+  String get startTime => 'وقت البداية';
+
+  @override
+  String get hours => 'ساعات';
+
+  @override
   String get month => 'الشهر';
 
   @override
@@ -493,6 +499,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get assignCandidate => 'إسناد السيفي';
 
   @override
+  String get reserveCandidate => 'حجز السيفي';
+
+  @override
+  String get candidateReserved => 'تم حجز السيفي بنجاح';
+
+  @override
+  String get myReservedCandidates => 'حجوزاتي';
+
+  @override
+  String get noReservedCandidates => 'لا توجد سيفيهات محجوزة لك';
+
+  @override
   String get noCandidates => 'لا توجد سيفيهات';
 
   @override
@@ -650,6 +668,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addPermissionRequest => 'تقديم طلب إذن';
 
   @override
+  String get permissionHours => 'عدد الساعات';
+
+  @override
+  String get invalidPermissionHours => 'أدخل عدد ساعات صحيح';
+
+  @override
   String get leaveType => 'نوع الإجازة';
 
   @override
@@ -696,13 +720,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noLeaves => 'لا يوجد طلبات إجازة';
 
   @override
+  String get noPermissions => 'لا يوجد طلبات إذن';
+
+  @override
   String get leaveSubmitted => 'تم تقديم الطلب بنجاح';
+
+  @override
+  String get permissionSubmitted => 'تم تقديم طلب الإذن بنجاح';
 
   @override
   String get leaveApproved => 'تم قبول طلب الإجازة';
 
   @override
   String get leaveRejected => 'تم رفض طلب الإجازة';
+
+  @override
+  String get permissionApproved => 'تم قبول طلب الإذن';
+
+  @override
+  String get permissionRejected => 'تم رفض طلب الإذن';
 
   @override
   String get editLeaveRequest => 'تعديل طلب الإجازة';

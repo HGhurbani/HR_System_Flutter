@@ -39,6 +39,12 @@ class EmployeeShell extends ConsumerWidget {
         route: AppRoutes.employeeSalary,
       ),
       _NavItem(
+        label: l10n.candidates,
+        icon: Icons.folder_outlined,
+        activeIcon: Icons.folder_rounded,
+        route: AppRoutes.employeeCandidates,
+      ),
+      _NavItem(
         label: l10n.leaves,
         icon: Icons.event_note_outlined,
         activeIcon: Icons.event_note_rounded,
@@ -59,7 +65,11 @@ class EmployeeShell extends ConsumerWidget {
     ];
 
     // Keep bottom navigation short; the full list stays in the Drawer.
-    const bottomBranchIndexes = <int>[0, 1, 5]; // Dashboard, Attendance, Settings
+    const bottomBranchIndexes = <int>[
+      0,
+      1,
+      6
+    ]; // Dashboard, Attendance, Settings
     final bottomSelectedIndex = bottomBranchIndexes.indexOf(shell.currentIndex);
     final safeBottomSelectedIndex =
         bottomSelectedIndex >= 0 ? bottomSelectedIndex : 0;
