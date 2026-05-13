@@ -9,6 +9,7 @@ import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/widgets/stat_card.dart';
 import '../../../admin/application/admin_user_management_providers.dart';
 import '../../../auth/application/auth_providers.dart';
+import '../../application/candidate_cv_share_service.dart';
 import '../../application/candidates_providers.dart';
 import '../../data/models/candidate_model.dart';
 import '../../domain/entities/candidate_status.dart';
@@ -29,6 +30,17 @@ class CandidateDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.candidateProfile),
         actions: [
+          if (currentUser?.role.isAdmin == true)
+            candidateAsync.maybeWhen(
+              data: (candidate) => candidate == null
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      icon: const Icon(Icons.share_outlined),
+                      tooltip: l10n.share,
+                      onPressed: () => _shareCandidate(context, candidate),
+                    ),
+              orElse: () => const SizedBox.shrink(),
+            ),
           if (currentUser?.role.canManageCandidates == true)
             IconButton(
               icon: const Icon(Icons.edit_outlined),
@@ -68,6 +80,46 @@ class CandidateDetailScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _shareCandidate(
+    BuildContext context,
+    CandidateModel candidate,
+  ) async {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        content: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: 14),
+            Flexible(child: Text(context.l10n.preparingCvFiles)),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final result = await const CandidateCvShareService().shareCandidates(
+        [candidate],
+        sharePositionOrigin: _sharePositionOrigin(context),
+      );
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
+      if (result.sharedCount == 0) {
+        context.showSnackBar(context.l10n.noCvFileToShare, isError: true);
+      }
+    } catch (_) {
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
+      context.showSnackBar(context.l10n.shareCvFailed, isError: true);
+    }
+  }
+
   Future<void> _deleteCandidate(
     BuildContext context,
     WidgetRef ref,
@@ -81,11 +133,12 @@ class CandidateDetailScreen extends ConsumerWidget {
     );
     if (confirmed != true) return;
 
-    final success = await ref.read(candidatesNotifierProvider.notifier).deleteCandidate(
-          candidate.id,
-          imageUrl: candidate.imageUrl,
-          cvFileUrl: candidate.cvFileUrl,
-        );
+    final success =
+        await ref.read(candidatesNotifierProvider.notifier).deleteCandidate(
+              candidate.id,
+              imageUrl: candidate.imageUrl,
+              cvFileUrl: candidate.cvFileUrl,
+            );
     if (!context.mounted) return;
     if (success) {
       context.showSnackBar(context.l10n.deleteSuccess);
@@ -93,6 +146,12 @@ class CandidateDetailScreen extends ConsumerWidget {
     } else {
       context.showSnackBar(context.l10n.errorGeneral, isError: true);
     }
+  }
+
+  Rect? _sharePositionOrigin(BuildContext context) {
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    return box.localToGlobal(Offset.zero) & box.size;
   }
 }
 

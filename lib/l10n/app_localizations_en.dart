@@ -558,6 +558,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changeStatus => 'Change Status';
 
   @override
+  String get share => 'Share';
+
+  @override
+  String get selectAll => 'Select all';
+
+  @override
+  String get preparingCvFiles => 'Preparing CV files...';
+
+  @override
+  String get noCvFileToShare => 'There is no CV file to share';
+
+  @override
+  String get shareCvFailed => 'Failed to share the CV file';
+
+  @override
+  String selectedCandidates(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String someCvFilesMissing(int count) {
+    return '$count selected CVs do not have a file';
+  }
+
+  @override
   String get attendance => 'Attendance';
 
   @override

@@ -1184,6 +1184,48 @@ abstract class AppLocalizations {
   /// **'تغيير الحالة'**
   String get changeStatus;
 
+  /// No description provided for @share.
+  ///
+  /// In ar, this message translates to:
+  /// **'مشاركة'**
+  String get share;
+
+  /// No description provided for @selectAll.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحديد الكل'**
+  String get selectAll;
+
+  /// No description provided for @preparingCvFiles.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاري تجهيز ملفات السيفي...'**
+  String get preparingCvFiles;
+
+  /// No description provided for @noCvFileToShare.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يوجد ملف سيفي للمشاركة'**
+  String get noCvFileToShare;
+
+  /// No description provided for @shareCvFailed.
+  ///
+  /// In ar, this message translates to:
+  /// **'فشلت مشاركة ملف السيفي'**
+  String get shareCvFailed;
+
+  /// No description provided for @selectedCandidates.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تحديد {count}'**
+  String selectedCandidates(int count);
+
+  /// No description provided for @someCvFilesMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count} من السيفيهات المحددة لا تحتوي على ملف'**
+  String someCvFilesMissing(int count);
+
   /// No description provided for @attendance.
   ///
   /// In ar, this message translates to:

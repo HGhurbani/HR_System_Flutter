@@ -556,6 +556,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String get changeStatus => 'تغيير الحالة';
 
   @override
+  String get share => 'مشاركة';
+
+  @override
+  String get selectAll => 'تحديد الكل';
+
+  @override
+  String get preparingCvFiles => 'جاري تجهيز ملفات السيفي...';
+
+  @override
+  String get noCvFileToShare => 'لا يوجد ملف سيفي للمشاركة';
+
+  @override
+  String get shareCvFailed => 'فشلت مشاركة ملف السيفي';
+
+  @override
+  String selectedCandidates(int count) {
+    return 'تم تحديد $count';
+  }
+
+  @override
+  String someCvFilesMissing(int count) {
+    return '$count من السيفيهات المحددة لا تحتوي على ملف';
+  }
+
+  @override
   String get attendance => 'الحضور';
 
   @override

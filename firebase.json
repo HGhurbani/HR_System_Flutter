@@ -1,11 +1,1 @@
-{
-  "firestore": {
-    "rules": "firestore.rules"
-  },
-  "storage": {
-    "rules": "storage.rules"
-  },
-  "functions": {
-    "source": "functions"
-  }
-}
+{"firestore":{"rules":"firestore.rules"},"storage":{"rules":"storage.rules"},"functions":{"source":"functions"},"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"hr-sys-fa9d3","configurations":{"windows":"1:737044049717:web:56ab1f17081a4a1cb2667c"}}}}}}

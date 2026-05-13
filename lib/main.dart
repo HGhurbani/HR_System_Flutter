@@ -29,8 +29,16 @@ void main() async {
     ),
   );
 
-  // Register Crashlytics after the first frame so startup painting is not delayed.
+  // Crashlytics is supported on Android/iOS only for this Flutter SDK stack.
   WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (kIsWeb) return;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        break;
+      default:
+        return;
+    }
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
     PlatformDispatcher.instance.onError = (error, stack) {
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);

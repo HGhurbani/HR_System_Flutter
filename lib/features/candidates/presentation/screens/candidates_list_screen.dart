@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/widgets/stat_card.dart';
+import '../../../admin/presentation/admin_shell_scaffold.dart';
+import '../../application/candidate_cv_share_service.dart';
 import '../../application/candidates_providers.dart';
 import '../../data/models/candidate_model.dart';
 import '../../domain/entities/candidate_status.dart';
 import '../widgets/candidate_cv_file_viewer.dart';
-import '../../../admin/presentation/admin_shell_scaffold.dart';
 
 class CandidatesListScreen extends ConsumerStatefulWidget {
   final bool isAdminView;
@@ -25,6 +27,10 @@ class CandidatesListScreen extends ConsumerStatefulWidget {
 
 class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
   final _searchController = TextEditingController();
+  final _selectedCandidateIds = <String>{};
+  bool _isSharing = false;
+
+  bool get _selectionMode => _selectedCandidateIds.isNotEmpty;
 
   @override
   void dispose() {
@@ -42,126 +48,267 @@ class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: widget.isAdminView
-            ? const IconButton(
-                icon: Icon(Icons.menu_rounded),
-                onPressed: openAdminShellDrawer,
+        leading: _selectionMode
+            ? IconButton(
+                icon: const Icon(Icons.close_rounded),
+                onPressed: _clearSelection,
               )
-            : null,
-        title: Text(l10n.candidateManagement),
-        actions: [
-          IconButton(
-            icon: Stack(
-              children: [
-                const Icon(Icons.filter_list_rounded),
-                if (filter.hasActiveFilters)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.accent,
-                        shape: BoxShape.circle,
-                      ),
+            : widget.isAdminView
+                ? const IconButton(
+                    icon: Icon(Icons.menu_rounded),
+                    onPressed: openAdminShellDrawer,
+                  )
+                : null,
+        title: Text(
+          _selectionMode
+              ? l10n.selectedCandidates(_selectedCandidateIds.length)
+              : l10n.candidateManagement,
+        ),
+        actions: _selectionMode
+            ? [
+                IconButton(
+                  icon: _isSharing
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.share_outlined),
+                  tooltip: l10n.share,
+                  onPressed: _isSharing
+                      ? null
+                      : () => _shareSelectedCandidates(candidatesAsync),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.select_all_rounded),
+                  tooltip: l10n.selectAll,
+                  onPressed: candidatesAsync.maybeWhen(
+                    data: (candidates) => () => _selectAllVisibleCandidates(
+                          candidates,
+                          filter.searchQuery,
+                        ),
+                    orElse: () => null,
+                  ),
+                ),
+              ]
+            : [
+                IconButton(
+                  icon: Stack(
+                    children: [
+                      const Icon(Icons.filter_list_rounded),
+                      if (filter.hasActiveFilters)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: AppColors.accent,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  onPressed: () => _showFilterSheet(context, filter),
+                ),
+              ],
+      ),
+      floatingActionButton: _selectionMode
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () {
+                if (widget.isAdminView) {
+                  context.push('${AppRoutes.adminCandidates}/add');
+                } else {
+                  context.push('${AppRoutes.supervisorCandidates}/add');
+                }
+              },
+              icon: const Icon(Icons.add_rounded),
+              label: Text(l10n.addCandidate),
+            ),
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: SearchBar(
+                  controller: _searchController,
+                  hintText: l10n.searchCandidates,
+                  leading: const Icon(Icons.search),
+                  trailing: _searchController.text.isNotEmpty
+                      ? [
+                          IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              ref
+                                  .read(candidateFilterProvider.notifier)
+                                  .update((s) => s.copyWith(searchQuery: ''));
+                            },
+                          )
+                        ]
+                      : null,
+                  onChanged: (v) => ref
+                      .read(candidateFilterProvider.notifier)
+                      .update((s) => s.copyWith(searchQuery: v.toLowerCase())),
+                ),
+              ),
+              if (filter.hasActiveFilters)
+                _ActiveFiltersBar(
+                  filter: filter,
+                  onClear: () => ref
+                      .read(candidateFilterProvider.notifier)
+                      .state = const CandidateFilter(),
+                ),
+              Expanded(
+                child: candidatesAsync.when(
+                  loading: () => const ShimmerList(count: 8, itemHeight: 100),
+                  error: (e, _) => Center(child: Text('${l10n.error}: $e')),
+                  data: (candidates) {
+                    final filtered =
+                        _filterCandidates(candidates, filter.searchQuery);
+
+                    if (filtered.isEmpty) {
+                      return EmptyState(
+                        message: l10n.noCandidates,
+                        icon: Icons.folder_open_outlined,
+                        actionLabel: l10n.addCandidate,
+                        onAction: () {
+                          if (widget.isAdminView) {
+                            context.push('${AppRoutes.adminCandidates}/add');
+                          } else {
+                            context
+                                .push('${AppRoutes.supervisorCandidates}/add');
+                          }
+                        },
+                      );
+                    }
+
+                    return ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (_, i) {
+                        final candidate = filtered[i];
+                        return _CandidateCard(
+                          candidate: candidate,
+                          isAdminView: widget.isAdminView,
+                          selectionMode: _selectionMode,
+                          selected:
+                              _selectedCandidateIds.contains(candidate.id),
+                          onToggleSelection: widget.isAdminView
+                              ? () => _toggleCandidateSelection(candidate.id)
+                              : null,
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          if (_isSharing)
+            ColoredBox(
+              color: Colors.black.withValues(alpha: 0.18),
+              child: Center(
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        const SizedBox(width: 14),
+                        Text(l10n.preparingCvFiles),
+                      ],
                     ),
                   ),
-              ],
+                ),
+              ),
             ),
-            onPressed: () => _showFilterSheet(context, filter),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          if (widget.isAdminView) {
-            context.push('${AppRoutes.adminCandidates}/add');
-          } else {
-            context.push('${AppRoutes.supervisorCandidates}/add');
-          }
-        },
-        icon: const Icon(Icons.add_rounded),
-        label: Text(l10n.addCandidate),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: SearchBar(
-              controller: _searchController,
-              hintText: l10n.searchCandidates,
-              leading: const Icon(Icons.search),
-              trailing: _searchController.text.isNotEmpty
-                  ? [
-                      IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          ref
-                              .read(candidateFilterProvider.notifier)
-                              .update((s) => s.copyWith(searchQuery: ''));
-                        },
-                      )
-                    ]
-                  : null,
-              onChanged: (v) => ref
-                  .read(candidateFilterProvider.notifier)
-                  .update((s) => s.copyWith(searchQuery: v.toLowerCase())),
-            ),
-          ),
-          if (filter.hasActiveFilters)
-            _ActiveFiltersBar(
-              filter: filter,
-              onClear: () => ref.read(candidateFilterProvider.notifier).state =
-                  const CandidateFilter(),
-            ),
-          Expanded(
-            child: candidatesAsync.when(
-              loading: () => const ShimmerList(count: 8, itemHeight: 100),
-              error: (e, _) => Center(child: Text('${l10n.error}: $e')),
-              data: (candidates) {
-                final searchQuery = filter.searchQuery;
-                final filtered = searchQuery.isEmpty
-                    ? candidates
-                    : candidates
-                        .where((c) =>
-                            c.fullName.toLowerCase().contains(searchQuery) ||
-                            c.nationality.value
-                                .toLowerCase()
-                                .contains(searchQuery))
-                        .toList();
-
-                if (filtered.isEmpty) {
-                  return EmptyState(
-                    message: l10n.noCandidates,
-                    icon: Icons.folder_open_outlined,
-                    actionLabel: l10n.addCandidate,
-                    onAction: () {
-                      if (widget.isAdminView) {
-                        context.push('${AppRoutes.adminCandidates}/add');
-                      } else {
-                        context.push('${AppRoutes.supervisorCandidates}/add');
-                      }
-                    },
-                  );
-                }
-
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
-                  itemBuilder: (_, i) => _CandidateCard(
-                    candidate: filtered[i],
-                    isAdminView: widget.isAdminView,
-                  ),
-                );
-              },
-            ),
-          ),
         ],
       ),
     );
+  }
+
+  List<CandidateModel> _filterCandidates(
+    List<CandidateModel> candidates,
+    String searchQuery,
+  ) {
+    if (searchQuery.isEmpty) return candidates;
+    return candidates
+        .where((c) =>
+            c.fullName.toLowerCase().contains(searchQuery) ||
+            c.nationality.value.toLowerCase().contains(searchQuery))
+        .toList();
+  }
+
+  void _toggleCandidateSelection(String candidateId) {
+    setState(() {
+      if (!_selectedCandidateIds.add(candidateId)) {
+        _selectedCandidateIds.remove(candidateId);
+      }
+    });
+  }
+
+  void _clearSelection() {
+    setState(_selectedCandidateIds.clear);
+  }
+
+  void _selectAllVisibleCandidates(
+    List<CandidateModel> candidates,
+    String searchQuery,
+  ) {
+    final visible = _filterCandidates(candidates, searchQuery);
+    setState(() {
+      _selectedCandidateIds
+        ..clear()
+        ..addAll(visible.map((candidate) => candidate.id));
+    });
+  }
+
+  Future<void> _shareSelectedCandidates(
+    AsyncValue<List<CandidateModel>> candidatesAsync,
+  ) async {
+    final candidates = candidatesAsync.valueOrNull;
+    if (candidates == null || _selectedCandidateIds.isEmpty) return;
+
+    final selected = candidates
+        .where((candidate) => _selectedCandidateIds.contains(candidate.id))
+        .toList();
+    if (selected.isEmpty) return;
+
+    setState(() => _isSharing = true);
+    try {
+      final result = await const CandidateCvShareService().shareCandidates(
+        selected,
+        sharePositionOrigin: _sharePositionOrigin(context),
+      );
+      if (!mounted) return;
+      if (result.sharedCount == 0) {
+        context.showSnackBar(context.l10n.noCvFileToShare, isError: true);
+        return;
+      }
+      if (result.missingCount > 0) {
+        context.showSnackBar(
+          context.l10n.someCvFilesMissing(result.missingCount),
+        );
+      }
+      _clearSelection();
+    } catch (_) {
+      if (mounted) {
+        context.showSnackBar(context.l10n.shareCvFailed, isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _isSharing = false);
+    }
   }
 
   void _showFilterSheet(BuildContext context, CandidateFilter filter) {
@@ -174,6 +321,12 @@ class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
       ),
       builder: (_) => _FilterSheet(currentFilter: filter),
     );
+  }
+
+  Rect? _sharePositionOrigin(BuildContext context) {
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    return box.localToGlobal(Offset.zero) & box.size;
   }
 }
 
@@ -218,10 +371,16 @@ class _ActiveFiltersBar extends StatelessWidget {
 class _CandidateCard extends ConsumerWidget {
   final CandidateModel candidate;
   final bool isAdminView;
+  final bool selectionMode;
+  final bool selected;
+  final VoidCallback? onToggleSelection;
 
   const _CandidateCard({
     required this.candidate,
     required this.isAdminView,
+    required this.selectionMode,
+    required this.selected,
+    required this.onToggleSelection,
   });
 
   Color _statusColor(CandidateStatus status) {
@@ -267,16 +426,28 @@ class _CandidateCard extends ConsumerWidget {
     return Card(
       child: InkWell(
         onTap: () {
+          if (selectionMode) {
+            onToggleSelection?.call();
+            return;
+          }
           final basePath = isAdminView
               ? AppRoutes.adminCandidates
               : AppRoutes.supervisorCandidates;
           context.push('$basePath/${candidate.id}');
         },
+        onLongPress: isAdminView ? onToggleSelection : null,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(
             children: [
+              if (isAdminView && selectionMode) ...[
+                Checkbox(
+                  value: selected,
+                  onChanged: (_) => onToggleSelection?.call(),
+                ),
+                const SizedBox(width: 8),
+              ],
               Container(
                 width: 60,
                 height: 60,
@@ -407,8 +578,9 @@ class _CandidateCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded,
-                  color: AppColors.textDisabled),
+              if (!selectionMode)
+                const Icon(Icons.chevron_right_rounded,
+                    color: AppColors.textDisabled),
             ],
           ),
         ),
@@ -479,9 +651,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
                   onPressed: () {
                     ref
                         .read(candidateFilterProvider.notifier)
-                        .update((s) => s.copyWith(
-                              status: _status,
-                            ));
+                        .update((s) => s.copyWith(status: _status));
                     Navigator.pop(context);
                   },
                   child: Text(l10n.filter),

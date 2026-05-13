@@ -195,6 +195,23 @@
   "statusHired": "تم التوظيف",
   "statusCancelled": "ملغى",
   "changeStatus": "تغيير الحالة",
+  "share": "مشاركة",
+  "selectAll": "تحديد الكل",
+  "preparingCvFiles": "جاري تجهيز ملفات السيفي...",
+  "noCvFileToShare": "لا يوجد ملف سيفي للمشاركة",
+  "shareCvFailed": "فشلت مشاركة ملف السيفي",
+  "selectedCandidates": "تم تحديد {count}",
+  "@selectedCandidates": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "someCvFilesMissing": "{count} من السيفيهات المحددة لا تحتوي على ملف",
+  "@someCvFilesMissing": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
 
   "attendance": "الحضور",
   "attendanceManagement": "إدارة الحضور",
