@@ -199,9 +199,9 @@ class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
                           selectionMode: _selectionMode,
                           selected:
                               _selectedCandidateIds.contains(candidate.id),
-                          onToggleSelection: widget.isAdminView
-                              ? () => _toggleCandidateSelection(candidate.id)
-                              : null,
+                          selectionEnabled: true,
+                          onToggleSelection: () =>
+                              _toggleCandidateSelection(candidate.id),
                         );
                       },
                     );
@@ -372,13 +372,15 @@ class _CandidateCard extends ConsumerWidget {
   final CandidateModel candidate;
   final bool isAdminView;
   final bool selectionMode;
+  final bool selectionEnabled;
   final bool selected;
-  final VoidCallback? onToggleSelection;
+  final VoidCallback onToggleSelection;
 
   const _CandidateCard({
     required this.candidate,
     required this.isAdminView,
     required this.selectionMode,
+    required this.selectionEnabled,
     required this.selected,
     required this.onToggleSelection,
   });
@@ -427,7 +429,7 @@ class _CandidateCard extends ConsumerWidget {
       child: InkWell(
         onTap: () {
           if (selectionMode) {
-            onToggleSelection?.call();
+            onToggleSelection();
             return;
           }
           final basePath = isAdminView
@@ -435,16 +437,16 @@ class _CandidateCard extends ConsumerWidget {
               : AppRoutes.supervisorCandidates;
           context.push('$basePath/${candidate.id}');
         },
-        onLongPress: isAdminView ? onToggleSelection : null,
+        onLongPress: selectionEnabled ? onToggleSelection : null,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(
             children: [
-              if (isAdminView && selectionMode) ...[
+              if (selectionEnabled && selectionMode) ...[
                 Checkbox(
                   value: selected,
-                  onChanged: (_) => onToggleSelection?.call(),
+                  onChanged: (_) => onToggleSelection(),
                 ),
                 const SizedBox(width: 8),
               ],

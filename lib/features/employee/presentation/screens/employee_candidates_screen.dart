@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/loading_widget.dart';
+import '../../../candidates/application/candidate_cv_share_service.dart';
 import '../../../candidates/application/candidates_providers.dart';
 import '../../../candidates/data/models/candidate_model.dart';
 import '../../../candidates/domain/entities/candidate_status.dart';
@@ -189,23 +190,72 @@ class _EmployeeCandidateCard extends ConsumerWidget {
                     label: Text(l10n.view),
                   ),
                 ),
-                if (showReserveButton) ...[
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed:
-                          state.isLoading ? null : () => _reserve(context, ref),
-                      icon: const Icon(Icons.bookmark_add_outlined),
-                      label: Text(l10n.reserveCandidate),
-                    ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: hasFile ? () => _shareCandidate(context) : null,
+                    icon: const Icon(Icons.share_outlined),
+                    label: Text(l10n.share),
                   ),
-                ],
+                ),
               ],
             ),
+            if (showReserveButton) ...[
+              const SizedBox(height: 8),
+              ElevatedButton.icon(
+                onPressed:
+                    state.isLoading ? null : () => _reserve(context, ref),
+                icon: const Icon(Icons.bookmark_add_outlined),
+                label: Text(l10n.reserveCandidate),
+              ),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _shareCandidate(BuildContext context) async {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        content: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: 14),
+            Flexible(child: Text(context.l10n.preparingCvFiles)),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final result = await const CandidateCvShareService().shareCandidates(
+        [candidate],
+        sharePositionOrigin: _sharePositionOrigin(context),
+      );
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
+      if (result.sharedCount == 0) {
+        context.showSnackBar(context.l10n.noCvFileToShare, isError: true);
+      }
+    } catch (_) {
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
+      context.showSnackBar(context.l10n.shareCvFailed, isError: true);
+    }
+  }
+
+  Rect? _sharePositionOrigin(BuildContext context) {
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    return box.localToGlobal(Offset.zero) & box.size;
   }
 
   void _openFile(BuildContext context) {

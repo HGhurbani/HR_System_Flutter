@@ -30,7 +30,7 @@ class CandidateDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.candidateProfile),
         actions: [
-          if (currentUser?.role.isAdmin == true)
+          if (currentUser?.role.canManageCandidates == true)
             candidateAsync.maybeWhen(
               data: (candidate) => candidate == null
                   ? const SizedBox.shrink()
