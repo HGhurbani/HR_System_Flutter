@@ -179,6 +179,8 @@ class ManagedUserService {
   Future<void> updateManagedUser({
     required String userId,
     required String fullName,
+    required String email,
+    required String currentEmail,
     String? phone,
     String? position,
     String? department,
@@ -187,12 +189,114 @@ class ManagedUserService {
     String weeklyRestDaysMode = AppUser.weeklyRestDaysModeCompany,
     List<int> customWeeklyRestDays = const [],
     required bool isActive,
+    Duration timeout = const Duration(seconds: 90),
   }) async {
-    await _firestore
+    final normalizedEmail = email.trim().toLowerCase();
+    if (normalizedEmail == currentEmail.trim().toLowerCase()) {
+      await _updateFirestoreUser(
+        userId: userId,
+        fullName: fullName,
+        email: normalizedEmail,
+        phone: phone,
+        position: position,
+        department: department,
+        employeeCode: employeeCode,
+        hireDate: hireDate,
+        weeklyRestDaysMode: weeklyRestDaysMode,
+        customWeeklyRestDays: customWeeklyRestDays,
+        isActive: isActive,
+      );
+      await _notifyUserUpdated(fullName);
+      return;
+    }
+
+    if (_adminId.isEmpty) {
+      throw const AppException(
+        message: 'Admin session not available',
+        code: 'admin-session-missing',
+      );
+    }
+
+    final docRef = _firestore
+        .collection(AppConstants.adminUserUpdateRequestsCollection)
+        .doc();
+    await docRef.set({
+      'targetUserId': userId,
+      'fullName': fullName.trim(),
+      'email': normalizedEmail,
+      'phone': phone?.trim().isEmpty == true ? null : phone?.trim(),
+      'position': position?.trim().isEmpty == true ? null : position?.trim(),
+      'department':
+          department?.trim().isEmpty == true ? null : department?.trim(),
+      'employeeCode':
+          employeeCode?.trim().isEmpty == true ? null : employeeCode?.trim(),
+      'hireDate': hireDate != null ? Timestamp.fromDate(hireDate) : null,
+      'weeklyRestDaysMode':
+          AppUser.normalizeWeeklyRestDaysMode(weeklyRestDaysMode),
+      'customWeeklyRestDays':
+          AppUser.sanitizeWeeklyRestDays(customWeeklyRestDays),
+      'isActive': isActive,
+      'status': 'pending',
+      'requestedByAdminId': _adminId,
+      'requestedByAdminName': _adminName,
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    final completer = Completer<void>();
+    late final StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>
+        subscription;
+    subscription = docRef.snapshots().listen((snapshot) {
+      final data = snapshot.data();
+      if (data == null) return;
+      final status = data['status'] as String? ?? 'pending';
+      if (status == 'completed' && !completer.isCompleted) {
+        completer.complete();
+      } else if (status == 'failed' && !completer.isCompleted) {
+        completer.completeError(
+          AppException(
+            message:
+                data['errorMessage'] as String? ?? 'Managed user update failed',
+            code: data['errorCode'] as String? ?? 'managed-user-update-failed',
+          ),
+        );
+      }
+    });
+
+    try {
+      await completer.future.timeout(
+        timeout,
+        onTimeout: () => throw const AppException(
+          message:
+              'User update request is still pending. Ensure the admin backend function is deployed.',
+          code: 'managed-user-update-timeout',
+        ),
+      );
+      await _notifyUserUpdated(fullName);
+    } finally {
+      await subscription.cancel();
+    }
+  }
+
+  Future<void> _updateFirestoreUser({
+    required String userId,
+    required String fullName,
+    required String email,
+    String? phone,
+    String? position,
+    String? department,
+    String? employeeCode,
+    DateTime? hireDate,
+    required String weeklyRestDaysMode,
+    required List<int> customWeeklyRestDays,
+    required bool isActive,
+  }) {
+    return _firestore
         .collection(AppConstants.usersCollection)
         .doc(userId)
         .update({
       'fullName': fullName.trim(),
+      'email': email,
       'phone': phone?.trim().isEmpty == true ? null : phone?.trim(),
       'position': position?.trim().isEmpty == true ? null : position?.trim(),
       'department':
@@ -207,7 +311,9 @@ class ManagedUserService {
       'isActive': isActive,
       'updatedAt': FieldValue.serverTimestamp(),
     });
+  }
 
+  Future<void> _notifyUserUpdated(String fullName) async {
     try {
       await _notifications.create(
         title: 'تم تحديث مستخدم',
@@ -222,6 +328,8 @@ class ManagedUserService {
     await updateManagedUser(
       userId: user.uid,
       fullName: user.fullName,
+      email: user.email,
+      currentEmail: user.email,
       phone: user.phone,
       position: user.position,
       department: user.department,

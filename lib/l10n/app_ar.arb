@@ -239,6 +239,9 @@
   "alreadyCheckedIn": "لقد سجلت حضورك مسبقاً",
   "notCheckedIn": "لم تسجل حضورك بعد",
   "noAttendance": "لا يوجد سجلات حضور",
+  "attendanceDateRange": "فترة تقرير الحضور",
+  "printAttendanceReport": "معاينة وطباعة تقرير الحضور",
+  "noAttendanceInRange": "لا توجد بيانات حضور ضمن الفترة المحددة",
 
   "attendancePresent": "حاضر",
   "attendanceAbsent": "غائب",

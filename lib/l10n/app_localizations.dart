@@ -1382,6 +1382,24 @@ abstract class AppLocalizations {
   /// **'لا يوجد سجلات حضور'**
   String get noAttendance;
 
+  /// No description provided for @attendanceDateRange.
+  ///
+  /// In ar, this message translates to:
+  /// **'فترة تقرير الحضور'**
+  String get attendanceDateRange;
+
+  /// No description provided for @printAttendanceReport.
+  ///
+  /// In ar, this message translates to:
+  /// **'معاينة وطباعة تقرير الحضور'**
+  String get printAttendanceReport;
+
+  /// No description provided for @noAttendanceInRange.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد بيانات حضور ضمن الفترة المحددة'**
+  String get noAttendanceInRange;
+
   /// No description provided for @attendancePresent.
   ///
   /// In ar, this message translates to:

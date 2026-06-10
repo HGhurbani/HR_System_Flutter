@@ -237,6 +237,9 @@
   "alreadyCheckedIn": "You have already checked in",
   "notCheckedIn": "You have not checked in yet",
   "noAttendance": "No attendance records",
+  "attendanceDateRange": "Attendance report period",
+  "printAttendanceReport": "Preview and print attendance report",
+  "noAttendanceInRange": "No attendance data in the selected period",
 
   "attendancePresent": "Present",
   "attendanceAbsent": "Absent",

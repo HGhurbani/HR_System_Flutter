@@ -662,6 +662,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noAttendance => 'No attendance records';
 
   @override
+  String get attendanceDateRange => 'Attendance report period';
+
+  @override
+  String get printAttendanceReport => 'Preview and print attendance report';
+
+  @override
+  String get noAttendanceInRange => 'No attendance data in the selected period';
+
+  @override
   String get attendancePresent => 'Present';
 
   @override

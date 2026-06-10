@@ -177,6 +177,12 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // ─── Admin-triggered user updates (processed by Admin SDK / CF) ───────
+    match /admin_user_update_requests/{requestId} {
+      allow read, create, delete: if isAdmin();
+      allow update: if false;
+    }
+
     // ─── Company settings (theme, policies, …) ───────────────────────────
     match /company_settings/{settingId} {
       allow read: if isAuthenticated() && isActiveUser();

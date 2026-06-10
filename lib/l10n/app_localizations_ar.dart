@@ -660,6 +660,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noAttendance => 'لا يوجد سجلات حضور';
 
   @override
+  String get attendanceDateRange => 'فترة تقرير الحضور';
+
+  @override
+  String get printAttendanceReport => 'معاينة وطباعة تقرير الحضور';
+
+  @override
+  String get noAttendanceInRange => 'لا توجد بيانات حضور ضمن الفترة المحددة';
+
+  @override
   String get attendancePresent => 'حاضر';
 
   @override

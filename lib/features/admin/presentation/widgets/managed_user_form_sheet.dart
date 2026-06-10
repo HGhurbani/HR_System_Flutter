@@ -203,6 +203,8 @@ class _ManagedUserFormSheetState extends ConsumerState<ManagedUserFormSheet> {
         await ref.read(managedUserServiceProvider).updateManagedUser(
               userId: widget.editingUser!.uid,
               fullName: formData.fullName,
+              email: formData.email,
+              currentEmail: widget.editingUser!.email,
               phone: formData.phone,
               position: formData.position,
               department: formData.department,
@@ -308,7 +310,6 @@ class _ManagedUserFormSheetState extends ConsumerState<ManagedUserFormSheet> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _emailController,
-                readOnly: _isEditing,
                 decoration: InputDecoration(
                   labelText: l10n.email,
                   prefixIcon: const Icon(Icons.email_outlined),

@@ -6,9 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../auth/application/auth_providers.dart';
+import '../../auth/data/models/user_model.dart';
+import '../../auth/domain/entities/user_role.dart';
+import '../../holidays/data/models/company_holiday_model.dart';
+import '../../leaves/data/models/leave_request_model.dart';
 import '../../notifications/application/notifications_providers.dart';
 import '../data/models/attendance_model.dart';
 import '../data/models/attendance_policy_model.dart';
+import '../data/models/attendance_report.dart';
 import '../data/models/company_work_schedule.dart';
 
 // ─── Company Location Model ────────────────────────────────────────────────
@@ -43,8 +48,7 @@ class CompanyLocation {
 }
 
 // ─── Today's Attendance ───────────────────────────────────────────────────
-final todayAttendanceProvider =
-    StreamProvider<AttendanceModel?>((ref) async* {
+final todayAttendanceProvider = StreamProvider<AttendanceModel?>((ref) async* {
   final user = ref.watch(currentUserProvider);
   if (user == null) {
     yield null;
@@ -59,8 +63,7 @@ final todayAttendanceProvider =
   yield* firestore
       .collection(AppConstants.attendanceLogsCollection)
       .where('employeeId', isEqualTo: user.uid)
-      .where('date',
-          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+      .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
       .where('date', isLessThan: Timestamp.fromDate(endOfDay))
       .limit(1)
       .snapshots()
@@ -71,8 +74,7 @@ final todayAttendanceProvider =
 
 // ─── Attendance History ────────────────────────────────────────────────────
 final attendanceHistoryProvider =
-    StreamProvider.family<List<AttendanceModel>, String>(
-        (ref, employeeId) {
+    StreamProvider.family<List<AttendanceModel>, String>((ref, employeeId) {
   final firestore = ref.watch(firestoreProvider);
   return firestore
       .collection(AppConstants.attendanceLogsCollection)
@@ -80,8 +82,7 @@ final attendanceHistoryProvider =
       .orderBy('date', descending: true)
       .limit(30)
       .snapshots()
-      .map((snap) =>
-          snap.docs.map(AttendanceModel.fromFirestore).toList());
+      .map((snap) => snap.docs.map(AttendanceModel.fromFirestore).toList());
 });
 
 // ─── All Attendance (Admin) ────────────────────────────────────────────────
@@ -92,17 +93,73 @@ final allAttendanceProvider = StreamProvider<List<AttendanceModel>>((ref) {
 
   return firestore
       .collection(AppConstants.attendanceLogsCollection)
-      .where('date',
-          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+      .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
       .orderBy('date', descending: true)
       .snapshots()
-      .map((snap) =>
-          snap.docs.map(AttendanceModel.fromFirestore).toList());
+      .map((snap) => snap.docs.map(AttendanceModel.fromFirestore).toList());
+});
+
+final attendanceReportProvider =
+    FutureProvider.family<List<AttendanceReportRow>, AttendanceDateRange>(
+        (ref, range) async {
+  final firestore = ref.watch(firestoreProvider);
+
+  final results = await Future.wait([
+    firestore
+        .collection(AppConstants.usersCollection)
+        .where('role', isEqualTo: UserRole.employee.value)
+        .get(),
+    firestore
+        .collection(AppConstants.attendanceLogsCollection)
+        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(range.start))
+        .where('date', isLessThan: Timestamp.fromDate(range.endExclusive))
+        .get(),
+    firestore.collection(AppConstants.leaveRequestsCollection).get(),
+    firestore
+        .collection(AppConstants.companyHolidaysCollection)
+        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(range.start))
+        .where('date', isLessThan: Timestamp.fromDate(range.endExclusive))
+        .get(),
+    firestore
+        .collection(AppConstants.companySettingsCollection)
+        .doc(AppConstants.companyAttendancePolicyDocId)
+        .get(),
+  ]);
+
+  final employeeSnapshot = results[0] as QuerySnapshot<Map<String, dynamic>>;
+  final attendanceSnapshot = results[1] as QuerySnapshot<Map<String, dynamic>>;
+  final leaveSnapshot = results[2] as QuerySnapshot<Map<String, dynamic>>;
+  final holidaySnapshot = results[3] as QuerySnapshot<Map<String, dynamic>>;
+  final policySnapshot = results[4] as DocumentSnapshot<Map<String, dynamic>>;
+
+  final employees = employeeSnapshot.docs.map(UserModel.fromFirestore).toList();
+  final attendanceLogs =
+      attendanceSnapshot.docs.map(AttendanceModel.fromFirestore).toList();
+  final approvedLeaves = leaveSnapshot.docs
+      .map(LeaveRequestModel.fromFirestore)
+      .where((leave) =>
+          leave.status == LeaveRequestStatus.approved &&
+          !AttendanceDateRange.dateOnly(leave.endDate).isBefore(range.start) &&
+          !AttendanceDateRange.dateOnly(leave.startDate).isAfter(range.end))
+      .toList();
+  final holidayDayKeys = holidaySnapshot.docs
+      .map(CompanyHolidayModel.fromFirestore)
+      .map((holiday) => AttendanceReportBuilder.dayKey(holiday.date))
+      .toSet();
+  final policy = AttendancePolicyModel.fromMap(policySnapshot.data());
+
+  return AttendanceReportBuilder.build(
+    range: range,
+    employees: employees,
+    attendanceLogs: attendanceLogs,
+    approvedLeaves: approvedLeaves,
+    companyWeeklyRestDays: policy.weeklyRestDays,
+    holidayDayKeys: holidayDayKeys,
+  );
 });
 
 // ─── Company Locations ─────────────────────────────────────────────────────
-final companyLocationsProvider =
-    StreamProvider<List<CompanyLocation>>((ref) {
+final companyLocationsProvider = StreamProvider<List<CompanyLocation>>((ref) {
   final firestore = ref.watch(firestoreProvider);
   return firestore
       .collection(AppConstants.companyLocationsCollection)
@@ -126,8 +183,7 @@ final allCompanyLocationsProvider =
 });
 
 /// Shift start times and lateness grace (document `company_settings/work_hours`).
-final workScheduleProvider =
-    StreamProvider<CompanyWorkSchedule>((ref) {
+final workScheduleProvider = StreamProvider<CompanyWorkSchedule>((ref) {
   final firestore = ref.watch(firestoreProvider);
   return firestore
       .collection(AppConstants.companySettingsCollection)
@@ -137,8 +193,7 @@ final workScheduleProvider =
 });
 
 /// Payroll attendance policy (document `company_settings/attendance_policy`).
-final attendancePolicyProvider =
-    StreamProvider<AttendancePolicyModel>((ref) {
+final attendancePolicyProvider = StreamProvider<AttendancePolicyModel>((ref) {
   final firestore = ref.watch(firestoreProvider);
   return firestore
       .collection(AppConstants.companySettingsCollection)
@@ -263,8 +318,7 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
     }
   }
 
-  bool checkGeofence(
-      Position position, List<CompanyLocation> locations) {
+  bool checkGeofence(Position position, List<CompanyLocation> locations) {
     for (final loc in locations) {
       final distance = Geolocator.distanceBetween(
         position.latitude,
@@ -296,26 +350,22 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
       final existing = await _firestore
           .collection(AppConstants.attendanceLogsCollection)
           .where('employeeId', isEqualTo: _employeeId)
-          .where('date',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
           .limit(1)
           .get();
 
       if (existing.docs.isNotEmpty) {
         throw const AppException(
-            message: 'Already checked in today',
-            code: 'already-checked-in');
+            message: 'Already checked in today', code: 'already-checked-in');
       }
 
-      final doc = _firestore
-          .collection(AppConstants.attendanceLogsCollection)
-          .doc();
+      final doc =
+          _firestore.collection(AppConstants.attendanceLogsCollection).doc();
 
       final shiftStart = workSchedule.shiftStartOnDay(now, shiftType);
       final grace = workSchedule.graceMinutesFor(shiftType, day: now);
-      final lateMinutes = now.isAfter(shiftStart)
-          ? now.difference(shiftStart).inMinutes
-          : 0;
+      final lateMinutes =
+          now.isAfter(shiftStart) ? now.difference(shiftStart).inMinutes : 0;
 
       final attendance = AttendanceModel(
         id: doc.id,
@@ -344,8 +394,7 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
       state = state.copyWith(isLoading: false, isSuccess: true);
       return true;
     } catch (e) {
-      state = state.copyWith(
-          isLoading: false, errorMessage: e.toString());
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
       return false;
     }
   }
@@ -361,8 +410,8 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
           .doc(attendanceId)
           .update({
         'checkOutTime': FieldValue.serverTimestamp(),
-          'checkOutLat': position.latitude,
-          'checkOutLng': position.longitude,
+        'checkOutLat': position.latitude,
+        'checkOutLng': position.longitude,
       });
       await _notify(
         title: 'تم تسجيل انصراف',
@@ -373,8 +422,7 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
       state = state.copyWith(isLoading: false, isSuccess: true);
       return true;
     } catch (e) {
-      state = state.copyWith(
-          isLoading: false, errorMessage: e.toString());
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
       return false;
     }
   }
