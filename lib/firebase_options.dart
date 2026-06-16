@@ -48,7 +48,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '737044049717',
     projectId: 'hr-sys-fa9d3',
     storageBucket: 'hr-sys-fa9d3.firebasestorage.app',
-    iosBundleId: 'com.company.hrsysapp',
+    iosBundleId: 'com.athar.hr',
   );
 
   /// Web + Windows desktop use the same Firebase Web app registration.
