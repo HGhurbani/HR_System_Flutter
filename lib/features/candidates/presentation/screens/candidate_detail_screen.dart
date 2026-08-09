@@ -135,9 +135,7 @@ class CandidateDetailScreen extends ConsumerWidget {
 
     final success =
         await ref.read(candidatesNotifierProvider.notifier).deleteCandidate(
-              candidate.id,
-              imageUrl: candidate.imageUrl,
-              cvFileUrl: candidate.cvFileUrl,
+              candidate,
             );
     if (!context.mounted) return;
     if (success) {

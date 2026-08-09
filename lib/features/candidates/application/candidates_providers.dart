@@ -31,6 +31,20 @@ class CandidateFilter {
   bool get hasActiveFilters => status != null;
 }
 
+class CandidateDeletionResult {
+  final Set<String> deletedIds;
+  final Set<String> failedIds;
+
+  const CandidateDeletionResult({
+    required this.deletedIds,
+    required this.failedIds,
+  });
+
+  int get deletedCount => deletedIds.length;
+  int get failedCount => failedIds.length;
+  bool get isSuccessful => failedIds.isEmpty;
+}
+
 final candidateFilterProvider =
     StateProvider<CandidateFilter>((ref) => const CandidateFilter());
 
@@ -287,31 +301,66 @@ class CandidatesNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
-  Future<bool> deleteCandidate(
-    String id, {
-    String? imageUrl,
-    String? cvFileUrl,
-  }) async {
+  Future<bool> deleteCandidate(CandidateModel candidate) async {
+    final result = await deleteCandidates([candidate]);
+    return result.isSuccessful;
+  }
+
+  Future<CandidateDeletionResult> deleteCandidates(
+    Iterable<CandidateModel> candidates,
+  ) async {
+    final candidatesToDelete = candidates.toList(growable: false);
+    if (candidatesToDelete.isEmpty) {
+      return const CandidateDeletionResult(
+        deletedIds: <String>{},
+        failedIds: <String>{},
+      );
+    }
+
     state = const AsyncValue.loading();
-    try {
-      await _deleteStorageFile(imageUrl);
-      await _deleteStorageFile(cvFileUrl);
-      await _firestore
-          .collection(AppConstants.candidateProfilesCollection)
-          .doc(id)
-          .delete();
+    final deletedIds = <String>{};
+    final failedIds = <String>{};
+    Object? lastError;
+    StackTrace? lastStackTrace;
+
+    for (final candidate in candidatesToDelete) {
+      try {
+        await _deleteStorageFile(candidate.imageUrl);
+        await _deleteStorageFile(candidate.cvFileUrl);
+        await _deleteStorageFile(candidate.videoUrl);
+        await _firestore
+            .collection(AppConstants.candidateProfilesCollection)
+            .doc(candidate.id)
+            .delete();
+        deletedIds.add(candidate.id);
+      } catch (error, stackTrace) {
+        failedIds.add(candidate.id);
+        lastError = error;
+        lastStackTrace = stackTrace;
+      }
+    }
+
+    if (deletedIds.isNotEmpty) {
       await _notify(
-        title: 'تم حذف سيفي',
-        body: 'تم حذف سيفي من النظام',
+        title: deletedIds.length == 1 ? 'تم حذف سيفي' : 'تم حذف سيفيهات',
+        body: deletedIds.length == 1
+            ? 'تم حذف سيفي من النظام'
+            : 'تم حذف ${deletedIds.length} سيفيهات من النظام',
         type: 'candidate_deleted',
         targetUserId: adminNotificationTarget,
       );
-      state = const AsyncValue.data(null);
-      return true;
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-      return false;
     }
+
+    if (failedIds.isEmpty) {
+      state = const AsyncValue.data(null);
+    } else {
+      state = AsyncValue.error(lastError!, lastStackTrace!);
+    }
+
+    return CandidateDeletionResult(
+      deletedIds: deletedIds,
+      failedIds: failedIds,
+    );
   }
 
   Future<void> _deleteStorageFile(String? url) async {

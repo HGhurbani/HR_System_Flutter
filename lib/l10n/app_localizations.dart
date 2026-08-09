@@ -1202,6 +1202,12 @@ abstract class AppLocalizations {
   /// **'جاري تجهيز ملفات السيفي...'**
   String get preparingCvFiles;
 
+  /// No description provided for @deletingCandidates.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاري حذف السيفيهات...'**
+  String get deletingCandidates;
+
   /// No description provided for @noCvFileToShare.
   ///
   /// In ar, this message translates to:
@@ -1225,6 +1231,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'{count} من السيفيهات المحددة لا تحتوي على ملف'**
   String someCvFilesMissing(int count);
+
+  /// No description provided for @deleteCandidateMessage.
+  ///
+  /// In ar, this message translates to:
+  /// **'هل تريد حذف سيفي {name} وجميع ملفاته؟ لا يمكن التراجع عن هذا الإجراء.'**
+  String deleteCandidateMessage(String name);
+
+  /// No description provided for @deleteCandidatesMessage.
+  ///
+  /// In ar, this message translates to:
+  /// **'هل تريد حذف {count} من السيفيهات المحددة وجميع ملفاتها؟ لا يمكن التراجع عن هذا الإجراء.'**
+  String deleteCandidatesMessage(int count);
+
+  /// No description provided for @candidatesDeleted.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حذف {count} من السيفيهات بنجاح'**
+  String candidatesDeleted(int count);
+
+  /// No description provided for @candidatesDeletePartial.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حذف {deletedCount}، وتعذر حذف {failedCount}'**
+  String candidatesDeletePartial(int deletedCount, int failedCount);
 
   /// No description provided for @attendance.
   ///
@@ -2059,6 +2089,24 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تم الحذف بنجاح'**
   String get deleteSuccess;
+
+  /// No description provided for @deleteSalaryMessage.
+  ///
+  /// In ar, this message translates to:
+  /// **'هل تريد حذف راتب {name} لشهر {month}؟ لن تُحذف العمولات المرتبطة.'**
+  String deleteSalaryMessage(String name, String month);
+
+  /// No description provided for @deleteCommissionMessage.
+  ///
+  /// In ar, this message translates to:
+  /// **'هل تريد حذف عمولة {name} لشهر {month}؟ لن يُعاد حساب الراتب المولّد تلقائياً.'**
+  String deleteCommissionMessage(String name, String month);
+
+  /// No description provided for @deleteCompensationProfileMessage.
+  ///
+  /// In ar, this message translates to:
+  /// **'هل تريد حذف إعدادات راتب {name}؟ ستبقى الرواتب والعمولات السابقة، ولن يمكن توليد راتب جديد حتى إعادة إنشاء الإعدادات.'**
+  String deleteCompensationProfileMessage(String name);
 
   /// No description provided for @saveSuccess.
   ///

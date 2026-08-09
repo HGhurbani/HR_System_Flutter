@@ -152,6 +152,7 @@ class _CompensationProfilesTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profilesAsync = ref.watch(employeeCompensationProfilesProvider);
     final l10n = context.l10n;
+    final isDeleting = ref.watch(salaryAdminNotifierProvider).isLoading;
 
     return profilesAsync.when(
       loading: () => const ShimmerList(count: 6, itemHeight: 110),
@@ -177,13 +178,24 @@ class _CompensationProfilesTab extends ConsumerWidget {
                 isScrollControlled: true,
                 useSafeArea: true,
                 shape: const RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
-                builder: (_) =>
-                    _CompensationSheet(initialProfile: profile),
+                builder: (_) => _CompensationSheet(initialProfile: profile),
               ),
-              child: _CompensationTile(profile: profile),
+              child: _CompensationTile(
+                profile: profile,
+                onDelete: isDeleting
+                    ? null
+                    : () => _confirmFinancialDelete(
+                          context,
+                          ref,
+                          message: l10n.deleteCompensationProfileMessage(
+                            profile.employeeName ?? profile.employeeId,
+                          ),
+                          delete: (notifier) => notifier
+                              .deleteCompensationProfile(profile.employeeId),
+                        ),
+              ),
             );
           },
         );
@@ -199,6 +211,7 @@ class _PayrollTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final salariesAsync = ref.watch(allSalariesProvider);
     final l10n = context.l10n;
+    final isDeleting = ref.watch(salaryAdminNotifierProvider).isLoading;
 
     return salariesAsync.when(
       loading: () => const ShimmerList(count: 6, itemHeight: 110),
@@ -216,7 +229,23 @@ class _PayrollTab extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           itemCount: salaries.length,
           separatorBuilder: (_, __) => const SizedBox(height: 8),
-          itemBuilder: (_, index) => _SalaryTile(salary: salaries[index]),
+          itemBuilder: (_, index) {
+            final salary = salaries[index];
+            return _SalaryTile(
+              salary: salary,
+              onDelete: isDeleting
+                  ? null
+                  : () => _confirmFinancialDelete(
+                        context,
+                        ref,
+                        message: l10n.deleteSalaryMessage(
+                          salary.employeeName ?? salary.employeeId,
+                          salary.month,
+                        ),
+                        delete: (notifier) => notifier.deleteSalary(salary.id),
+                      ),
+            );
+          },
         );
       },
     );
@@ -230,6 +259,7 @@ class _CommissionsTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final commissionsAsync = ref.watch(allCommissionsProvider);
     final l10n = context.l10n;
+    final isDeleting = ref.watch(salaryAdminNotifierProvider).isLoading;
 
     return commissionsAsync.when(
       loading: () => const ShimmerList(count: 6, itemHeight: 90),
@@ -247,18 +277,63 @@ class _CommissionsTab extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           itemCount: commissions.length,
           separatorBuilder: (_, __) => const SizedBox(height: 8),
-          itemBuilder: (_, index) =>
-              _CommissionTile(commission: commissions[index]),
+          itemBuilder: (_, index) {
+            final commission = commissions[index];
+            return _CommissionTile(
+              commission: commission,
+              onDelete: isDeleting
+                  ? null
+                  : () => _confirmFinancialDelete(
+                        context,
+                        ref,
+                        message: l10n.deleteCommissionMessage(
+                          commission.employeeName ?? commission.employeeId,
+                          commission.month,
+                        ),
+                        delete: (notifier) =>
+                            notifier.deleteCommission(commission.id),
+                      ),
+            );
+          },
         );
       },
     );
   }
 }
 
+Future<void> _confirmFinancialDelete(
+  BuildContext context,
+  WidgetRef ref, {
+  required String message,
+  required Future<bool> Function(SalaryAdminNotifier notifier) delete,
+}) async {
+  final confirmed = await context.showConfirmDialog(
+    title: context.l10n.confirmDelete,
+    message: message,
+    confirmLabel: context.l10n.delete,
+    isDanger: true,
+  );
+  if (confirmed != true || !context.mounted) return;
+
+  final success = await delete(
+    ref.read(salaryAdminNotifierProvider.notifier),
+  );
+  if (!context.mounted) return;
+
+  context.showSnackBar(
+    success ? context.l10n.deleteSuccess : context.l10n.errorGeneral,
+    isError: !success,
+  );
+}
+
 class _CompensationTile extends StatelessWidget {
   final EmployeeCompensationModel profile;
+  final VoidCallback? onDelete;
 
-  const _CompensationTile({required this.profile});
+  const _CompensationTile({
+    required this.profile,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -298,6 +373,12 @@ class _CompensationTile extends StatelessWidget {
                     ),
                   ),
                 ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  tooltip: l10n.delete,
+                  color: context.colorScheme.error,
+                  onPressed: onDelete,
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -329,8 +410,12 @@ class _CompensationTile extends StatelessWidget {
 
 class _SalaryTile extends StatelessWidget {
   final SalaryModel salary;
+  final VoidCallback? onDelete;
 
-  const _SalaryTile({required this.salary});
+  const _SalaryTile({
+    required this.salary,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -360,13 +445,22 @@ class _SalaryTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    salary.isApproved ? l10n.approvedStatus : l10n.pendingStatus,
+                    salary.isApproved
+                        ? l10n.approvedStatus
+                        : l10n.pendingStatus,
                     style: TextStyle(
-                      color:
-                          salary.isApproved ? AppColors.success : AppColors.warning,
+                      color: salary.isApproved
+                          ? AppColors.success
+                          : AppColors.warning,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  tooltip: l10n.delete,
+                  color: context.colorScheme.error,
+                  onPressed: onDelete,
                 ),
               ],
             ),
@@ -420,8 +514,12 @@ class _SalaryTile extends StatelessWidget {
 
 class _CommissionTile extends StatelessWidget {
   final CommissionModel commission;
+  final VoidCallback? onDelete;
 
-  const _CommissionTile({required this.commission});
+  const _CommissionTile({
+    required this.commission,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -440,12 +538,23 @@ class _CommissionTile extends StatelessWidget {
         subtitle: Text(
           '${commission.month} • ${commission.reason ?? commission.source ?? ''}',
         ),
-        trailing: Text(
-          '${commission.amount.toStringAsFixed(0)} ${context.l10n.currency}',
-          style: const TextStyle(
-            color: AppColors.accent,
-            fontWeight: FontWeight.w700,
-          ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${commission.amount.toStringAsFixed(0)} ${context.l10n.currency}',
+              style: const TextStyle(
+                color: AppColors.accent,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline_rounded),
+              tooltip: context.l10n.delete,
+              color: context.colorScheme.error,
+              onPressed: onDelete,
+            ),
+          ],
         ),
       ),
     );
@@ -475,7 +584,8 @@ class _CompensationSheetState extends ConsumerState<_CompensationSheet> {
     final profile = widget.initialProfile;
     if (profile != null) {
       _basicController.text = profile.basicSalary.toStringAsFixed(0);
-      _ruleValueController.text = profile.commissionRuleValue.toStringAsFixed(0);
+      _ruleValueController.text =
+          profile.commissionRuleValue.toStringAsFixed(0);
       _notesController.text = profile.notes ?? '';
       _isCommissionEligible = profile.isCommissionEligible;
     }
@@ -492,7 +602,9 @@ class _CompensationSheetState extends ConsumerState<_CompensationSheet> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate() || _selectedEmployee == null) return;
 
-    final success = await ref.read(salaryAdminNotifierProvider.notifier).saveCompensationProfile(
+    final success = await ref
+        .read(salaryAdminNotifierProvider.notifier)
+        .saveCompensationProfile(
           EmployeeCompensationModel(
             employeeId: _selectedEmployee!.uid,
             employeeName: _selectedEmployee!.fullName,
@@ -528,7 +640,8 @@ class _CompensationSheetState extends ConsumerState<_CompensationSheet> {
     final l10n = context.l10n;
 
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -618,7 +731,6 @@ class _CompensationSheetState extends ConsumerState<_CompensationSheet> {
       ),
     );
   }
-
 }
 
 class _CommissionSheet extends ConsumerStatefulWidget {
@@ -650,14 +762,15 @@ class _CommissionSheetState extends ConsumerState<_CommissionSheet> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate() || _selectedEmployee == null) return;
 
-    final success = await ref.read(salaryAdminNotifierProvider.notifier).addCommission(
-          employee: _selectedEmployee!,
-          month: _monthController.text.trim(),
-          amount: double.tryParse(_amountController.text) ?? 0,
-          reason: _reasonController.text.trim(),
-          source: _source,
-          notes: _notesController.text.trim(),
-        );
+    final success =
+        await ref.read(salaryAdminNotifierProvider.notifier).addCommission(
+              employee: _selectedEmployee!,
+              month: _monthController.text.trim(),
+              amount: double.tryParse(_amountController.text) ?? 0,
+              reason: _reasonController.text.trim(),
+              source: _source,
+              notes: _notesController.text.trim(),
+            );
 
     if (mounted) {
       if (success) {
@@ -675,7 +788,8 @@ class _CommissionSheetState extends ConsumerState<_CommissionSheet> {
     final l10n = context.l10n;
 
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -698,7 +812,8 @@ class _CommissionSheetState extends ConsumerState<_CommissionSheet> {
                         ),
                       )
                       .toList(),
-                  onChanged: (value) => setState(() => _selectedEmployee = value),
+                  onChanged: (value) =>
+                      setState(() => _selectedEmployee = value),
                   decoration: InputDecoration(
                     labelText: l10n.employees,
                     prefixIcon: const Icon(Icons.people_outline),
@@ -835,14 +950,15 @@ class _SalarySheetState extends ConsumerState<_SalarySheet> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate() || _selectedEmployee == null) return;
 
-    final success = await ref.read(salaryAdminNotifierProvider.notifier).generateSalary(
-          employee: _selectedEmployee!,
-          month: _monthController.text.trim(),
-          additions: double.tryParse(_additionsController.text) ?? 0,
-          deductions: double.tryParse(_deductionsController.text) ?? 0,
-          notes: _notesController.text.trim(),
-          approve: _approveNow,
-        );
+    final success =
+        await ref.read(salaryAdminNotifierProvider.notifier).generateSalary(
+              employee: _selectedEmployee!,
+              month: _monthController.text.trim(),
+              additions: double.tryParse(_additionsController.text) ?? 0,
+              deductions: double.tryParse(_deductionsController.text) ?? 0,
+              notes: _notesController.text.trim(),
+              approve: _approveNow,
+            );
 
     if (mounted) {
       if (success) {
@@ -860,7 +976,8 @@ class _SalarySheetState extends ConsumerState<_SalarySheet> {
     final l10n = context.l10n;
 
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -883,7 +1000,8 @@ class _SalarySheetState extends ConsumerState<_SalarySheet> {
                         ),
                       )
                       .toList(),
-                  onChanged: (value) => setState(() => _selectedEmployee = value),
+                  onChanged: (value) =>
+                      setState(() => _selectedEmployee = value),
                   decoration: InputDecoration(
                     labelText: l10n.employees,
                     prefixIcon: const Icon(Icons.people_outline),

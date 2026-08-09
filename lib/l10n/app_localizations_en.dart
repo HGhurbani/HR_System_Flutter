@@ -567,6 +567,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preparingCvFiles => 'Preparing CV files...';
 
   @override
+  String get deletingCandidates => 'Deleting CVs...';
+
+  @override
   String get noCvFileToShare => 'There is no CV file to share';
 
   @override
@@ -580,6 +583,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String someCvFilesMissing(int count) {
     return '$count selected CVs do not have a file';
+  }
+
+  @override
+  String deleteCandidateMessage(String name) {
+    return 'Delete $name\'s CV and all of its files? This action cannot be undone.';
+  }
+
+  @override
+  String deleteCandidatesMessage(int count) {
+    return 'Delete the $count selected CVs and all of their files? This action cannot be undone.';
+  }
+
+  @override
+  String candidatesDeleted(int count) {
+    return 'Successfully deleted $count CVs';
+  }
+
+  @override
+  String candidatesDeletePartial(int deletedCount, int failedCount) {
+    return 'Deleted $deletedCount; failed to delete $failedCount';
   }
 
   @override
@@ -1002,6 +1025,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteSuccess => 'Deleted successfully';
+
+  @override
+  String deleteSalaryMessage(String name, String month) {
+    return 'Delete $name\'s salary for $month? Related commissions will not be deleted.';
+  }
+
+  @override
+  String deleteCommissionMessage(String name, String month) {
+    return 'Delete $name\'s commission for $month? Any generated salary will not be recalculated automatically.';
+  }
+
+  @override
+  String deleteCompensationProfileMessage(String name) {
+    return 'Delete $name\'s salary settings? Existing salaries and commissions will remain, and new salaries cannot be generated until the settings are recreated.';
+  }
 
   @override
   String get saveSuccess => 'Saved successfully';

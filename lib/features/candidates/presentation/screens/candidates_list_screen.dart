@@ -29,8 +29,10 @@ class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
   final _searchController = TextEditingController();
   final _selectedCandidateIds = <String>{};
   bool _isSharing = false;
+  bool _isDeleting = false;
 
   bool get _selectionMode => _selectedCandidateIds.isNotEmpty;
+  bool get _isBusy => _isSharing || _isDeleting;
 
   @override
   void dispose() {
@@ -66,6 +68,14 @@ class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
         ),
         actions: _selectionMode
             ? [
+                if (widget.isAdminView)
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline_rounded),
+                    tooltip: l10n.delete,
+                    onPressed: _isBusy
+                        ? null
+                        : () => _deleteSelectedCandidates(candidatesAsync),
+                  ),
                 IconButton(
                   icon: _isSharing
                       ? const SizedBox(
@@ -75,20 +85,23 @@ class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
                         )
                       : const Icon(Icons.share_outlined),
                   tooltip: l10n.share,
-                  onPressed: _isSharing
+                  onPressed: _isBusy
                       ? null
                       : () => _shareSelectedCandidates(candidatesAsync),
                 ),
                 IconButton(
                   icon: const Icon(Icons.select_all_rounded),
                   tooltip: l10n.selectAll,
-                  onPressed: candidatesAsync.maybeWhen(
-                    data: (candidates) => () => _selectAllVisibleCandidates(
-                          candidates,
-                          filter.searchQuery,
+                  onPressed: _isBusy
+                      ? null
+                      : candidatesAsync.maybeWhen(
+                          data: (candidates) =>
+                              () => _selectAllVisibleCandidates(
+                                    candidates,
+                                    filter.searchQuery,
+                                  ),
+                          orElse: () => null,
                         ),
-                    orElse: () => null,
-                  ),
                 ),
               ]
             : [
@@ -202,6 +215,9 @@ class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
                           selectionEnabled: true,
                           onToggleSelection: () =>
                               _toggleCandidateSelection(candidate.id),
+                          onDelete: widget.isAdminView
+                              ? () => _deleteCandidate(candidate)
+                              : null,
                         );
                       },
                     );
@@ -210,7 +226,7 @@ class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
               ),
             ],
           ),
-          if (_isSharing)
+          if (_isBusy)
             ColoredBox(
               color: Colors.black.withValues(alpha: 0.18),
               child: Center(
@@ -226,7 +242,9 @@ class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                         const SizedBox(width: 14),
-                        Text(l10n.preparingCvFiles),
+                        Text(_isDeleting
+                            ? l10n.deletingCandidates
+                            : l10n.preparingCvFiles),
                       ],
                     ),
                   ),
@@ -272,6 +290,80 @@ class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
         ..clear()
         ..addAll(visible.map((candidate) => candidate.id));
     });
+  }
+
+  Future<void> _deleteCandidate(CandidateModel candidate) async {
+    final confirmed = await context.showConfirmDialog(
+      title: context.l10n.confirmDelete,
+      message: context.l10n.deleteCandidateMessage(candidate.fullName),
+      confirmLabel: context.l10n.delete,
+      isDanger: true,
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isDeleting = true);
+    final success =
+        await ref.read(candidatesNotifierProvider.notifier).deleteCandidate(
+              candidate,
+            );
+    if (!mounted) return;
+    setState(() => _isDeleting = false);
+    context.showSnackBar(
+      success ? context.l10n.deleteSuccess : context.l10n.errorGeneral,
+      isError: !success,
+    );
+  }
+
+  Future<void> _deleteSelectedCandidates(
+    AsyncValue<List<CandidateModel>> candidatesAsync,
+  ) async {
+    final candidates = candidatesAsync.valueOrNull;
+    if (candidates == null || _selectedCandidateIds.isEmpty) return;
+
+    final selected = candidates
+        .where((candidate) => _selectedCandidateIds.contains(candidate.id))
+        .toList(growable: false);
+    if (selected.isEmpty) return;
+
+    final confirmed = await context.showConfirmDialog(
+      title: context.l10n.confirmDelete,
+      message: context.l10n.deleteCandidatesMessage(selected.length),
+      confirmLabel: context.l10n.delete,
+      isDanger: true,
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isDeleting = true);
+    final result =
+        await ref.read(candidatesNotifierProvider.notifier).deleteCandidates(
+              selected,
+            );
+    if (!mounted) return;
+
+    setState(() {
+      _isDeleting = false;
+      _selectedCandidateIds
+        ..clear()
+        ..addAll(result.failedIds);
+    });
+
+    if (result.failedCount == 0) {
+      context.showSnackBar(
+        context.l10n.candidatesDeleted(result.deletedCount),
+      );
+      return;
+    }
+    if (result.deletedCount == 0) {
+      context.showSnackBar(context.l10n.errorGeneral, isError: true);
+      return;
+    }
+    context.showSnackBar(
+      context.l10n.candidatesDeletePartial(
+        result.deletedCount,
+        result.failedCount,
+      ),
+      isError: true,
+    );
   }
 
   Future<void> _shareSelectedCandidates(
@@ -375,6 +467,7 @@ class _CandidateCard extends ConsumerWidget {
   final bool selectionEnabled;
   final bool selected;
   final VoidCallback onToggleSelection;
+  final VoidCallback? onDelete;
 
   const _CandidateCard({
     required this.candidate,
@@ -383,6 +476,7 @@ class _CandidateCard extends ConsumerWidget {
     required this.selectionEnabled,
     required this.selected,
     required this.onToggleSelection,
+    this.onDelete,
   });
 
   Color _statusColor(CandidateStatus status) {
@@ -510,6 +604,13 @@ class _CandidateCard extends ConsumerWidget {
                           label: _statusLabel(candidate.status, l10n),
                           color: statusColor,
                         ),
+                        if (!selectionMode && onDelete != null)
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            icon: const Icon(Icons.delete_outline_rounded),
+                            tooltip: l10n.delete,
+                            onPressed: onDelete,
+                          ),
                       ],
                     ),
                     if (!candidate.isImageOnlyProfile) ...[

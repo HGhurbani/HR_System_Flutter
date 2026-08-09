@@ -565,6 +565,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get preparingCvFiles => 'جاري تجهيز ملفات السيفي...';
 
   @override
+  String get deletingCandidates => 'جاري حذف السيفيهات...';
+
+  @override
   String get noCvFileToShare => 'لا يوجد ملف سيفي للمشاركة';
 
   @override
@@ -578,6 +581,26 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String someCvFilesMissing(int count) {
     return '$count من السيفيهات المحددة لا تحتوي على ملف';
+  }
+
+  @override
+  String deleteCandidateMessage(String name) {
+    return 'هل تريد حذف سيفي $name وجميع ملفاته؟ لا يمكن التراجع عن هذا الإجراء.';
+  }
+
+  @override
+  String deleteCandidatesMessage(int count) {
+    return 'هل تريد حذف $count من السيفيهات المحددة وجميع ملفاتها؟ لا يمكن التراجع عن هذا الإجراء.';
+  }
+
+  @override
+  String candidatesDeleted(int count) {
+    return 'تم حذف $count من السيفيهات بنجاح';
+  }
+
+  @override
+  String candidatesDeletePartial(int deletedCount, int failedCount) {
+    return 'تم حذف $deletedCount، وتعذر حذف $failedCount';
   }
 
   @override
@@ -1000,6 +1023,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deleteSuccess => 'تم الحذف بنجاح';
+
+  @override
+  String deleteSalaryMessage(String name, String month) {
+    return 'هل تريد حذف راتب $name لشهر $month؟ لن تُحذف العمولات المرتبطة.';
+  }
+
+  @override
+  String deleteCommissionMessage(String name, String month) {
+    return 'هل تريد حذف عمولة $name لشهر $month؟ لن يُعاد حساب الراتب المولّد تلقائياً.';
+  }
+
+  @override
+  String deleteCompensationProfileMessage(String name) {
+    return 'هل تريد حذف إعدادات راتب $name؟ ستبقى الرواتب والعمولات السابقة، ولن يمكن توليد راتب جديد حتى إعادة إنشاء الإعدادات.';
+  }
 
   @override
   String get saveSuccess => 'تم الحفظ بنجاح';

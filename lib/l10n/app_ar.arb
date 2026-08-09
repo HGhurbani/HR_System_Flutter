@@ -198,6 +198,7 @@
   "share": "مشاركة",
   "selectAll": "تحديد الكل",
   "preparingCvFiles": "جاري تجهيز ملفات السيفي...",
+  "deletingCandidates": "جاري حذف السيفيهات...",
   "noCvFileToShare": "لا يوجد ملف سيفي للمشاركة",
   "shareCvFailed": "فشلت مشاركة ملف السيفي",
   "selectedCandidates": "تم تحديد {count}",
@@ -210,6 +211,32 @@
   "@someCvFilesMissing": {
     "placeholders": {
       "count": { "type": "int" }
+    }
+  },
+
+  "deleteCandidateMessage": "هل تريد حذف سيفي {name} وجميع ملفاته؟ لا يمكن التراجع عن هذا الإجراء.",
+  "@deleteCandidateMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "deleteCandidatesMessage": "هل تريد حذف {count} من السيفيهات المحددة وجميع ملفاتها؟ لا يمكن التراجع عن هذا الإجراء.",
+  "@deleteCandidatesMessage": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "candidatesDeleted": "تم حذف {count} من السيفيهات بنجاح",
+  "@candidatesDeleted": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "candidatesDeletePartial": "تم حذف {deletedCount}، وتعذر حذف {failedCount}",
+  "@candidatesDeletePartial": {
+    "placeholders": {
+      "deletedCount": { "type": "int" },
+      "failedCount": { "type": "int" }
     }
   },
 
@@ -363,6 +390,26 @@
   "confirmDelete": "هل أنت متأكد من الحذف؟",
   "confirmDeleteMessage": "لا يمكن التراجع عن هذا الإجراء",
   "deleteSuccess": "تم الحذف بنجاح",
+  "deleteSalaryMessage": "هل تريد حذف راتب {name} لشهر {month}؟ لن تُحذف العمولات المرتبطة.",
+  "@deleteSalaryMessage": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "month": { "type": "String" }
+    }
+  },
+  "deleteCommissionMessage": "هل تريد حذف عمولة {name} لشهر {month}؟ لن يُعاد حساب الراتب المولّد تلقائياً.",
+  "@deleteCommissionMessage": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "month": { "type": "String" }
+    }
+  },
+  "deleteCompensationProfileMessage": "هل تريد حذف إعدادات راتب {name}؟ ستبقى الرواتب والعمولات السابقة، ولن يمكن توليد راتب جديد حتى إعادة إنشاء الإعدادات.",
+  "@deleteCompensationProfileMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
   "saveSuccess": "تم الحفظ بنجاح",
   "updateSuccess": "تم التحديث بنجاح",
   "disableAccount": "تعطيل الحساب",

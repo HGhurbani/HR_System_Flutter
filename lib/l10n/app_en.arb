@@ -196,6 +196,7 @@
   "share": "Share",
   "selectAll": "Select all",
   "preparingCvFiles": "Preparing CV files...",
+  "deletingCandidates": "Deleting CVs...",
   "noCvFileToShare": "There is no CV file to share",
   "shareCvFailed": "Failed to share the CV file",
   "selectedCandidates": "{count} selected",
@@ -208,6 +209,32 @@
   "@someCvFilesMissing": {
     "placeholders": {
       "count": { "type": "int" }
+    }
+  },
+
+  "deleteCandidateMessage": "Delete {name}'s CV and all of its files? This action cannot be undone.",
+  "@deleteCandidateMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "deleteCandidatesMessage": "Delete the {count} selected CVs and all of their files? This action cannot be undone.",
+  "@deleteCandidatesMessage": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "candidatesDeleted": "Successfully deleted {count} CVs",
+  "@candidatesDeleted": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "candidatesDeletePartial": "Deleted {deletedCount}; failed to delete {failedCount}",
+  "@candidatesDeletePartial": {
+    "placeholders": {
+      "deletedCount": { "type": "int" },
+      "failedCount": { "type": "int" }
     }
   },
 
@@ -361,6 +388,26 @@
   "confirmDelete": "Are you sure you want to delete?",
   "confirmDeleteMessage": "This action cannot be undone",
   "deleteSuccess": "Deleted successfully",
+  "deleteSalaryMessage": "Delete {name}'s salary for {month}? Related commissions will not be deleted.",
+  "@deleteSalaryMessage": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "month": { "type": "String" }
+    }
+  },
+  "deleteCommissionMessage": "Delete {name}'s commission for {month}? Any generated salary will not be recalculated automatically.",
+  "@deleteCommissionMessage": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "month": { "type": "String" }
+    }
+  },
+  "deleteCompensationProfileMessage": "Delete {name}'s salary settings? Existing salaries and commissions will remain, and new salaries cannot be generated until the settings are recreated.",
+  "@deleteCompensationProfileMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
   "saveSuccess": "Saved successfully",
   "updateSuccess": "Updated successfully",
   "disableAccount": "Disable Account",

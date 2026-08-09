@@ -135,6 +135,27 @@ class SalaryAdminNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
+  Future<bool> deleteCompensationProfile(String employeeId) {
+    return _deleteDocument(
+      collection: AppConstants.employeeCompensationCollection,
+      documentId: employeeId,
+    );
+  }
+
+  Future<bool> deleteSalary(String id) {
+    return _deleteDocument(
+      collection: AppConstants.salariesCollection,
+      documentId: id,
+    );
+  }
+
+  Future<bool> deleteCommission(String id) {
+    return _deleteDocument(
+      collection: AppConstants.commissionsCollection,
+      documentId: id,
+    );
+  }
+
   Future<bool> addCommission({
     required UserModel employee,
     required String month,
@@ -336,6 +357,21 @@ class SalaryAdminNotifier extends StateNotifier<AsyncValue<void>> {
       approvedLeaves: approvedLeaves,
       holidayDayKeys: holidayDayKeys,
     );
+  }
+
+  Future<bool> _deleteDocument({
+    required String collection,
+    required String documentId,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await _firestore.collection(collection).doc(documentId).delete();
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+      return false;
+    }
   }
 
   Future<void> _notify({
