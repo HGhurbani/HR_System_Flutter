@@ -2,7 +2,9 @@ workflows:
   ios-release:
     name: iOS Release
     environment:
-      flutter: stable
+      # pdfrx 2.2.24 / pdfrx_engine 0.3.9 target Flutter 3.35.x (Dart 3.9).
+      # Pin the toolchain so a moving stable channel cannot break iOS archives.
+      flutter: 3.35.3
       xcode: latest
       ios_signing:
         distribution_type: app_store
