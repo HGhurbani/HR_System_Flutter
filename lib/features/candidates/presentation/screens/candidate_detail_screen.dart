@@ -51,7 +51,7 @@ class CandidateDetailScreen extends ConsumerWidget {
                 context.push('$basePath/$candidateId/edit');
               },
             ),
-          if (currentUser?.role.isAdmin == true)
+          if (currentUser?.role.canManageCandidates == true)
             candidateAsync.maybeWhen(
               data: (candidate) => candidate == null
                   ? const SizedBox.shrink()

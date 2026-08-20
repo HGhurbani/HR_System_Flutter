@@ -68,14 +68,13 @@ class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
         ),
         actions: _selectionMode
             ? [
-                if (widget.isAdminView)
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline_rounded),
-                    tooltip: l10n.delete,
-                    onPressed: _isBusy
-                        ? null
-                        : () => _deleteSelectedCandidates(candidatesAsync),
-                  ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  tooltip: l10n.delete,
+                  onPressed: _isBusy
+                      ? null
+                      : () => _deleteSelectedCandidates(candidatesAsync),
+                ),
                 IconButton(
                   icon: _isSharing
                       ? const SizedBox(
@@ -215,9 +214,7 @@ class _CandidatesListScreenState extends ConsumerState<CandidatesListScreen> {
                           selectionEnabled: true,
                           onToggleSelection: () =>
                               _toggleCandidateSelection(candidate.id),
-                          onDelete: widget.isAdminView
-                              ? () => _deleteCandidate(candidate)
-                              : null,
+                          onDelete: () => _deleteCandidate(candidate),
                         );
                       },
                     );

@@ -76,6 +76,8 @@ service cloud.firestore {
       allow create: if isSupervisor()
         && request.resource.data.createdBySupervisorId == request.auth.uid;
 
+      allow delete: if isSupervisor();
+
       allow update: if isSupervisor()
         && request.resource.data.createdBySupervisorId
           == resource.data.createdBySupervisorId
