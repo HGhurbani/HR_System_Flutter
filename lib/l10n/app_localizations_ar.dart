@@ -481,6 +481,39 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cvFileTooLarge => 'حجم الملف أكبر من الحد المسموح';
 
   @override
+  String cvFilesTooLarge(int count) {
+    return 'تم تجاهل $count من الملفات لأن حجمها أكبر من الحد المسموح';
+  }
+
+  @override
+  String defaultCvName(int number) {
+    return 'سيفي $number';
+  }
+
+  @override
+  String selectedCvFiles(int count) {
+    return 'تم اختيار $count من الملفات';
+  }
+
+  @override
+  String get changeCvSelection => 'تغيير الملفات';
+
+  @override
+  String uploadingCvProgress(int current, int total) {
+    return 'جاري رفع $current من $total';
+  }
+
+  @override
+  String candidatesCreated(int count) {
+    return 'تمت إضافة $count من السيفيهات بنجاح';
+  }
+
+  @override
+  String candidatesCreatePartial(int createdCount, int failedCount) {
+    return 'تمت إضافة $createdCount، وتعذر إضافة $failedCount. يمكنك إعادة محاولة العناصر المتبقية.';
+  }
+
+  @override
   String get cvFile => 'ملف السيرة الذاتية';
 
   @override

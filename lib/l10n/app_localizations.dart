@@ -1034,6 +1034,48 @@ abstract class AppLocalizations {
   /// **'حجم الملف أكبر من الحد المسموح'**
   String get cvFileTooLarge;
 
+  /// No description provided for @cvFilesTooLarge.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تجاهل {count} من الملفات لأن حجمها أكبر من الحد المسموح'**
+  String cvFilesTooLarge(int count);
+
+  /// No description provided for @defaultCvName.
+  ///
+  /// In ar, this message translates to:
+  /// **'سيفي {number}'**
+  String defaultCvName(int number);
+
+  /// No description provided for @selectedCvFiles.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم اختيار {count} من الملفات'**
+  String selectedCvFiles(int count);
+
+  /// No description provided for @changeCvSelection.
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير الملفات'**
+  String get changeCvSelection;
+
+  /// No description provided for @uploadingCvProgress.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاري رفع {current} من {total}'**
+  String uploadingCvProgress(int current, int total);
+
+  /// No description provided for @candidatesCreated.
+  ///
+  /// In ar, this message translates to:
+  /// **'تمت إضافة {count} من السيفيهات بنجاح'**
+  String candidatesCreated(int count);
+
+  /// No description provided for @candidatesCreatePartial.
+  ///
+  /// In ar, this message translates to:
+  /// **'تمت إضافة {createdCount}، وتعذر إضافة {failedCount}. يمكنك إعادة محاولة العناصر المتبقية.'**
+  String candidatesCreatePartial(int createdCount, int failedCount);
+
   /// No description provided for @cvFile.
   ///
   /// In ar, this message translates to:

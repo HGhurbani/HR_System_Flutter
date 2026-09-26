@@ -166,6 +166,45 @@
   "cvFileRequired": "CV file is required",
   "unsupportedCvFileType": "Unsupported file type. Choose an image or PDF",
   "cvFileTooLarge": "The file is larger than the allowed limit",
+  "cvFilesTooLarge": "{count} files were skipped because they exceed the size limit",
+  "@cvFilesTooLarge": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "defaultCvName": "CV {number}",
+  "@defaultCvName": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "selectedCvFiles": "{count} files selected",
+  "@selectedCvFiles": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "changeCvSelection": "Change files",
+  "uploadingCvProgress": "Uploading {current} of {total}",
+  "@uploadingCvProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "candidatesCreated": "Successfully added {count} CVs",
+  "@candidatesCreated": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "candidatesCreatePartial": "Added {createdCount}; failed to add {failedCount}. You can retry the remaining items.",
+  "@candidatesCreatePartial": {
+    "placeholders": {
+      "createdCount": { "type": "int" },
+      "failedCount": { "type": "int" }
+    }
+  },
   "cvFile": "CV File",
   "videoUrl": "Video",
   "assignedTo": "Assigned To",

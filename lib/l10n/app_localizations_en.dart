@@ -483,6 +483,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cvFileTooLarge => 'The file is larger than the allowed limit';
 
   @override
+  String cvFilesTooLarge(int count) {
+    return '$count files were skipped because they exceed the size limit';
+  }
+
+  @override
+  String defaultCvName(int number) {
+    return 'CV $number';
+  }
+
+  @override
+  String selectedCvFiles(int count) {
+    return '$count files selected';
+  }
+
+  @override
+  String get changeCvSelection => 'Change files';
+
+  @override
+  String uploadingCvProgress(int current, int total) {
+    return 'Uploading $current of $total';
+  }
+
+  @override
+  String candidatesCreated(int count) {
+    return 'Successfully added $count CVs';
+  }
+
+  @override
+  String candidatesCreatePartial(int createdCount, int failedCount) {
+    return 'Added $createdCount; failed to add $failedCount. You can retry the remaining items.';
+  }
+
+  @override
   String get cvFile => 'CV File';
 
   @override

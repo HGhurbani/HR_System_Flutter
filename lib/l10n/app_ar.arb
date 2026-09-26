@@ -168,6 +168,45 @@
   "cvFileRequired": "يجب إضافة ملف السيفي",
   "unsupportedCvFileType": "نوع الملف غير مدعوم. اختر صورة أو PDF",
   "cvFileTooLarge": "حجم الملف أكبر من الحد المسموح",
+  "cvFilesTooLarge": "تم تجاهل {count} من الملفات لأن حجمها أكبر من الحد المسموح",
+  "@cvFilesTooLarge": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "defaultCvName": "سيفي {number}",
+  "@defaultCvName": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "selectedCvFiles": "تم اختيار {count} من الملفات",
+  "@selectedCvFiles": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "changeCvSelection": "تغيير الملفات",
+  "uploadingCvProgress": "جاري رفع {current} من {total}",
+  "@uploadingCvProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "candidatesCreated": "تمت إضافة {count} من السيفيهات بنجاح",
+  "@candidatesCreated": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "candidatesCreatePartial": "تمت إضافة {createdCount}، وتعذر إضافة {failedCount}. يمكنك إعادة محاولة العناصر المتبقية.",
+  "@candidatesCreatePartial": {
+    "placeholders": {
+      "createdCount": { "type": "int" },
+      "failedCount": { "type": "int" }
+    }
+  },
   "cvFile": "ملف السيرة الذاتية",
   "videoUrl": "فيديو تعريفي",
   "assignedTo": "مسند إلى",

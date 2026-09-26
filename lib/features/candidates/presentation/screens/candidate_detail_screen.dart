@@ -140,7 +140,12 @@ class CandidateDetailScreen extends ConsumerWidget {
     if (!context.mounted) return;
     if (success) {
       context.showSnackBar(context.l10n.deleteSuccess);
-      context.go(AppRoutes.adminCandidates);
+      final currentUser = ref.read(currentUserProvider);
+      context.go(
+        currentUser?.role.isSupervisor == true
+            ? AppRoutes.supervisorCandidates
+            : AppRoutes.adminCandidates,
+      );
     } else {
       context.showSnackBar(context.l10n.errorGeneral, isError: true);
     }

@@ -45,6 +45,20 @@ class CandidateDeletionResult {
   bool get isSuccessful => failedIds.isEmpty;
 }
 
+class CandidateCreationResult {
+  final Set<String> createdIds;
+  final Set<String> failedIds;
+
+  const CandidateCreationResult({
+    required this.createdIds,
+    required this.failedIds,
+  });
+
+  int get createdCount => createdIds.length;
+  int get failedCount => failedIds.length;
+  bool get isSuccessful => failedIds.isEmpty;
+}
+
 final candidateFilterProvider =
     StateProvider<CandidateFilter>((ref) => const CandidateFilter());
 
@@ -147,51 +161,89 @@ class CandidatesNotifier extends StateNotifier<AsyncValue<void>> {
         super(const AsyncValue.data(null));
 
   Future<String?> createCandidate(CandidateModel candidate) async {
+    final result = await createCandidates([candidate]);
+    return result.createdIds.isEmpty ? null : result.createdIds.first;
+  }
+
+  Future<CandidateCreationResult> createCandidates(
+    Iterable<CandidateModel> candidates,
+  ) async {
+    final candidatesToCreate = candidates.toList(growable: false);
+    if (candidatesToCreate.isEmpty) {
+      return const CandidateCreationResult(
+        createdIds: <String>{},
+        failedIds: <String>{},
+      );
+    }
+
     state = const AsyncValue.loading();
-    try {
-      final now = DateTime.now();
-      final docRef = candidate.id.isNotEmpty
-          ? _firestore
-              .collection(AppConstants.candidateProfilesCollection)
-              .doc(candidate.id)
-          : _firestore
-              .collection(AppConstants.candidateProfilesCollection)
-              .doc();
+    final createdIds = <String>{};
+    final failedIds = <String>{};
+    Object? lastError;
+    StackTrace? lastStackTrace;
 
-      final data = CandidateModel(
-        id: docRef.id,
-        fullName: candidate.fullName,
-        nationality: candidate.nationality,
-        age: candidate.age,
-        religion: candidate.religion,
-        maritalStatus: candidate.maritalStatus,
-        experienceYears: candidate.experienceYears,
-        spokenLanguages: candidate.spokenLanguages,
-        jobType: candidate.jobType,
-        notes: candidate.notes,
-        imageUrl: candidate.imageUrl,
-        videoUrl: candidate.videoUrl,
-        cvFileUrl: candidate.cvFileUrl,
-        status: CandidateStatus.available,
-        createdBySupervisorId: _currentUserId,
-        createdBySupervisorName: _currentUserName,
-        createdAt: now,
-        updatedAt: now,
-      ).toMap();
+    for (final candidate in candidatesToCreate) {
+      try {
+        final now = DateTime.now();
+        final docRef = candidate.id.isNotEmpty
+            ? _firestore
+                .collection(AppConstants.candidateProfilesCollection)
+                .doc(candidate.id)
+            : _firestore
+                .collection(AppConstants.candidateProfilesCollection)
+                .doc();
 
-      await docRef.set(data);
+        final data = CandidateModel(
+          id: docRef.id,
+          fullName: candidate.fullName,
+          nationality: candidate.nationality,
+          age: candidate.age,
+          religion: candidate.religion,
+          maritalStatus: candidate.maritalStatus,
+          experienceYears: candidate.experienceYears,
+          spokenLanguages: candidate.spokenLanguages,
+          jobType: candidate.jobType,
+          notes: candidate.notes,
+          imageUrl: candidate.imageUrl,
+          videoUrl: candidate.videoUrl,
+          cvFileUrl: candidate.cvFileUrl,
+          status: CandidateStatus.available,
+          createdBySupervisorId: _currentUserId,
+          createdBySupervisorName: _currentUserName,
+          createdAt: now,
+          updatedAt: now,
+        ).toMap();
+
+        await docRef.set(data);
+        createdIds.add(docRef.id);
+      } catch (error, stackTrace) {
+        failedIds.add(candidate.id);
+        lastError = error;
+        lastStackTrace = stackTrace;
+      }
+    }
+
+    if (createdIds.isNotEmpty) {
       await _notify(
-        title: 'تمت إضافة سيفي',
-        body: 'تمت إضافة سيفي ${candidate.fullName}',
+        title: createdIds.length == 1 ? 'تمت إضافة سيفي' : 'تمت إضافة سيفيهات',
+        body: createdIds.length == 1
+            ? 'تمت إضافة سيفي جديد'
+            : 'تمت إضافة ${createdIds.length} سيفيهات',
         type: 'candidate_created',
         targetUserId: adminNotificationTarget,
       );
-      state = const AsyncValue.data(null);
-      return docRef.id;
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-      return null;
     }
+
+    if (failedIds.isEmpty) {
+      state = const AsyncValue.data(null);
+    } else {
+      state = AsyncValue.error(lastError!, lastStackTrace!);
+    }
+
+    return CandidateCreationResult(
+      createdIds: createdIds,
+      failedIds: failedIds,
+    );
   }
 
   Future<bool> updateCandidate(String id, Map<String, dynamic> data) async {
