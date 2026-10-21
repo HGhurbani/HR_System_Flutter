@@ -1367,8 +1367,32 @@ abstract class AppLocalizations {
   /// No description provided for @latenessMinutes.
   ///
   /// In ar, this message translates to:
-  /// **'دقائق التأخير'**
+  /// **'ساعات التأخير الكاملة'**
   String get latenessMinutes;
+
+  /// No description provided for @attendanceRestDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'يوم راحة'**
+  String get attendanceRestDay;
+
+  /// No description provided for @correctShift.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصحيح الوردية'**
+  String get correctShift;
+
+  /// No description provided for @shiftCorrected.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تصحيح الوردية'**
+  String get shiftCorrected;
+
+  /// No description provided for @shiftCorrectionFailed.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذر تصحيح الوردية'**
+  String get shiftCorrectionFailed;
 
   /// No description provided for @shiftType.
   ///

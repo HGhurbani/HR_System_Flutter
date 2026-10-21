@@ -15,6 +15,7 @@ import '../data/models/attendance_model.dart';
 import '../data/models/attendance_policy_model.dart';
 import '../data/models/attendance_report.dart';
 import '../data/models/company_work_schedule.dart';
+import 'attendance_time_utils.dart';
 
 // ─── Company Location Model ────────────────────────────────────────────────
 class CompanyLocation {
@@ -362,10 +363,11 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
       final doc =
           _firestore.collection(AppConstants.attendanceLogsCollection).doc();
 
-      final shiftStart = workSchedule.shiftStartOnDay(now, shiftType);
-      final grace = workSchedule.graceMinutesFor(shiftType, day: now);
-      final lateMinutes =
-          now.isAfter(shiftStart) ? now.difference(shiftStart).inMinutes : 0;
+      final timing = attendanceForShift(
+        checkInTime: now,
+        shiftType: shiftType,
+        workSchedule: workSchedule,
+      );
 
       final attendance = AttendanceModel(
         id: doc.id,
@@ -377,10 +379,8 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
         checkInLat: position.latitude,
         checkInLng: position.longitude,
         insideGeofence: insideGeofence,
-        status: lateMinutes > grace
-            ? AttendanceStatus.late
-            : AttendanceStatus.present,
-        latenessMinutes: lateMinutes > 0 ? lateMinutes : 0,
+        status: timing.status,
+        latenessMinutes: timing.latenessMinutes,
         createdAt: now,
       );
 
@@ -402,23 +402,88 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
   Future<bool> checkOut({
     required String attendanceId,
     required Position position,
+    required CompanyWorkSchedule workSchedule,
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      await _firestore
+      final ref = _firestore
           .collection(AppConstants.attendanceLogsCollection)
-          .doc(attendanceId)
-          .update({
+          .doc(attendanceId);
+      final snapshot = await ref.get();
+      if (!snapshot.exists ||
+          snapshot.data()?['employeeId'] != _employeeId ||
+          snapshot.data()?['checkOutTime'] != null) {
+        throw const AppException(message: 'Invalid attendance check-out');
+      }
+      final attendance = AttendanceModel.fromFirestore(snapshot);
+      final now = DateTime.now();
+      final earlyMinutes = earlyDepartureMinutes(
+        checkOutTime: now,
+        attendanceDate: attendance.date,
+        shiftType: attendance.shiftType,
+        workSchedule: workSchedule,
+      );
+      await ref.update({
         'checkOutTime': FieldValue.serverTimestamp(),
         'checkOutLat': position.latitude,
         'checkOutLng': position.longitude,
       });
       await _notify(
-        title: 'تم تسجيل انصراف',
-        body: 'سجل $_employeeName الانصراف',
-        type: 'attendance_check_out',
+        title: earlyMinutes > 0 ? 'انصراف مبكر' : 'تم تسجيل انصراف',
+        body: earlyMinutes > 0
+            ? 'انصرف $_employeeName قبل نهاية الدوام بـ $earlyMinutes دقيقة'
+            : 'سجل $_employeeName الانصراف',
+        type: earlyMinutes > 0
+            ? 'attendance_early_check_out'
+            : 'attendance_check_out',
         targetUserId: adminNotificationTarget,
       );
+      state = state.copyWith(isLoading: false, isSuccess: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> correctShift({
+    required AttendanceModel attendance,
+    required ShiftType shiftType,
+    required CompanyWorkSchedule workSchedule,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      if (attendance.employeeId != _employeeId ||
+          !canCorrectShift(attendance, DateTime.now()) ||
+          attendance.shiftType == shiftType) {
+        throw const AppException(message: 'Shift correction is unavailable');
+      }
+      final ref = _firestore
+          .collection(AppConstants.attendanceLogsCollection)
+          .doc(attendance.id);
+      await _firestore.runTransaction((transaction) async {
+        final snapshot = await transaction.get(ref);
+        if (!snapshot.exists) {
+          throw const AppException(message: 'Attendance not found');
+        }
+        final current = AttendanceModel.fromFirestore(snapshot);
+        if (current.employeeId != _employeeId ||
+            !canCorrectShift(current, DateTime.now()) ||
+            current.shiftType == shiftType) {
+          throw const AppException(message: 'Shift correction is unavailable');
+        }
+        final timing = attendanceForShift(
+          checkInTime: current.checkInTime!,
+          shiftType: shiftType,
+          workSchedule: workSchedule,
+        );
+        transaction.update(ref, {
+          'shiftType': shiftType == ShiftType.morning ? 'morning' : 'evening',
+          'status': timing.status == AttendanceStatus.late ? 'late' : 'present',
+          'latenessMinutes': timing.latenessMinutes,
+          'shiftCorrectedAt': FieldValue.serverTimestamp(),
+        });
+      });
       state = state.copyWith(isLoading: false, isSuccess: true);
       return true;
     } catch (e) {

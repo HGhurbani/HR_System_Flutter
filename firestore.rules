@@ -115,8 +115,25 @@ service cloud.firestore {
 
       allow update: if isEmployee() && isActiveUser()
         && resource.data.employeeId == request.auth.uid
+        && resource.data.checkOutTime == null
+        && request.resource.data.checkOutTime == request.time
         && request.resource.data.diff(resource.data).affectedKeys()
            .hasOnly(['checkOutTime', 'checkOutLat', 'checkOutLng']);
+
+      allow update: if isEmployee() && isActiveUser()
+        && resource.data.employeeId == request.auth.uid
+        && resource.data.checkInTime != null
+        && resource.data.checkOutTime == null
+        && request.time >= resource.data.date
+        && request.time < resource.data.date + duration.value(1, 'd')
+        && request.resource.data.shiftType in ['morning', 'evening']
+        && request.resource.data.shiftType != resource.data.shiftType
+        && request.resource.data.status in ['present', 'late']
+        && request.resource.data.latenessMinutes is int
+        && request.resource.data.latenessMinutes >= 0
+        && request.resource.data.shiftCorrectedAt == request.time
+        && request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['shiftType', 'status', 'latenessMinutes', 'shiftCorrectedAt']);
     }
 
     // ─── Leave requests ───────────────────────────────────────────────────

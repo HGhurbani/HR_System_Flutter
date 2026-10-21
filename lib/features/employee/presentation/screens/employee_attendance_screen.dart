@@ -6,6 +6,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../attendance/application/attendance_providers.dart';
+import '../../../attendance/application/attendance_time_utils.dart';
 import '../../../attendance/data/models/attendance_model.dart';
 import '../../../attendance/data/models/company_work_schedule.dart';
 import '../../../auth/application/auth_providers.dart';
@@ -25,8 +26,7 @@ class _EmployeeAttendanceScreenState
 
   void _showLocationFailureMessage() {
     final l10n = context.l10n;
-    final code =
-        ref.read(attendanceNotifierProvider).errorMessage ?? '';
+    final code = ref.read(attendanceNotifierProvider).errorMessage ?? '';
     final message = switch (code) {
       'location-disabled' => l10n.locationServiceDisabled,
       'permission-denied' => l10n.locationRequired,
@@ -149,6 +149,8 @@ class _EmployeeAttendanceScreenState
     final success = await notifier.checkOut(
       attendanceId: attendanceId,
       position: position,
+      workSchedule: ref.read(workScheduleProvider).valueOrNull ??
+          const CompanyWorkSchedule(),
     );
 
     if (mounted) {
@@ -160,14 +162,35 @@ class _EmployeeAttendanceScreenState
     }
   }
 
+  Future<void> _handleShiftCorrection(
+    AttendanceModel attendance,
+    ShiftType shiftType,
+  ) async {
+    final schedule = ref.read(workScheduleProvider).valueOrNull ??
+        const CompanyWorkSchedule();
+    final success =
+        await ref.read(attendanceNotifierProvider.notifier).correctShift(
+              attendance: attendance,
+              shiftType: shiftType,
+              workSchedule: schedule,
+            );
+    if (mounted) {
+      context.showSnackBar(
+        success
+            ? context.l10n.shiftCorrected
+            : context.l10n.shiftCorrectionFailed,
+        isError: !success,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final user = ref.watch(currentUserProvider);
     final todayAttAsync = ref.watch(todayAttendanceProvider);
     final attendanceState = ref.watch(attendanceNotifierProvider);
-    final historyAsync = ref.watch(
-        attendanceHistoryProvider(user?.uid ?? ''));
+    final historyAsync = ref.watch(attendanceHistoryProvider(user?.uid ?? ''));
 
     return Scaffold(
       appBar: AppBar(
@@ -190,8 +213,10 @@ class _EmployeeAttendanceScreenState
                 attendance: attendance,
                 selectedShift: _selectedShift,
                 isLoading: attendanceState.isLoading,
-                onShiftChanged: (s) =>
-                    setState(() => _selectedShift = s),
+                onShiftChanged: (s) => setState(() => _selectedShift = s),
+                onCorrectShift: attendance != null
+                    ? (shift) => _handleShiftCorrection(attendance, shift)
+                    : null,
                 onCheckIn: _handleCheckIn,
                 onCheckOut: attendance != null
                     ? () => _handleCheckOut(attendance.id)
@@ -202,8 +227,7 @@ class _EmployeeAttendanceScreenState
             const SizedBox(height: 24),
 
             // History
-            Text(l10n.attendanceHistory,
-                style: context.textTheme.titleLarge),
+            Text(l10n.attendanceHistory, style: context.textTheme.titleLarge),
             const SizedBox(height: 12),
 
             historyAsync.when(
@@ -220,8 +244,7 @@ class _EmployeeAttendanceScreenState
                               size: 48, color: AppColors.textDisabled),
                           const SizedBox(height: 12),
                           Text(l10n.noAttendance,
-                              style: TextStyle(
-                                  color: AppColors.textSecondary)),
+                              style: TextStyle(color: AppColors.textSecondary)),
                         ],
                       ),
                     ),
@@ -230,8 +253,7 @@ class _EmployeeAttendanceScreenState
                 return Column(
                   children: history
                       .map((log) => Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.only(bottom: 8),
                             child: _AttendanceHistoryTile(
                               log: log,
                               l10n: l10n,
@@ -253,6 +275,7 @@ class _CheckInOutCard extends StatelessWidget {
   final ShiftType selectedShift;
   final bool isLoading;
   final ValueChanged<ShiftType> onShiftChanged;
+  final ValueChanged<ShiftType>? onCorrectShift;
   final VoidCallback onCheckIn;
   final VoidCallback? onCheckOut;
   final dynamic l10n;
@@ -262,6 +285,7 @@ class _CheckInOutCard extends StatelessWidget {
     required this.selectedShift,
     required this.isLoading,
     required this.onShiftChanged,
+    required this.onCorrectShift,
     required this.onCheckIn,
     required this.onCheckOut,
     required this.l10n,
@@ -281,13 +305,11 @@ class _CheckInOutCard extends StatelessWidget {
             // Current time
             Text(
               DateFormat('hh:mm a').format(DateTime.now()),
-              style: const TextStyle(
-                  fontSize: 36, fontWeight: FontWeight.w700),
+              style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w700),
             ),
             Text(
               DateFormat('EEEE, d MMMM').format(DateTime.now()),
-              style: TextStyle(
-                  color: AppColors.textSecondary, fontSize: 14),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
             ),
             const SizedBox(height: 20),
 
@@ -325,16 +347,36 @@ class _CheckInOutCard extends StatelessWidget {
                   _TimeDisplay(
                     label: l10n.checkOutTime,
                     time: hasCheckedOut
-                        ? timeFormat
-                            .format(attendance!.checkOutTime!)
+                        ? timeFormat.format(attendance!.checkOutTime!)
                         : '--:--',
-                    color: hasCheckedOut
-                        ? AppColors.info
-                        : AppColors.textDisabled,
+                    color:
+                        hasCheckedOut ? AppColors.info : AppColors.textDisabled,
                   ),
                 ],
               ),
               const SizedBox(height: 20),
+              if (attendance != null &&
+                  canCorrectShift(attendance!, DateTime.now())) ...[
+                Text(l10n.correctShift),
+                const SizedBox(height: 8),
+                SegmentedButton<ShiftType>(
+                  segments: [
+                    ButtonSegment(
+                      value: ShiftType.morning,
+                      label: Text(l10n.morningShift),
+                    ),
+                    ButtonSegment(
+                      value: ShiftType.evening,
+                      label: Text(l10n.eveningShift),
+                    ),
+                  ],
+                  selected: {attendance!.shiftType},
+                  onSelectionChanged: isLoading
+                      ? null
+                      : (value) => onCorrectShift?.call(value.first),
+                ),
+                const SizedBox(height: 20),
+              ],
             ],
 
             // Action button
@@ -356,8 +398,8 @@ class _CheckInOutCard extends StatelessWidget {
               )
             else
               Container(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 12, horizontal: 20),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                 decoration: BoxDecoration(
                   color: AppColors.success.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
@@ -401,8 +443,7 @@ class _TimeDisplay extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
-              fontSize: 12, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 4),
         Text(
@@ -432,8 +473,7 @@ class _AttendanceHistoryTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-            color: statusColor.withOpacity(0.2)),
+        border: Border.all(color: statusColor.withOpacity(0.2)),
       ),
       child: Row(
         children: [
@@ -473,8 +513,7 @@ class _AttendanceHistoryTile extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
@@ -526,6 +565,8 @@ class _AttendanceHistoryTile extends StatelessWidget {
         return l10n.attendanceLate;
       case AttendanceStatus.onLeave:
         return l10n.attendanceLeave;
+      case AttendanceStatus.restDay:
+        return l10n.attendanceRestDay;
       default:
         return l10n.attendancePresent;
     }

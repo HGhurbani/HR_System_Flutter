@@ -5,6 +5,10 @@ import 'package:hr_sys/features/attendance/data/models/company_work_schedule.dar
 import 'package:hr_sys/features/permissions/data/models/permission_request_model.dart';
 
 void main() {
+  test('complete lateness hours discard partial hours', () {
+    expect(
+        [59, 60, 119, 120].map(completeLatenessHours).toList(), [0, 1, 1, 2]);
+  });
   test('formats lateness minutes as hours and minutes', () {
     expect(formatLatenessDuration(0), '0:00');
     expect(formatLatenessDuration(5), '0:05');

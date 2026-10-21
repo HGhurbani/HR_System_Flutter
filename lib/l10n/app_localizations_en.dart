@@ -672,7 +672,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lateToday => 'Late Today';
 
   @override
-  String get latenessMinutes => 'Minutes Late';
+  String get latenessMinutes => 'Complete hours late';
+
+  @override
+  String get attendanceRestDay => 'Rest day';
+
+  @override
+  String get correctShift => 'Correct shift';
+
+  @override
+  String get shiftCorrected => 'Shift corrected';
+
+  @override
+  String get shiftCorrectionFailed => 'Could not correct shift';
 
   @override
   String get shiftType => 'Shift Type';

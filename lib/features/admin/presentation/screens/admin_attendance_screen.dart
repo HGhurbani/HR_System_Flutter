@@ -9,6 +9,7 @@ import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../attendance/application/attendance_providers.dart';
 import '../../../attendance/application/attendance_report_pdf_service.dart';
+import '../../../attendance/application/lateness_utils.dart';
 import '../../../attendance/data/models/attendance_model.dart';
 import '../../../attendance/data/models/attendance_report.dart';
 import '../admin_shell_scaffold.dart';
@@ -170,9 +171,11 @@ class _AdminAttendanceTile extends StatelessWidget {
         ? AppColors.attendanceLate
         : row.status == AttendanceStatus.absent
             ? AppColors.attendanceAbsent
-            : row.status == AttendanceStatus.onLeave
-                ? AppColors.secondary
-                : AppColors.attendancePresent;
+            : row.status == AttendanceStatus.restDay
+                ? AppColors.info
+                : row.status == AttendanceStatus.onLeave
+                    ? AppColors.secondary
+                    : AppColors.attendancePresent;
 
     String timeOrDash(DateTime? value) =>
         value == null ? '-' : timeFormat.format(value);
@@ -207,7 +210,7 @@ class _AdminAttendanceTile extends StatelessWidget {
                   ),
                   if (row.latenessMinutes > 0)
                     Text(
-                      '${l10n.latenessMinutes}: ${row.latenessMinutes}',
+                      '${l10n.latenessMinutes}: ${completeLatenessHours(row.latenessMinutes)}',
                       style: context.textTheme.bodySmall?.copyWith(
                         color: AppColors.attendanceLate,
                       ),
@@ -237,6 +240,7 @@ class _StatusBadge extends StatelessWidget {
       AttendanceStatus.absent => l10n.attendanceAbsent,
       AttendanceStatus.onLeave => l10n.attendanceLeave,
       AttendanceStatus.holiday => l10n.attendanceHoliday,
+      AttendanceStatus.restDay => l10n.attendanceRestDay,
       AttendanceStatus.present => l10n.attendancePresent,
     };
     return Container(

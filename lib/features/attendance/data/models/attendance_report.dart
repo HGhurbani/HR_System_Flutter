@@ -125,20 +125,22 @@ class AttendanceReportBuilder {
         final key = _employeeDayKey(employee.uid, day);
         final hiredAfterDay = employee.hireDate != null &&
             AttendanceDateRange.dateOnly(employee.hireDate!).isAfter(day);
-        final isNonWorkingDay = restDays.contains(day.weekday) ||
-            holidayDayKeys.contains(dayKey(day));
+        final isRestDay = restDays.contains(day.weekday);
+        final isHoliday = holidayDayKeys.contains(dayKey(day));
 
         if (!logsByEmployeeDay.containsKey(key) &&
             !hiredAfterDay &&
-            !isNonWorkingDay) {
+            (!isHoliday || isRestDay)) {
           rows.add(
             AttendanceReportRow(
               employeeId: employee.uid,
               employeeName: employee.fullName,
               date: day,
-              status: approvedLeaveDays.contains(key)
-                  ? AttendanceStatus.onLeave
-                  : AttendanceStatus.absent,
+              status: isRestDay
+                  ? AttendanceStatus.restDay
+                  : approvedLeaveDays.contains(key)
+                      ? AttendanceStatus.onLeave
+                      : AttendanceStatus.absent,
               isSynthetic: true,
             ),
           );

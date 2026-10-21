@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum AttendanceStatus { present, absent, late, onLeave, holiday }
+enum AttendanceStatus { present, absent, late, onLeave, holiday, restDay }
 
 enum ShiftType { morning, evening }
 
@@ -20,6 +20,7 @@ class AttendanceModel {
   final AttendanceStatus status;
   final int latenessMinutes;
   final DateTime createdAt;
+  final DateTime? shiftCorrectedAt;
 
   const AttendanceModel({
     required this.id,
@@ -37,6 +38,7 @@ class AttendanceModel {
     required this.status,
     this.latenessMinutes = 0,
     required this.createdAt,
+    this.shiftCorrectedAt,
   });
 
   factory AttendanceModel.fromFirestore(
@@ -65,11 +67,11 @@ class AttendanceModel {
       checkOutLng: (data['checkOutLng'] as num?)?.toDouble(),
       insideGeofence: data['insideGeofence'] as bool? ?? true,
       status: _parseStatus(data['status'] as String? ?? 'present'),
-      latenessMinutes:
-          (data['latenessMinutes'] as num?)?.toInt() ?? 0,
+      latenessMinutes: (data['latenessMinutes'] as num?)?.toInt() ?? 0,
       createdAt: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
+      shiftCorrectedAt: (data['shiftCorrectedAt'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -83,6 +85,8 @@ class AttendanceModel {
         return AttendanceStatus.onLeave;
       case 'holiday':
         return AttendanceStatus.holiday;
+      case 'rest_day':
+        return AttendanceStatus.restDay;
       default:
         return AttendanceStatus.present;
     }
@@ -106,6 +110,8 @@ class AttendanceModel {
       'status': _statusString(status),
       'latenessMinutes': latenessMinutes,
       'createdAt': Timestamp.fromDate(createdAt),
+      if (shiftCorrectedAt != null)
+        'shiftCorrectedAt': Timestamp.fromDate(shiftCorrectedAt!),
     };
   }
 
@@ -119,6 +125,8 @@ class AttendanceModel {
         return 'on_leave';
       case AttendanceStatus.holiday:
         return 'holiday';
+      case AttendanceStatus.restDay:
+        return 'rest_day';
       default:
         return 'present';
     }

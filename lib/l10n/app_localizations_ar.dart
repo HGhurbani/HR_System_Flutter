@@ -670,7 +670,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lateToday => 'متأخر اليوم';
 
   @override
-  String get latenessMinutes => 'دقائق التأخير';
+  String get latenessMinutes => 'ساعات التأخير الكاملة';
+
+  @override
+  String get attendanceRestDay => 'يوم راحة';
+
+  @override
+  String get correctShift => 'تصحيح الوردية';
+
+  @override
+  String get shiftCorrected => 'تم تصحيح الوردية';
+
+  @override
+  String get shiftCorrectionFailed => 'تعذر تصحيح الوردية';
 
   @override
   String get shiftType => 'نوع الوردية';

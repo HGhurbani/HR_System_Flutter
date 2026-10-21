@@ -5,6 +5,7 @@ import 'package:pdf/widgets.dart' as pw;
 
 import '../data/models/attendance_model.dart';
 import '../data/models/attendance_report.dart';
+import 'lateness_utils.dart';
 
 class AttendanceReportPdfService {
   const AttendanceReportPdfService();
@@ -93,7 +94,7 @@ class AttendanceReportPdfService {
                     row.checkOutTime == null
                         ? '-'
                         : timeFormat.format(row.checkOutTime!),
-                    row.latenessMinutes.toString(),
+                    completeLatenessHours(row.latenessMinutes).toString(),
                     _statusLabel(row.status, labels),
                   ],
                 )
@@ -120,6 +121,8 @@ class AttendanceReportPdfService {
         return labels.leave;
       case AttendanceStatus.holiday:
         return labels.holiday;
+      case AttendanceStatus.restDay:
+        return labels.restDay;
       case AttendanceStatus.present:
         return labels.present;
     }
@@ -139,7 +142,7 @@ class _PdfLabels {
   String get shift => isArabic ? 'الوردية' : 'Shift';
   String get checkIn => isArabic ? 'الحضور' : 'Check-in';
   String get checkOut => isArabic ? 'الانصراف' : 'Check-out';
-  String get lateness => isArabic ? 'التأخير' : 'Late (min)';
+  String get lateness => isArabic ? 'التأخير (ساعات)' : 'Late (hours)';
   String get status => isArabic ? 'الحالة' : 'Status';
   String get morning => isArabic ? 'صباحية' : 'Morning';
   String get evening => isArabic ? 'مسائية' : 'Evening';
@@ -148,5 +151,6 @@ class _PdfLabels {
   String get late => isArabic ? 'متأخر' : 'Late';
   String get leave => isArabic ? 'إجازة' : 'On leave';
   String get holiday => isArabic ? 'عطلة' : 'Holiday';
+  String get restDay => isArabic ? 'يوم راحة' : 'Rest day';
   String get page => isArabic ? 'صفحة' : 'Page';
 }

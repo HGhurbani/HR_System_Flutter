@@ -295,7 +295,7 @@ class _AttendanceCard extends StatelessWidget {
                     if (effectiveLateMinutes > 0)
                       Text(
                         '${l10n.latenessMinutes}: '
-                        '${formatLatenessDuration(effectiveLateMinutes)} '
+                        '${completeLatenessHours(effectiveLateMinutes)} '
                         '${l10n.hours}',
                         style: TextStyle(
                             color: statusColor.withOpacity(0.7), fontSize: 13),

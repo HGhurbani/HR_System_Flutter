@@ -9,6 +9,8 @@ String formatLatenessDuration(int minutes) {
   return '$hours:${remainingMinutes.toString().padLeft(2, '0')}';
 }
 
+int completeLatenessHours(int minutes) => minutes <= 0 ? 0 : minutes ~/ 60;
+
 int effectiveLatenessMinutes({
   required AttendanceModel attendance,
   required CompanyWorkSchedule workSchedule,

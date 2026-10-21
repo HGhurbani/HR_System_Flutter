@@ -6,6 +6,36 @@ import 'package:hr_sys/features/auth/domain/entities/user_role.dart';
 import 'package:hr_sys/features/leaves/data/models/leave_request_model.dart';
 
 void main() {
+  test('Saturday rest day is shown, including when leave overlaps', () {
+    final saturday = DateTime(2026, 6, 6);
+    final rows = AttendanceReportBuilder.build(
+      range: AttendanceDateRange(start: saturday, end: saturday),
+      employees: [
+        _employee(customRestDays: const [DateTime.saturday])
+      ],
+      attendanceLogs: const [],
+      approvedLeaves: [_leave(saturday)],
+      companyWeeklyRestDays: const [DateTime.friday],
+      holidayDayKeys: const {},
+    );
+    expect(rows, hasLength(1));
+    expect(rows.single.status, AttendanceStatus.restDay);
+    expect(rows.single.isSynthetic, isTrue);
+  });
+
+  test('actual attendance wins over a rest day', () {
+    final saturday = DateTime(2026, 6, 6);
+    final rows = AttendanceReportBuilder.build(
+      range: AttendanceDateRange(start: saturday, end: saturday),
+      employees: [_employee()],
+      attendanceLogs: [_attendance(saturday)],
+      approvedLeaves: const [],
+      companyWeeklyRestDays: const [DateTime.saturday],
+      holidayDayKeys: const {},
+    );
+    expect(rows, hasLength(1));
+    expect(rows.single.status, AttendanceStatus.present);
+  });
   test('range includes its first and last calendar day', () {
     final range = AttendanceDateRange(
       start: DateTime(2026, 6, 1, 12),
@@ -58,13 +88,13 @@ void main() {
       containsAll([
         '2:absent',
         '3:onLeave',
+        '5:restDay',
         '6:absent',
         '7:present',
       ]),
     );
     expect(rows.any((row) => row.date.day == 1), isFalse);
     expect(rows.any((row) => row.date.day == 4), isFalse);
-    expect(rows.any((row) => row.date.day == 5), isFalse);
   });
 
   test('actual record wins over computed leave or absence', () {
