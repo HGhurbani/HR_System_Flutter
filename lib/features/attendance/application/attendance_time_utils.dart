@@ -29,7 +29,6 @@ int earlyDepartureMinutes({
 
 bool canCorrectShift(AttendanceModel attendance, DateTime now) =>
     attendance.checkInTime != null &&
-    attendance.checkOutTime == null &&
     attendance.date.year == now.year &&
     attendance.date.month == now.month &&
     attendance.date.day == now.day;

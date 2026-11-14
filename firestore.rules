@@ -123,7 +123,6 @@ service cloud.firestore {
       allow update: if isEmployee() && isActiveUser()
         && resource.data.employeeId == request.auth.uid
         && resource.data.checkInTime != null
-        && resource.data.checkOutTime == null
         && request.time >= resource.data.date
         && request.time < resource.data.date + duration.value(1, 'd')
         && request.resource.data.shiftType in ['morning', 'evening']

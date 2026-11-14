@@ -46,7 +46,7 @@ void main() {
     );
   });
 
-  test('correction closes after checkout or on the next day', () {
+  test('correction stays available after checkout but closes next day', () {
     final day = DateTime(2026, 10, 22);
     AttendanceModel attendance(DateTime? checkout) => AttendanceModel(
           id: '1',
@@ -63,7 +63,7 @@ void main() {
     expect(
         canCorrectShift(attendance(day.add(const Duration(hours: 16))),
             day.add(const Duration(hours: 17))),
-        isFalse);
+        isTrue);
     expect(canCorrectShift(attendance(null), day.add(const Duration(days: 1))),
         isFalse);
   });

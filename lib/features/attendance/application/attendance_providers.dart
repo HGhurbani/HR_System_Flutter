@@ -484,6 +484,13 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
           'shiftCorrectedAt': FieldValue.serverTimestamp(),
         });
       });
+      await _notify(
+        title: 'تم تصحيح الوردية',
+        body:
+            'صحح $_employeeName الوردية إلى ${shiftType == ShiftType.morning ? 'الصباحية' : 'المسائية'}',
+        type: 'attendance_shift_correction',
+        targetUserId: adminNotificationTarget,
+      );
       state = state.copyWith(isLoading: false, isSuccess: true);
       return true;
     } catch (e) {
